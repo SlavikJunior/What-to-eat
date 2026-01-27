@@ -17,8 +17,8 @@ interface RecipeDAO {
     suspend fun isStored(title: String, description: String): RecipeEntity?
 
     @Insert
-    suspend fun insert(recipe: RecipeEntity): Boolean
+    suspend fun insert(recipe: RecipeEntity): Long
 
     @Delete
-    suspend fun delete(recipe: RecipeEntity): Boolean
+    suspend fun delete(recipe: RecipeEntity): Int
 }
