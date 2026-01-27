@@ -9,10 +9,10 @@ class RecipeRepository(
     private val recipeDAO: RecipeDAO
 ): FavoriteRecipeRepository {
     override suspend fun addRecipe(recipe: Recipe) =
-        recipeDAO.insert(RecipeEntity.fromRecipe(recipe))
+        (recipeDAO.insert(RecipeEntity.fromRecipe(recipe)))
 
     override suspend fun removeRecipe(recipe: Recipe) =
-        recipeDAO.delete(RecipeEntity.fromRecipe(recipe))
+        (recipeDAO.delete(RecipeEntity.fromRecipe(recipe)))
 
     suspend fun isStored(recipe: Recipe) =
         recipeDAO.isStored(recipe.title, recipe.description)

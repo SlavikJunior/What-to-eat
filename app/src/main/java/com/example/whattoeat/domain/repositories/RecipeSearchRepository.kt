@@ -6,6 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 @FunctionalInterface
 interface RecipeSearchRepository {
-
-    fun getRecipesByRecipeSearch(recipeSearch: RecipeSearch): Flow<List<Recipe>>
+    // Возвращаем Flow отдельных рецептов, а не списка
+    fun getRecipesByRecipeSearch(recipeSearch: RecipeSearch): Flow<Recipe>
 }
