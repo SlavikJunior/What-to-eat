@@ -1,4 +1,4 @@
-package com.example.whattoeat
+package com.example.whattoeat.presentation
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
