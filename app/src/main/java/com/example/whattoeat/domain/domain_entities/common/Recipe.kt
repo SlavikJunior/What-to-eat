@@ -4,9 +4,11 @@ import com.example.whattoeat.domain.domain_entities.support.CookingTime
 import com.example.whattoeat.domain.domain_entities.support.Step
 import com.example.whattoeat.domain.domain_entities.support.Portions
 import com.example.whattoeat.domain.domain_entities.support.Product
+import kotlinx.serialization.Serializable
 
 // Бизнес-сущность рецепта, будет отправляться на ui в таком виде,
 // а репозитории должны уметь обернуть в неё сырые данные из data слоя.
+@Serializable
 data class Recipe(
     val title: String,
     val description: String,
