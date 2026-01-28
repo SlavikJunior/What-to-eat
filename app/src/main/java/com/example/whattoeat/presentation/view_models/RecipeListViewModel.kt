@@ -1,7 +1,10 @@
 package com.example.whattoeat.presentation.view_models
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.whattoeat.data.net.client.RussianFoodComClient
+import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.support.RecipeSearch
 import com.example.whattoeat.domain.use_cases.GetRecipesUC
@@ -134,5 +137,17 @@ class RecipeListViewModel(
                 currentState.getStateAfterSearchError(cause)
             }
         }
+    }
+
+    companion object Factory : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>) =
+            RecipeListViewModel(
+                getRecipesUseCase = GetRecipesUC(
+                    repository = RecipeSearchRepositoryImpl(
+                        client = RussianFoodComClient()
+                    )
+                )
+            ) as T
     }
 }

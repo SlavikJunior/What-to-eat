@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">What to eat</string>
+
+    <!--  WhatToEatTopAppBar  -->
+    <string name="back_button_content_description">Back button</string>
+    <!--  WhatToEatTopAppBar  END  -->
+
+    <!--  WhatToEatBottomAppBar  -->
+    <string name="recipe_list_content_description">Recipe list</string>
+    <string name="favorite_recipes_content_description">Favorite Recipes</string>
+    <!--  WhatToEatTopBottomBar  END  -->
 </resources>
