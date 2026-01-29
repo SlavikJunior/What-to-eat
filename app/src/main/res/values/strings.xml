@@ -17,5 +17,10 @@
     <string name="inclusive_products_text_field_label">Inclusive products</string>
     <string name="exclusive_products_text_field_label">Exclusive products</string>
     <string name="search_button_text">Search</string>
+
+        <!--  RecipeCard  -->
+        <string name="recipe_card_image_content_description">Image for recipe: %1$s</string>
+        <!--  RecipeCard END -->
+
     <!--  RecipeList END  -->
 </resources>
