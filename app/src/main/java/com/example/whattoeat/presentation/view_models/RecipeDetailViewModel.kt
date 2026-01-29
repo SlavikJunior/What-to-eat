@@ -17,12 +17,12 @@ class RecipeDetailViewModel(
             RecipeDetailViewModel(
                 addFavoriteRecipeUseCase = AddFavoriteRecipeUC(
                     repository = RecipeRepository(
-                        recipeDAO = TODO() // todo: продумать, как я могу поставить сюда DAO, mb через контейнер, но как его сюда прокинуть??
+                        recipeDAO = TODO("продумать, как я могу поставить сюда DAO, mb через контейнер, но как его сюда прокинуть??")
                     )
                 ),
                 removeFavoriteRecipeUseCase = RemoveFavoriteRecipeUC(
                     repository = RecipeRepository(
-                        recipeDAO = TODO() // todo: продумать, как я могу поставить сюда DAO, mb через контейнер, но как его сюда прокинуть??
+                        recipeDAO = TODO("продумать, как я могу поставить сюда DAO, mb через контейнер, но как его сюда прокинуть??")
                     )
                 )
             ) as T

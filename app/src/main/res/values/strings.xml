@@ -1,12 +1,21 @@
 <resources>
+    <!--  Common  -->
     <string name="app_name">What to eat</string>
+    <!--  Common END  -->
 
     <!--  WhatToEatTopAppBar  -->
     <string name="back_button_content_description">Back button</string>
-    <!--  WhatToEatTopAppBar  END  -->
+    <!--  WhatToEatTopAppBar END  -->
 
     <!--  WhatToEatBottomAppBar  -->
     <string name="recipe_list_content_description">Recipe list</string>
     <string name="favorite_recipes_content_description">Favorite Recipes</string>
-    <!--  WhatToEatTopBottomBar  END  -->
+    <!--  WhatToEatTopBottomBar END  -->
+
+    <!--  RecipeList  -->
+    <string name="recipe_title_text_field_label">Recipe title</string>
+    <string name="inclusive_products_text_field_label">Inclusive products</string>
+    <string name="exclusive_products_text_field_label">Exclusive products</string>
+    <string name="search_button_text">Search</string>
+    <!--  RecipeList END  -->
 </resources>
