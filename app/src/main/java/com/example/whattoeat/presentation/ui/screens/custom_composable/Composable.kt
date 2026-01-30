@@ -1,29 +1,51 @@
 package com.example.whattoeat.presentation.ui.screens.custom_composable
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.palette.graphics.Palette
 import coil3.compose.AsyncImage
+import coil3.toBitmap
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.valentinilk.shimmer.shimmer
 
 @Composable
 fun VerticalText(verticalText: String, modifier: Modifier = Modifier, textStyle: TextStyle = LocalTextStyle.current) {
@@ -42,48 +64,126 @@ fun VerticalText(verticalText: String, modifier: Modifier = Modifier, textStyle:
 fun RecipeCard(
     recipe: Recipe,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(4.dp)
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        onClick = { onClick() },
-        modifier = modifier,
-        shape = shape
-    ) {
+    var isImageLoaded by remember { mutableStateOf(false) }
+
+    var backgroundColor by remember { mutableStateOf(Color(0xFF7090A6)) }
+    var titleColor by remember { mutableStateOf(Color(0xFF2B2B2B)) }
+    var chipColor by remember { mutableStateOf(Color.White) }
+    var buttonColor by remember { mutableStateOf(Color(0xFFFF8A80)) }
+
+    Card(modifier = modifier
+            .fillMaxWidth()
+            .then(if (!isImageLoaded) Modifier.shimmer() else Modifier)
+            .clickable(enabled = isImageLoaded) { onClick() },
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        elevation = CardDefaults.cardElevation(4.dp)) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxWidth()
+                .height(120.dp)
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
                 model = recipe.image,
                 contentDescription = stringResource(R.string.recipe_card_image_content_description, recipe.title),
-                modifier = Modifier.size(100.dp)
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(90.dp)
+                    .clip(RoundedCornerShape(18.dp)),
+                onSuccess = { success ->
+                    val bitmap = success.result.image.toBitmap(
+                        success.result.image.width,
+                        success.result.image.height
+                    )
+
+                    Palette.from(bitmap)
+                        .maximumColorCount(16)
+                        .generate { palette ->
+                            palette?.let {
+                                backgroundColor = Color(
+                                    it.getLightMutedColor(0xFFEAF6FF.toInt())
+                                )
+                                titleColor = Color(
+                                    it.getDarkVibrantColor(0xFF2B2B2B.toInt())
+                                )
+                                chipColor = Color(
+                                    it.getLightVibrantColor(0xFFFFFFFF.toInt())
+                                )
+                                buttonColor = Color(
+                                    it.getVibrantColor(0xFFFF8A80.toInt())
+                                )
+                            }
+                        }
+                    isImageLoaded = true
+                }
             )
+
+            Spacer(modifier = Modifier.width(width = 12.dp))
+
             Column(
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
+
                 Text(
                     text = recipe.title,
-                    modifier = Modifier.weight(2f),
-                    style = TextStyle(
-                        fontSize = 22.sp,
+                    color = titleColor,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Row {
+                    RecipeChip(recipe.cookingTime?.value ?: "", chipColor)
+                    Spacer(Modifier.width(8.dp))
+                    RecipeChip("легко", chipColor)
+                }
+
+                Button(
+                    onClick = onClick,
+                    enabled = isImageLoaded,
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = buttonColor
                     ),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = recipe.description,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Start
-                )
+                    contentPadding = PaddingValues(
+                        horizontal = 20.dp,
+                        vertical = 6.dp
+                    )
+                ) {
+                    Text("поехали")
+                }
             }
         }
     }
 }
 
+@Composable
+private fun RecipeChip(
+    text: String,
+    background: Color
+) {
+    Box(
+        modifier = Modifier
+            .background(background, RoundedCornerShape(12.dp))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            color = Color.Black
+        )
+    }
+}
+
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun RecipeCardPreview() =
+private fun RecipeCardPreview() =
     RecipeCard(
         recipe = Recipe("Блины", "Ещё один рецепт вкусных блинов"),
         onClick = {},

@@ -19,6 +19,8 @@ coroutines = "1.10.2"
 navigation = "2.9.6"
 jsoup = "1.21.1"
 coil = "3.3.0"
+shimmer = "1.3.3"
+palette = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,6 +51,8 @@ compose-navigation = { group = "androidx.navigation", name = "navigation-compose
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coilNet = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+shimmer = { group = "com.valentinilk.shimmer", name = "compose-shimmer", version.ref = "shimmer" }
+palette = { group = "androidx.palette", name = "palette", version.ref = "palette" }
 
 
 [plugins]

@@ -63,6 +63,8 @@ dependencies {
     implementation(libs.jsoup)
     implementation(libs.coil)
     implementation(libs.coilNet)
+    implementation(libs.shimmer)
+    implementation(libs.palette)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
