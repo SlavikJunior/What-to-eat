@@ -1,5 +1,6 @@
 package com.example.whattoeat.data.net.client
 
+import android.util.Log
 import com.example.whattoeat.data.net.encodeTo
 import com.example.whattoeat.data.net.parser.Parser
 import com.example.whattoeat.domain.domain_entities.common.Recipe
@@ -7,10 +8,10 @@ import com.example.whattoeat.domain.domain_entities.support.RecipeSearch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
+import org.jsoup.HttpStatusException
 import org.jsoup.Jsoup
 import org.jsoup.helper.HttpConnection
 import org.jsoup.nodes.Document
@@ -21,40 +22,56 @@ class RussianFoodComClient(
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun searchRecipes(recipeSearch: RecipeSearch): Flow<Recipe> {
-        return flow {
-            val searchDoc = fetchSearchPage(recipeSearch)
+    fun searchRecipes(recipeSearch: RecipeSearch): Flow<Recipe> = flow {
+        Log.d(TAG, "searchRecipes started")
 
-            val recipeLinks = parseSearchResults(searchDoc)
+        val searchDoc = fetchSearchPage(recipeSearch)
 
-            recipeLinks.forEach { link ->
-                emit(link)
+        val recipeLinks = parseSearchResults(searchDoc ?: return@flow)
+
+        Log.d(TAG, "Found ${recipeLinks.size} links to parse")
+
+        recipeLinks.forEach { link ->
+            try {
+                Log.d(TAG, "Parsing link: $link")
+                val recipe = parser.parse(link)
+                if (recipe != null) {
+                    Log.d(TAG, "Emitting recipe: ${recipe.title}")
+                    emit(recipe)
+                } else {
+                    Log.d(TAG, "Recipe is null for link: $link")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to parse $link", e)
             }
         }
-            .flatMapMerge { link ->
-                flow {
-                    parser.parse(link)?.let { recipe ->
-                        emit(recipe)
-                    }
-                }
-            }
-            .flowOn(Dispatchers.IO)
-    }
+
+        Log.d(TAG, "Finished parsing all links")
+    }.flowOn(Dispatchers.IO)
 
 
-    private suspend fun fetchSearchPage(recipeSearch: RecipeSearch): Document {
-        val url = buildSearchUrl(recipeSearch)
+    private suspend fun fetchSearchPage(recipeSearch: RecipeSearch): Document? {
+//        val url = buildSearchUrl(recipeSearch)
+        val url =
+            "https://www.russianfood.com/search/simple/index.php?ssgrtype=bytype&sskw_title=&tag_tree%5B1%5D%5B%5D=27&tag_tree%5B2%5D%5B%5D=103&sskw_iplus=&sskw_iminus=&submit=#beforesearchform"
+        Log.d(TAG, "fetchSearchPage(), url: $url")
         return withContext(Dispatchers.IO) {
-            Jsoup.connect(url)
-                .userAgent(HttpConnection.DEFAULT_UA)
-                .referrer(REFERER)
-                .timeout(TIMEOUT)
-                .get()
+            try {
+                Jsoup.connect(url)
+                    .userAgent(HttpConnection.DEFAULT_UA)
+                    .referrer(REFERER)
+                    .timeout(TIMEOUT)
+                    .get()
+            } catch (e: HttpStatusException) {
+                Log.d(TAG, "code: ${e.statusCode}")
+                null
+            }
         }
     }
 
     private fun parseSearchResults(document: Document): List<String> {
-        return document.getElementsByClass("in_ceen")
+        Log.d(TAG, "start to parse ${document.normalName()}")
+        return document.getElementsByClass("in_seen")
             .mapNotNull { element ->
                 element.selectFirst("a[href]")?.let { linkElement ->
                     val relativeLink = linkElement.attr("href")
@@ -73,7 +90,7 @@ class RussianFoodComClient(
         val exProducts = StringBuilder(Params.PARAM_7_DEFAULT_VALUE)
         recipeSearch.excludedProducts?.map { products ->
             products.nameWithCount
-        }?.forEach { inProducts.append(it).append(",") }
+        }?.forEach { exProducts.append(it).append(",") }
 
         if (!recipeSearch.isAllProductsIncluded) {
             // TODO: сделать обработку фильтрации уже при выдаче пользователю. Если false, то надо будет кастомизировать пользовательский запрос
@@ -130,5 +147,7 @@ class RussianFoodComClient(
         private const val BASE_URL = "https://www.russianfood.com"
         private const val URL_SEARCH = "https://www.russianfood.com/search/simple/index.php"
         private const val ENCODE = "Windows-1251"
+
+        private const val TAG = "RussianFoodComClientTAG"
     }
 }

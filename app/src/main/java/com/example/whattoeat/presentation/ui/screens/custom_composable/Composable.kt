@@ -19,13 +19,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,9 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,18 +46,58 @@ import coil3.compose.AsyncImage
 import coil3.toBitmap
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.presentation.view_models.RecipeListPageEvent
+import com.example.whattoeat.presentation.view_models.RecipeListViewModel
 import com.valentinilk.shimmer.shimmer
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VerticalText(verticalText: String, modifier: Modifier = Modifier, textStyle: TextStyle = LocalTextStyle.current) {
-    val verticalTextFormatted = verticalText.map { it }.joinToString("\n")
+fun FilterBottomSheet(
+    viewModel: RecipeListViewModel
+) {
+    val uiState = viewModel.uiState.collectAsState()
+    val sheetState = rememberModalBottomSheetState()
 
-    Text(
-        text = verticalTextFormatted,
-        textAlign = TextAlign.Center,
-        modifier = modifier,
-        style = textStyle
-    )
+    if (uiState.value.isFilterBottomSheetVisible) {
+        ModalBottomSheet(
+            sheetState = sheetState,
+            onDismissRequest = {
+                viewModel.reduce(
+                    RecipeListPageEvent.IsFilterBottomSheetVisibleChange
+                )
+            }
+        ) {
+            Column {
+                OutlinedTextField(
+                    label = {
+                        Text(stringResource(R.string.inclusive_products_text_field_label))
+                    },
+                    value = uiState.value.filter.includedProducts,
+                    onValueChange = {
+                        viewModel.reduce(
+                            RecipeListPageEvent.IncludedProductsChange(it)
+                        )
+                    }
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    label = {
+                        Text(stringResource(R.string.exclusive_products_text_field_label))
+                    },
+                    value = uiState.value.filter.excludedProducts,
+                    onValueChange = {
+                        viewModel.reduce(
+                            RecipeListPageEvent.ExcludedProductsChange(it)
+                        )
+                    }
+                )
+
+                Spacer(Modifier.height(32.dp))
+            }
+        }
+    }
 }
 
 
@@ -68,15 +109,20 @@ fun RecipeCard(
 ) {
     var isImageLoaded by remember { mutableStateOf(false) }
 
-    var backgroundColor by remember { mutableStateOf(Color(0xFF7090A6)) }
+    var backgroundColor by remember { mutableStateOf(Color(0xC8ABD6FC)) }
     var titleColor by remember { mutableStateOf(Color(0xFF2B2B2B)) }
     var chipColor by remember { mutableStateOf(Color.White) }
     var buttonColor by remember { mutableStateOf(Color(0xFFFF8A80)) }
 
-    Card(modifier = modifier
-            .fillMaxWidth()
-            .then(if (!isImageLoaded) Modifier.shimmer() else Modifier)
-            .clickable(enabled = isImageLoaded) { onClick() },
+    Card(
+        onClick = { onClick() },
+        modifier = modifier
+            .then(
+                Modifier
+                    .fillMaxWidth()
+                    .then(if (!isImageLoaded) Modifier.shimmer() else Modifier)
+                    .clickable(enabled = isImageLoaded) { onClick() }
+            ),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
         elevation = CardDefaults.cardElevation(4.dp)) {
@@ -88,7 +134,10 @@ fun RecipeCard(
         ) {
             AsyncImage(
                 model = recipe.image,
-                contentDescription = stringResource(R.string.recipe_card_image_content_description, recipe.title),
+                contentDescription = stringResource(
+                    R.string.recipe_card_image_content_description,
+                    recipe.title
+                ),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(90.dp)
@@ -138,24 +187,9 @@ fun RecipeCard(
                 )
 
                 Row {
-                    RecipeChip(recipe.cookingTime?.value ?: "", chipColor)
+                    RecipeChip(recipe.cookingTime?.value ?: "быстро", chipColor)
                     Spacer(Modifier.width(8.dp))
                     RecipeChip("легко", chipColor)
-                }
-
-                Button(
-                    onClick = onClick,
-                    enabled = isImageLoaded,
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = buttonColor
-                    ),
-                    contentPadding = PaddingValues(
-                        horizontal = 20.dp,
-                        vertical = 6.dp
-                    )
-                ) {
-                    Text("поехали")
                 }
             }
         }
