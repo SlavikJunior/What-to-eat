@@ -23,18 +23,19 @@ class Parser(
 ) {
 
     suspend fun parse(url: String): Recipe? {
-        Log.d("ParserTAG", "Starting parse for url: $url")
+        Log.d(TAG, "Starting parse for url: $url")
         return try {
             withContext(Dispatchers.IO) {
                 try {
                     val doc = Jsoup.connect(url)
                         .userAgent(userAgentRepository.getRandomUserAgent())
-                        .proxy(proxyRepository.getRandomProxy())
+//                        .proxy(proxyRepository.getRandomProxy())
+                        .proxy("59.6.25.118", 3128)
                         .referrer(REFERER)
                         .timeout(TIMEOUT)
                         .get()
 
-                    Log.d("ParserTAG", "Document fetched for: $url")
+                    Log.d(TAG, "Document fetched for: $url")
 
                     Recipe(
                         title = extractTitle(doc),
@@ -47,15 +48,15 @@ class Parser(
                         video = extractVideo(doc),
                         steps = extractSteps(doc)
                     ).also {
-                        Log.d("ParserTAG", "Recipe created: ${it.title}")
+                        Log.d(TAG, "Recipe created: ${it.title}")
                     }
                 } catch (e: Exception) {
-                    Log.e("ParserTAG", "Error parsing $url: ${e.message}", e)
+                    Log.e(TAG, "Error parsing $url: ${e.message}", e)
                     null
                 }
             }
         } catch (e: Exception) {
-            Log.e("ParserTAG", "Outer exception for $url: ${e.message}", e)
+            Log.e(TAG, "Outer exception for $url: ${e.message}", e)
             null
         }
     }
@@ -180,5 +181,9 @@ class Parser(
                 else null
             }
         }?.takeIf { it.isNotEmpty() }
+    }
+
+    companion object {
+        private const val TAG = "TEST TAG"
     }
 }
