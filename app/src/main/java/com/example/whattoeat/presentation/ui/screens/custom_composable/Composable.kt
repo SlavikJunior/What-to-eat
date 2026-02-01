@@ -213,15 +213,3 @@ private fun RecipeChip(
         )
     }
 }
-
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun RecipeCardPreview() =
-    RecipeCard(
-        recipe = Recipe("Блины", "Ещё один рецепт вкусных блинов"),
-        onClick = {},
-        modifier = Modifier
-            .padding(horizontal = 8.dp)
-            .fillMaxWidth()
-    )

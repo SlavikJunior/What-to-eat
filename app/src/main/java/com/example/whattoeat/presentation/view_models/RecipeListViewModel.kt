@@ -166,12 +166,15 @@ class RecipeListViewModel(
     private fun combineRecipeSearchByDataFromUi() = with(_uiState.value) {
         RecipeSearch(
             title = filter.recipeTitle,
-            includedProducts = (filter.includedProducts).split(",")
-                .map { Product(it) }, // todo: пока разделяю чисто по запятой
-            excludedProducts = filter.excludedProducts.split(",").map { Product(it) },
+            includedProducts = if (filter.includedProducts.isNotEmpty())
+                filter.includedProducts.split(",")
+                    .map { Product(it.trim()) } else null,
+            excludedProducts = if (filter.excludedProducts.isNotEmpty())
+                filter.excludedProducts.split(",")
+                    .map { Product(it.trim()) } else null,
             isAllProductsIncluded = filter.isAllProductsAndNotContained,
-            isNeedVideo = true,
-            isNeedSteps = true
+            isNeedVideo = filter.isNeedVideo,
+            isNeedSteps = filter.isNeedSteps
         )
     }
 
