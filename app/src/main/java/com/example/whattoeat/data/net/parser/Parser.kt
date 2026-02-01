@@ -3,6 +3,8 @@ package com.example.whattoeat.data.net.parser
 import android.util.Log
 import com.example.whattoeat.data.net.client.RussianFoodComClient.Companion.REFERER
 import com.example.whattoeat.data.net.client.RussianFoodComClient.Companion.TIMEOUT
+import com.example.whattoeat.data.net.hack.ProxyRepository
+import com.example.whattoeat.data.net.hack.UserAgentRepository
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.support.CookingTime
 import com.example.whattoeat.domain.domain_entities.support.Portions
@@ -11,14 +13,14 @@ import com.example.whattoeat.domain.domain_entities.support.Step
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
-import org.jsoup.helper.HttpConnection
 import org.jsoup.nodes.Document
-import java.io.IOException
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import kotlin.jvm.Throws
 
-object Parser {
+class Parser(
+    private val proxyRepository: ProxyRepository,
+    private val userAgentRepository: UserAgentRepository
+) {
 
     suspend fun parse(url: String): Recipe? {
         Log.d("ParserTAG", "Starting parse for url: $url")
@@ -26,7 +28,8 @@ object Parser {
             withContext(Dispatchers.IO) {
                 try {
                     val doc = Jsoup.connect(url)
-                        .userAgent("Mozilla/5.0 (Windows NT 6.3; Trident/7.0; Touch; rv:11.0) like Gecko")
+                        .userAgent(userAgentRepository.getRandomUserAgent())
+                        .proxy(proxyRepository.getRandomProxy())
                         .referrer(REFERER)
                         .timeout(TIMEOUT)
                         .get()

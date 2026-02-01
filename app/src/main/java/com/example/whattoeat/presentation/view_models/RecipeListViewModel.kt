@@ -1,10 +1,10 @@
 package com.example.whattoeat.presentation.view_models
 
-import android.widget.TableRow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.data.net.client.RussianFoodComClient
+import com.example.whattoeat.data.net.parser.Parser
 import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.support.Product
@@ -206,7 +206,14 @@ class RecipeListViewModel(
             RecipeListViewModel(
                 getRecipesUseCase = GetRecipesUC(
                     repository = RecipeSearchRepositoryImpl(
-                        client = RussianFoodComClient()
+                        client = RussianFoodComClient(
+                            proxyRepository = TODO("продумать как внедрить"),
+                            userAgentRepository = TODO("продумать как внедрить"),
+                            parser = Parser(
+                                userAgentRepository = TODO(),
+                                proxyRepository = TODO(),
+                            ),
+                        )
                     )
                 )
             ) as T

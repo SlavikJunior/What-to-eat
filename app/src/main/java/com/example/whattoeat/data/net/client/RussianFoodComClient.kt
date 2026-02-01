@@ -2,6 +2,8 @@ package com.example.whattoeat.data.net.client
 
 import android.util.Log
 import com.example.whattoeat.data.net.encodeTo
+import com.example.whattoeat.data.net.hack.ProxyRepository
+import com.example.whattoeat.data.net.hack.UserAgentRepository
 import com.example.whattoeat.data.net.parser.Parser
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.support.RecipeSearch
@@ -18,7 +20,11 @@ import org.jsoup.nodes.Document
 
 
 class RussianFoodComClient(
-    private val parser: Parser = Parser
+    private val proxyRepository: ProxyRepository,
+//    = ProxyRepository()
+    private val userAgentRepository: UserAgentRepository,
+//    = UserAgentRepository()
+    private val parser: Parser = Parser(proxyRepository, userAgentRepository)
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -47,12 +53,12 @@ class RussianFoodComClient(
 
     private suspend fun fetchSearchPage(recipeSearch: RecipeSearch): Document? {
         val url = buildSearchUrl(recipeSearch)
-//        val url = "https://www.russianfood.com/search/simple/index.php?ssgrtype=bytype&sskw_title=&tag_tree%5B1%5D%5B%5D=27&tag_tree%5B2%5D%5B%5D=103&sskw_iplus=&sskw_iminus=&submit=#beforesearchform"
         Log.d(TAG, "fetchSearchPage(), url: $url")
         return withContext(Dispatchers.IO) {
             try {
                 Jsoup.connect(url)
-                    .userAgent(HttpConnection.DEFAULT_UA)
+                    .userAgent(userAgentRepository.getRandomUserAgent())
+                    .proxy(proxyRepository.getRandomProxy())
                     .referrer(REFERER)
                     .timeout(TIMEOUT)
                     .get()
@@ -75,7 +81,7 @@ class RussianFoodComClient(
             }
     }
 
-    fun buildSearchUrl(recipeSearch: RecipeSearch): String {
+    private fun buildSearchUrl(recipeSearch: RecipeSearch): String {
         val title = recipeSearch.title ?: Params.PARAM_2_DEFAULT_VALUE
 
         val inProducts = StringBuilder(Params.PARAM_6_DEFAULT_VALUE)
