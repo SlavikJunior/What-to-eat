@@ -1,0 +1,34 @@
+package com.example.whattoeat.di
+
+import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
+import com.example.whattoeat.domain.repositories.RecipeSearchRepository
+import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
+import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
+import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
+
+@Module
+@InstallIn(ViewModelComponent::class)
+object DomainModule {
+
+    @Provides
+    fun provideAddFavoriteRecipeUseCase(repository: FavoriteRecipeRepository) =
+        AddFavoriteRecipeUseCase(
+            repository = repository
+        )
+
+    @Provides
+    fun provideRemoveFavoriteRecipeUseCase(repository: FavoriteRecipeRepository) =
+        RemoveFavoriteRecipeUseCase(
+            repository = repository
+        )
+
+    @Provides
+    fun provideGetRecipesRecipesUseCase(repository: RecipeSearchRepository) =
+        GetRecipesUseCase(
+            repository = repository
+        )
+}
