@@ -17,5 +17,6 @@ abstract class WhatToEatDatabase: RoomDatabase() {
 
     companion object {
         const val WHAT_TO_EAT_DATABASE_VERSION = 1
+        const val WHAT_TO_EAT_DATABASE_NAME = "what_to_eat_database"
     }
 }

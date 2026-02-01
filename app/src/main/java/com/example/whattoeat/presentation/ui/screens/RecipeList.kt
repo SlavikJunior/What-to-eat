@@ -11,6 +11,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -18,17 +19,16 @@ import com.example.whattoeat.R
 import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
 import com.example.whattoeat.presentation.ui.screens.custom_composable.FilterBottomSheet
 import com.example.whattoeat.presentation.ui.screens.custom_composable.RecipeCard
-import com.example.whattoeat.presentation.view_models.RecipeListPageEvent
-import com.example.whattoeat.presentation.view_models.RecipeListViewModel
+import com.example.whattoeat.presentation.ui.view_models.RecipeDetailViewModel
+import com.example.whattoeat.presentation.ui.view_models.RecipeListPageEvent
+import com.example.whattoeat.presentation.ui.view_models.RecipeListViewModel
 
 @Composable
 fun RecipeList(
     navController: NavHostController,
+    viewModel: RecipeListViewModel = hiltViewModel(),
     paddingValues: PaddingValues = PaddingValues()
 ) {
-    val viewModel: RecipeListViewModel =
-        viewModel(factory = RecipeListViewModel.Factory)
-
     val uiState = viewModel.uiState.collectAsState()
 
     Column(

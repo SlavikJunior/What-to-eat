@@ -1,19 +1,17 @@
-package com.example.whattoeat.presentation.view_models
+package com.example.whattoeat.presentation.ui.view_models
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.whattoeat.data.net.client.RussianFoodComClient
-import com.example.whattoeat.data.net.parser.Parser
-import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.support.Product
 import com.example.whattoeat.domain.domain_entities.support.RecipeSearch
-import com.example.whattoeat.domain.use_cases.GetRecipesUC
+import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 enum class Cuisines {
     ALL,
@@ -98,8 +96,9 @@ sealed interface RecipeListPageEvent {
     data object IsFilterBottomSheetVisibleChange : RecipeListPageEvent
 }
 
-class RecipeListViewModel(
-    private val getRecipesUseCase: GetRecipesUC
+@HiltViewModel
+class RecipeListViewModel @Inject constructor(
+    private val getRecipesUseCase: GetRecipesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecipeListModel())
@@ -198,24 +197,5 @@ class RecipeListViewModel(
                 currentState.getStateAfterSearchError(cause)
             }
         }
-    }
-
-    companion object Factory : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>) =
-            RecipeListViewModel(
-                getRecipesUseCase = GetRecipesUC(
-                    repository = RecipeSearchRepositoryImpl(
-                        client = RussianFoodComClient(
-                            proxyRepository = TODO("продумать как внедрить"),
-                            userAgentRepository = TODO("продумать как внедрить"),
-                            parser = Parser(
-                                userAgentRepository = TODO(),
-                                proxyRepository = TODO(),
-                            ),
-                        )
-                    )
-                )
-            ) as T
     }
 }

@@ -5,8 +5,9 @@ import com.example.whattoeat.domain.domain_entities.support.RecipeSearch
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
-class GetRecipesUC(
+class GetRecipesUseCase @Inject constructor(
     private val repository: RecipeSearchRepository
 ) {
     @Throws(Exception::class)

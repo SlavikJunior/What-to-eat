@@ -4,8 +4,11 @@ import com.example.whattoeat.data.database.dao.RecipeDAO
 import com.example.whattoeat.data.database.entity.RecipeEntity
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RecipeRepository(
+@Singleton
+class FavoriteRecipeRepositoryImpl @Inject constructor(
     private val recipeDAO: RecipeDAO
 ): FavoriteRecipeRepository {
     override suspend fun addRecipe(recipe: Recipe) =
