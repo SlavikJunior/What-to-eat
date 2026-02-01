@@ -1,5 +1,6 @@
 package com.example.whattoeat.data.net.parser
 
+import android.util.Log
 import com.example.whattoeat.data.net.client.RussianFoodComClient.Companion.REFERER
 import com.example.whattoeat.data.net.client.RussianFoodComClient.Companion.TIMEOUT
 import com.example.whattoeat.domain.domain_entities.common.Recipe
@@ -19,30 +20,40 @@ import kotlin.jvm.Throws
 
 object Parser {
 
-    @Throws(IOException::class)
     suspend fun parse(url: String): Recipe? {
+        Log.d("ParserTAG", "Starting parse for url: $url")
         return try {
             withContext(Dispatchers.IO) {
-                val doc = Jsoup.connect(url)
-                .userAgent(HttpConnection.DEFAULT_UA)
-                .referrer(REFERER)
-                .timeout(TIMEOUT)
-                .get()
+                try {
+                    val doc = Jsoup.connect(url)
+                        .userAgent("Mozilla/5.0 (Windows NT 6.3; Trident/7.0; Touch; rv:11.0) like Gecko")
+                        .referrer(REFERER)
+                        .timeout(TIMEOUT)
+                        .get()
 
-                Recipe(
-                    title = extractTitle(doc),
-                    description = extractDescription(doc),
-                    image = extractImage(doc),
-                    fullDescription = extractFullDescription(doc),
-                    cookingTime = extractCookingTime(doc),
-                    portions = extractPortions(doc),
-                    products = extractProducts(doc),
-                    video = extractVideo(doc),
-                    steps = extractSteps(doc)
-                )
+                    Log.d("ParserTAG", "Document fetched for: $url")
+
+                    Recipe(
+                        title = extractTitle(doc),
+                        description = extractDescription(doc),
+                        image = extractImage(doc),
+                        fullDescription = extractFullDescription(doc),
+                        cookingTime = extractCookingTime(doc),
+                        portions = extractPortions(doc),
+                        products = extractProducts(doc),
+                        video = extractVideo(doc),
+                        steps = extractSteps(doc)
+                    ).also {
+                        Log.d("ParserTAG", "Recipe created: ${it.title}")
+                    }
+                } catch (e: Exception) {
+                    Log.e("ParserTAG", "Error parsing $url: ${e.message}", e)
+                    null
+                }
             }
-        } catch (e: IOException) {
-            throw e
+        } catch (e: Exception) {
+            Log.e("ParserTAG", "Outer exception for $url: ${e.message}", e)
+            null
         }
     }
 

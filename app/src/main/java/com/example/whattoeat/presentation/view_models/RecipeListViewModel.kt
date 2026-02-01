@@ -1,11 +1,13 @@
 package com.example.whattoeat.presentation.view_models
 
+import android.widget.TableRow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.data.net.client.RussianFoodComClient
 import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domain_entities.support.Product
 import com.example.whattoeat.domain.domain_entities.support.RecipeSearch
 import com.example.whattoeat.domain.use_cases.GetRecipesUC
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,18 +33,19 @@ sealed interface RecipeListState {
 }
 
 data class RecipeListFilter(
-    private val recipeTitle: String = "", // ye
-    private val cuisine: Cuisines = Cuisines.RUSSIAN, // ye
-    private val isVegan: Boolean = false, // ye
-    private val isSearchByDescription: Boolean = false, // ye
-    private val includedProducts: String = "", // ye
-    private val excludedProducts: String = "", // ye
-    private val isNeedVideo: Boolean = false, // ye
-    private val isNeedSteps: Boolean = false, // ye
-    private val isAllProductsAndNotContained: Boolean = false, // ye
+    val recipeTitle: String = "", // ye
+    val cuisine: Cuisines = Cuisines.RUSSIAN, // ye
+    val isVegan: Boolean = false, // ye
+    val isSearchByDescription: Boolean = false, // ye
+    val includedProducts: String = "", // ye
+    val excludedProducts: String = "", // ye
+    val isNeedVideo: Boolean = false, // ye
+    val isNeedSteps: Boolean = false, // ye
+    val isAllProductsAndNotContained: Boolean = false, // ye
 )
 
 data class RecipeListModel(
+    val isFilterBottomSheetVisible: Boolean = false,
     val state: RecipeListState = RecipeListState.SearchReadyState,
     val recipes: List<Recipe> = listOf(),
     val filter: RecipeListFilter = RecipeListFilter(),
@@ -81,44 +84,103 @@ fun RecipeListModel.getStateSearchStarted() =
     )
 
 sealed interface RecipeListPageEvent {
-    data class SearchButtonClicked(val recipeSearch: RecipeSearch): RecipeListPageEvent
-    data class RecipeTitleChange(private val recipeTitle: String): RecipeListPageEvent
-    data class IncludedProductsChange(private val includedProducts: String): RecipeListPageEvent
-    data class ExcludedProductsChange(private val excludedProducts: String): RecipeListPageEvent
-    data class CuisineChange(private val cuisine: Cuisines): RecipeListPageEvent
+    data object SearchButtonClicked : RecipeListPageEvent
+    data class RecipeTitleChange(val recipeTitle: String) : RecipeListPageEvent
+    data class IncludedProductsChange(val includedProducts: String) : RecipeListPageEvent
+    data class ExcludedProductsChange(val excludedProducts: String) : RecipeListPageEvent
+    data class CuisineChange(private val cuisine: Cuisines) : RecipeListPageEvent
     data object IsListShowingChange : RecipeListPageEvent
     data object IsVeganChange : RecipeListPageEvent
     data object IsNeedVideoChange : RecipeListPageEvent
     data object IsNeedStepsChange : RecipeListPageEvent
     data object IsNeedAllProductsChange : RecipeListPageEvent
     data object IsSearchByDescriptionChange : RecipeListPageEvent
+    data object IsFilterBottomSheetVisibleChange : RecipeListPageEvent
 }
 
 class RecipeListViewModel(
     private val getRecipesUseCase: GetRecipesUC
-): ViewModel() {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecipeListModel())
     val uiState = _uiState.asStateFlow()
 
     fun reduce(event: RecipeListPageEvent) =
-        when(event) {
-            is RecipeListPageEvent.SearchButtonClicked -> onClickSearchButton(event)
+        when (event) {
+            is RecipeListPageEvent.SearchButtonClicked -> onClickSearchButton()
+            is RecipeListPageEvent.IsFilterBottomSheetVisibleChange -> onChangeFilterShitVisible()
+            is RecipeListPageEvent.RecipeTitleChange -> onChangeRecipeTitle(event)
+            is RecipeListPageEvent.IncludedProductsChange -> onChangeIncludedProducts(event)
+            is RecipeListPageEvent.ExcludedProductsChange -> onChangeExcludedProducts(event)
             else -> {}
         }
 
-    private fun onClickSearchButton(event: RecipeListPageEvent.SearchButtonClicked) {
+    private fun onChangeExcludedProducts(event: RecipeListPageEvent.ExcludedProductsChange) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                filter = currentState.filter.copy(
+                    excludedProducts = event.excludedProducts
+                )
+            )
+        }
+    }
+
+    private fun onChangeIncludedProducts(event: RecipeListPageEvent.IncludedProductsChange) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                filter = currentState.filter.copy(
+                    includedProducts = event.includedProducts
+                )
+            )
+        }
+    }
+
+    private fun onChangeRecipeTitle(event: RecipeListPageEvent.RecipeTitleChange) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                filter = currentState.filter.copy(
+                    recipeTitle = event.recipeTitle
+                )
+            )
+        }
+    }
+
+    private fun onChangeFilterShitVisible() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                isFilterBottomSheetVisible = !currentState.isFilterBottomSheetVisible
+            )
+        }
+    }
+
+    private fun onClickSearchButton() {
         _uiState.update { currentState ->
             currentState.getStateSearchStarted()
         }
 
         viewModelScope.launch {
-            searchRecipes(event.recipeSearch)
+            searchRecipes()
         }
     }
 
-    private suspend fun searchRecipes(recipeSearch: RecipeSearch) {
-        runCatching {
+    private fun combineRecipeSearchByDataFromUi() = with(_uiState.value) {
+        RecipeSearch(
+            title = filter.recipeTitle,
+            includedProducts = if (filter.includedProducts.isNotEmpty())
+                filter.includedProducts.split(",")
+                    .map { Product(it.trim()) } else null,
+            excludedProducts = if (filter.excludedProducts.isNotEmpty())
+                filter.excludedProducts.split(",")
+                    .map { Product(it.trim()) } else null,
+            isAllProductsIncluded = filter.isAllProductsAndNotContained,
+            isNeedVideo = filter.isNeedVideo,
+            isNeedSteps = filter.isNeedSteps
+        )
+    }
+
+    private suspend fun searchRecipes() {
+        val recipeSearch = combineRecipeSearchByDataFromUi()
+        try {
             getRecipesUseCase(recipeSearch)
                 .collect { recipe ->
                     _uiState.update { state ->
@@ -128,11 +190,10 @@ class RecipeListViewModel(
                         )
                     }
                 }
-        }.onSuccess {
             _uiState.update { currentState ->
                 currentState.getStateAfterSearchSuccess()
             }
-        }.onFailure { cause ->
+        } catch (cause: Throwable) {
             _uiState.update { currentState ->
                 currentState.getStateAfterSearchError(cause)
             }

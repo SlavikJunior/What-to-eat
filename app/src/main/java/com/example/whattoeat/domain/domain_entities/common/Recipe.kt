@@ -19,4 +19,6 @@ data class Recipe(
     val products: List<Product>? = null,
     val video: String? = null,
     val steps: List<Step>? = null
-)
+) {
+    constructor() : this(title = "", description = "")
+}
