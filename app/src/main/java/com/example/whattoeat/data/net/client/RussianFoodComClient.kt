@@ -21,9 +21,7 @@ import org.jsoup.nodes.Document
 
 class RussianFoodComClient(
     private val proxyRepository: ProxyRepository,
-//    = ProxyRepository()
     private val userAgentRepository: UserAgentRepository,
-//    = UserAgentRepository()
     private val parser: Parser = Parser(proxyRepository, userAgentRepository)
 ) {
 
@@ -58,12 +56,13 @@ class RussianFoodComClient(
             try {
                 Jsoup.connect(url)
                     .userAgent(userAgentRepository.getRandomUserAgent())
-                    .proxy(proxyRepository.getRandomProxy())
+//                    .proxy(proxyRepository.getRandomProxy())
+                    .proxy("59.6.25.118", 3128)
                     .referrer(REFERER)
                     .timeout(TIMEOUT)
                     .get()
             } catch (e: HttpStatusException) {
-                Log.d(TAG, "code: ${e.statusCode}")
+                Log.d(TAG, "HttpStatusException, code: ${e.statusCode}")
                 null
             }
         }
@@ -147,6 +146,6 @@ class RussianFoodComClient(
         private const val URL_SEARCH = "https://www.russianfood.com/search/simple/index.php"
         private const val ENCODE = "Windows-1251"
 
-        private const val TAG = "RussianFoodComClientTAG"
+        private const val TAG = "TEST TAG"
     }
 }
