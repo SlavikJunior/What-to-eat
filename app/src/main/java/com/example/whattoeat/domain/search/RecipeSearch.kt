@@ -35,7 +35,7 @@ sealed interface RecipeSearch {
     ): RecipeSearch
 
     @Serializable
-    data class RecipeInformationSearch(
+    data class RecipeFullInformationSearch(
         val id: Int, // Идентификатор рецепта. не парметр - часть в path!!!
         val includeNutrition: Boolean // Включите в описание рецепта информацию о пищевой ценности на одну порцию.
     ): RecipeSearch
