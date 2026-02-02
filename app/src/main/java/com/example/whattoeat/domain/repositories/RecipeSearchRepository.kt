@@ -9,6 +9,6 @@ interface RecipeSearchRepository {
     suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<RecipeComplex>
     suspend fun getRecipeSimilar(recipeSearch: RecipeSearch.RecipeSimilarSearch): Flow<RecipeSimilar>
     suspend fun getRecipeSummary(recipeSearch: RecipeSearch.RecipeSummarySearch): Flow<RecipeSummary>
-    suspend fun getRecipeWithInformation(recipeSearch: RecipeSearch.RecipeInformationSearch): Flow<RecipeInformation>
-    suspend fun getRecipeWithIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch): Flow<RecipeByIngredients>
+    suspend fun getRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Flow<RecipeFullInformation>
+    suspend fun getRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch): Flow<RecipeByIngredients>
 }

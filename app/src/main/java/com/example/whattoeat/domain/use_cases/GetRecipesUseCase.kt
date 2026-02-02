@@ -10,14 +10,14 @@ class GetRecipesUseCase @Inject constructor(
     @Throws(Exception::class)
     suspend operator fun invoke(recipeSearch: RecipeSearch) =
         when(recipeSearch) {
-            is RecipeSearch.RecipeByIngredientsSearch -> repository.getRecipeWithIngredients(recipeSearch)
+            is RecipeSearch.RecipeByIngredientsSearch -> repository.getRecipeByIngredients(recipeSearch)
             is RecipeSearch.RecipeComplexSearch -> repository.getRecipeComplex(recipeSearch)
-            is RecipeSearch.RecipeInformationSearch -> repository.getRecipeWithInformation(recipeSearch)
+            is RecipeSearch.RecipeFullInformationSearch -> repository.getRecipeFullInformation(recipeSearch)
             is RecipeSearch.RecipeSimilarSearch -> repository.getRecipeSimilar(recipeSearch)
             is RecipeSearch.RecipeSummarySearch -> repository.getRecipeSummary(recipeSearch)
         }
 
     companion object {
-        private const val TAG = "GetRecipesUC"
+        private const val TAG = "GetRecipesUseCase"
     }
 }
