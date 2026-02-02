@@ -14,4 +14,4 @@ data class RecipeWithIngredients(
     val usedIngredients: List<Ingredient>,
     val unusedIngredients: List<Ingredient>,
     val likes: Int
-)
+): Recipe

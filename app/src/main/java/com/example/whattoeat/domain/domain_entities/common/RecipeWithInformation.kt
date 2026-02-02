@@ -34,4 +34,4 @@ data class RecipeWithInformation(
     val analyzedInstructions: List<AnalyzedInstruction>,
     val spoonacularScore: Double,
     val spoonacularSourceUrl: String
-)
+): Recipe

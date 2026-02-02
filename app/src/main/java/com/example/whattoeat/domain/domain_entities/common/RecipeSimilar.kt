@@ -11,4 +11,4 @@ data class RecipeSimilar(
     val readyInMinutes: Int,
     val servings: Int,
     val sourceUrl: String
-)
+): Recipe

@@ -8,4 +8,4 @@ data class RecipeComplex(
     val title: String,
     val image: String,
     val imageType: String
-)
+): Recipe
