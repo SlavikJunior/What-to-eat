@@ -4,7 +4,7 @@ import com.example.whattoeat.domain.domain_entities.support.Ingredient
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RecipeWithIngredients(
+data class RecipeByIngredients(
     val id: Int,
     val title: String,
     val image: String,
