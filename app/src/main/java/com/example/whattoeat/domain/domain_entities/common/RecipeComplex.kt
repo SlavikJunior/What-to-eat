@@ -3,7 +3,7 @@ package com.example.whattoeat.domain.domain_entities.common
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RecipeSimple(
+data class RecipeComplex(
     val id: Int,
     val title: String,
     val image: String,
