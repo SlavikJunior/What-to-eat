@@ -1,32 +1,21 @@
 package com.example.whattoeat.domain.use_cases
 
-import android.util.Log
-import com.example.whattoeat.domain.domain_entities.support.RecipeSearch
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
+import com.example.whattoeat.domain.search.RecipeSearch
 import javax.inject.Inject
 
 class GetRecipesUseCase @Inject constructor(
     private val repository: RecipeSearchRepository
 ) {
     @Throws(Exception::class)
-    operator fun invoke(recipeSearch: RecipeSearch) = flow {
-        Log.d(TAG, "Invoking with: $recipeSearch")
-        try {
-            repository.getRecipesByRecipeSearch(recipeSearch)
-                .onEach { recipe ->
-                    Log.d(TAG, "Received recipe from repository: ${recipe.title}")
-                }
-                .collect { recipe ->
-                    Log.d(TAG, "Emitting recipe: ${recipe.title}")
-                    emit(recipe)
-                }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error: ${e.message}", e)
-            throw e
+    suspend operator fun invoke(recipeSearch: RecipeSearch) =
+        when(recipeSearch) {
+            is RecipeSearch.RecipeByIngredientsSearch -> repository.getRecipeWithIngredients(recipeSearch)
+            is RecipeSearch.RecipeComplexSearch -> repository.getRecipeComplex(recipeSearch)
+            is RecipeSearch.RecipeInformationSearch -> repository.getRecipeWithInformation(recipeSearch)
+            is RecipeSearch.RecipeSimilarSearch -> repository.getRecipeSimilar(recipeSearch)
+            is RecipeSearch.RecipeSummarySearch -> repository.getRecipeSummary(recipeSearch)
         }
-    }
 
     companion object {
         private const val TAG = "GetRecipesUC"
