@@ -1,10 +1,13 @@
 package com.example.whattoeat.domain.repositories
 
-import com.example.whattoeat.domain.domain_entities.common.Recipe
-import com.example.whattoeat.domain.domain_entities.support.RecipeSearch
+import com.example.whattoeat.domain.domain_entities.common.*
 import kotlinx.coroutines.flow.Flow
 
-
 interface RecipeSearchRepository {
-    fun getRecipesByRecipeSearch(recipeSearch: RecipeSearch): Flow<Recipe>
+
+    suspend fun getRecipeComplex(): Flow<RecipeComplex>
+    suspend fun getRecipeSimilar(): Flow<RecipeSimilar>
+    suspend fun getRecipeSummary(): Flow<RecipeSummary>
+    suspend fun getRecipeWithInformation(): Flow<RecipeWithInformation>
+    suspend fun getRecipeWithIngredients(): Flow<RecipeWithIngredients>
 }

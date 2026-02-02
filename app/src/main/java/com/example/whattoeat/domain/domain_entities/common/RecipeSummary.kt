@@ -3,4 +3,8 @@ package com.example.whattoeat.domain.domain_entities.common
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface Recipe
+data class RecipeSummary(
+    val id: Int,
+    val title: String,
+    val summary: String
+): Recipe
