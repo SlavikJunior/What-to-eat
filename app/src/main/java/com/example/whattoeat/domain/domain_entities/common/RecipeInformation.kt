@@ -6,7 +6,7 @@ import com.example.whattoeat.domain.domain_entities.support.Diets
 import com.example.whattoeat.domain.domain_entities.support.DishTypes
 import com.example.whattoeat.domain.domain_entities.support.Ingredient
 
-data class RecipeWithInformation(
+data class RecipeInformation(
     val id: Int,
     val image: String,
     val imageType: String,
