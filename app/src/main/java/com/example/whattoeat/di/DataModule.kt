@@ -3,7 +3,6 @@ package com.example.whattoeat.di
 import android.content.Context
 import androidx.room.Room
 import com.example.whattoeat.data.database.WhatToEatDatabase
-import com.example.whattoeat.data.database.dao.RecipeDAO
 import com.example.whattoeat.data.database.repository.FavoriteRecipeRepositoryImpl
 import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.data.net.service.SpoonacularApiService
