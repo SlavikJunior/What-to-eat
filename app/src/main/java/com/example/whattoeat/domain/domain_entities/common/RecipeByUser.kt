@@ -4,7 +4,7 @@ import com.example.whattoeat.domain.domain_entities.support.*
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RecipeFullInformation(
+data class RecipeByUser(
     val id: Int,
     val image: String,
     val imageType: String,
@@ -18,9 +18,7 @@ data class RecipeFullInformation(
     val dairyFree: Boolean,
     val veryHealthy: Boolean,
     val cheap: Boolean,
-    val veryPopular: Boolean,
     val cookingMinutes: String?, // время готовки
-    val aggregateLikes: Int,
     val healthScore: Double,
     val extendedIngredients: List<Ingredient>,
     val summary: String,
@@ -29,7 +27,6 @@ data class RecipeFullInformation(
     val diets: List<Diets>,
     val occasions: List<String>,
     val instructions: String,
-    val analyzedInstructions: List<AnalyzedInstruction>,
-    val spoonacularScore: Double,
-    val spoonacularSourceUrl: String
+    val steps: List<StepByUser>,
+    val notes: String
 ): Recipe
