@@ -1,7 +1,6 @@
 package com.example.whattoeat.data.database.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.whattoeat.data.database.entity.CachedRecipe.Companion.TABLE_NAME
@@ -15,8 +14,11 @@ interface UsersRecipeDao {
     @Insert(entity = UsersRecipe::class)
     fun insert(recipeByUser: RecipeByUser): Long
 
-    @Delete(entity = UsersRecipe::class)
-    fun delete(id: Int): Int
+    @Query("""
+        delete from $TABLE_NAME
+        where image = :image
+    """)
+    fun delete(image: String): Int
 
     @Query("""
         select *
@@ -30,4 +32,24 @@ interface UsersRecipeDao {
         from $TABLE_NAME
     """)
     suspend fun selectAll(): Flow<UsersRecipe>
+
+    @Query("""
+        select *
+        from $TABLE_NAME
+        where title like '%' || :query || '%'
+    """)
+    suspend fun selectByTitle(query: String): Flow<UsersRecipe>
+
+    @Query("""
+        select *
+        from $TABLE_NAME 
+        where extended_ingredients like '%' || :ingredient1 || '%'
+           or extended_ingredients like '%' || :ingredient2 || '%'
+           or extended_ingredients like '%' || :ingredient3 || '%'
+    """)
+    suspend fun selectByMultipleIngredients(
+        ingredient1: String,
+        ingredient2: String? = null,
+        ingredient3: String? = null
+    ): Flow<UsersRecipe>
 }
