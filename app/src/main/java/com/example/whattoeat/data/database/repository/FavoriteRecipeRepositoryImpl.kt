@@ -1,22 +1,25 @@
 package com.example.whattoeat.data.database.repository
 
-import com.example.whattoeat.data.database.dao.RecipeDAO
-import com.example.whattoeat.data.database.entity.RecipeEntity
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
+import com.example.whattoeat.domain.search.RecipeSearch
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class FavoriteRecipeRepositoryImpl @Inject constructor(
-    private val recipeDAO: RecipeDAO
+
 ): FavoriteRecipeRepository {
-    override suspend fun addRecipe(recipe: Recipe) =
-        (recipeDAO.insert(RecipeEntity.fromRecipe(recipe)))
+    override suspend fun addRecipe(recipe: Recipe): Long {
+        TODO("Not yet implemented")
+    }
 
-    override suspend fun removeRecipe(recipe: Recipe) =
-        (recipeDAO.delete(RecipeEntity.fromRecipe(recipe)))
+    override suspend fun removeRecipe(recipe: Recipe): Int {
+        TODO("Not yet implemented")
+    }
 
-    suspend fun isStored(recipe: Recipe) =
-        recipeDAO.isStored(recipe.title, recipe.description)
+    override suspend fun getRecipes(recipeSearch: RecipeSearch): Flow<Recipe> {
+        TODO("Not yet implemented")
+    }
 }
