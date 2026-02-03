@@ -7,7 +7,6 @@ import javax.inject.Inject
 class GetRecipesUseCase @Inject constructor(
     private val repository: RecipeSearchRepository
 ) {
-    @Throws(Exception::class)
     suspend operator fun invoke(recipeSearch: RecipeSearch) =
         when(recipeSearch) {
             is RecipeSearch.RecipeByIngredientsSearch -> repository.getRecipeByIngredients(recipeSearch)
