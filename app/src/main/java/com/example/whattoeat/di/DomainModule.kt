@@ -2,9 +2,12 @@ package com.example.whattoeat.di
 
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
+import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
+import com.example.whattoeat.domain.use_cases.DeleteUsersRecipeUseCase
 import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
 import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
+import com.example.whattoeat.domain.use_cases.UploadUsersRecipeUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,6 +32,18 @@ object DomainModule {
     @Provides
     fun provideGetRecipesRecipesUseCase(repository: RecipeSearchRepository) =
         GetRecipesUseCase(
+            repository = repository
+        )
+
+    @Provides
+    fun provideUploadUsersRecipeUseCase(repository: UsersRecipeRepository) =
+        UploadUsersRecipeUseCase(
+            repository = repository
+        )
+
+    @Provides
+    fun provideDeleteUsersRecipeUseCase(repository: UsersRecipeRepository) =
+        DeleteUsersRecipeUseCase(
             repository = repository
         )
 }
