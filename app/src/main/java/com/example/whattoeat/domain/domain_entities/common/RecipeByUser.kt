@@ -29,4 +29,4 @@ data class RecipeByUser(
     val instructions: String,
     val steps: List<StepByUser>,
     val notes: String
-)
+): Recipe
