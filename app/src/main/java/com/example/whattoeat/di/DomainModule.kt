@@ -5,7 +5,9 @@ import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.DeleteUsersRecipeUseCase
+import com.example.whattoeat.domain.use_cases.GetFavoriteRecipesUseCase
 import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
+import com.example.whattoeat.domain.use_cases.GetUsersRecipesUseCase
 import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.UploadUsersRecipeUseCase
 import dagger.Module
@@ -30,6 +32,12 @@ object DomainModule {
         )
 
     @Provides
+    fun provideGetFavoriteRecipesUseCase(repository: FavoriteRecipeRepository) =
+        GetFavoriteRecipesUseCase(
+            repository = repository
+        )
+
+    @Provides
     fun provideGetRecipesRecipesUseCase(repository: RecipeSearchRepository) =
         GetRecipesUseCase(
             repository = repository
@@ -44,6 +52,12 @@ object DomainModule {
     @Provides
     fun provideDeleteUsersRecipeUseCase(repository: UsersRecipeRepository) =
         DeleteUsersRecipeUseCase(
+            repository = repository
+        )
+
+    @Provides
+    fun provideGetUsersRecipesUseCase(repository: UsersRecipeRepository) =
+        GetUsersRecipesUseCase(
             repository = repository
         )
 }
