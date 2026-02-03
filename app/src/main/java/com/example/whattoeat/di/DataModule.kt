@@ -12,6 +12,7 @@ import com.example.whattoeat.data.net.parser.Parser
 import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
+import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -82,5 +83,10 @@ object DataModule {
     @Singleton
     fun provideFavoriteRecipeRepository(recipeDAO: RecipeDAO): FavoriteRecipeRepository =
         FavoriteRecipeRepositoryImpl(recipeDAO = recipeDAO)
+
+    @Provides
+    @Singleton
+    fun provideUsersRecipeRepository(): UsersRecipeRepository =
+        TODO("Provide feature UsersRecipeRepositoryImpl here")
 
 }
