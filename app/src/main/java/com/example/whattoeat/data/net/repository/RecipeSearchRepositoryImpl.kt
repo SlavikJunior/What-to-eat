@@ -1,22 +1,35 @@
 package com.example.whattoeat.data.net.repository
 
-import com.example.whattoeat.data.net.client.RussianFoodComClient
-import com.example.whattoeat.domain.domain_entities.support.RecipeSearch
+import com.example.whattoeat.data.net.service.SpoonacularApiService
+import com.example.whattoeat.domain.domain_entities.common.RecipeByIngredients
+import com.example.whattoeat.domain.domain_entities.common.RecipeComplex
+import com.example.whattoeat.domain.domain_entities.common.RecipeFullInformation
+import com.example.whattoeat.domain.domain_entities.common.RecipeSimilar
+import com.example.whattoeat.domain.domain_entities.common.RecipeSummary
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
-import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.example.whattoeat.domain.search.RecipeSearch
+import kotlinx.coroutines.flow.Flow
 
-@Singleton
-class RecipeSearchRepositoryImpl @Inject constructor(
-    private val client: RussianFoodComClient
+class RecipeSearchRepositoryImpl(
+    service: SpoonacularApiService
 ): RecipeSearchRepository {
+    override suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<RecipeComplex> {
+        TODO("Not yet implemented")
+    }
 
-    override fun getRecipesByRecipeSearch(recipeSearch: RecipeSearch) = flow {
-        try {
-            client.searchRecipes(recipeSearch).collect { recipe ->
-                emit(recipe)
-            }
-        } catch (_: Exception) {}
+    override suspend fun getRecipeSimilar(recipeSearch: RecipeSearch.RecipeSimilarSearch): Flow<RecipeSimilar> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getRecipeSummary(recipeSearch: RecipeSearch.RecipeSummarySearch): Flow<RecipeSummary> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Flow<RecipeFullInformation> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch): Flow<RecipeByIngredients> {
+        TODO("Not yet implemented")
     }
 }

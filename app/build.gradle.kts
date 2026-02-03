@@ -65,6 +65,10 @@ dependencies {
     implementation(libs.shimmer)
     implementation(libs.palette)
     implementation(libs.hilt.navigation)
+    implementation(libs.retrofit)
+    implementation(libs.okhttp)
+    implementation(libs.retrofit.serialization)
+    implementation(libs.kotlin.reflect)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

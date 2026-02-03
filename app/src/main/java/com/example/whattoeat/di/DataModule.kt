@@ -5,14 +5,16 @@ import androidx.room.Room
 import com.example.whattoeat.data.database.WhatToEatDatabase
 import com.example.whattoeat.data.database.dao.RecipeDAO
 import com.example.whattoeat.data.database.repository.FavoriteRecipeRepositoryImpl
+import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
+import com.example.whattoeat.data.net.service.SpoonacularApiService
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
-import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import retrofit2.Retrofit
 import javax.inject.Singleton
 
 @Module
@@ -21,8 +23,18 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideRecipeSearchRepository(): RecipeSearchRepository =
-        TODO("Provide feature RecipeSearchRepositoryImpl here")
+    fun provideSpoonacularApiService() =
+        Retrofit.Builder()
+            .baseUrl("https://api.spoonacular.com")
+            .build()
+            .create(SpoonacularApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideRecipeSearchRepository(service: SpoonacularApiService): RecipeSearchRepositoryImpl =
+        RecipeSearchRepositoryImpl(
+            service = service
+        )
 
     @Provides
     @Singleton
