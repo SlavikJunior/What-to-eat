@@ -1,23 +1,25 @@
 package com.example.whattoeat.domain.domain_entities.support
 
-enum class SortTypes(val value: String) {
+import kotlinx.serialization.SerialName
 
-    POPULARITY(value = "popularity"),
-    HEALTHINESS(value = "healthiness"),
-    PRICE(value = "price"),
-    TIME(value = "time"),
-    MAX_USED_INGREDIENTS(value = "max-used-ingredients"),
-    MIN_MISSING_INGREDIENTS(value = "min-missing-ingredients"),
-    ENERGY(value = "energy"),
-    CALORIES(value = "calories"),
-    CARBS(value = "carbs"),
-    TOTAL_FAT(value = "total-fat"),
-    PROTEIN(value = "protein"),
-    SUGAR(value = "sugar")
+enum class SortTypes() {
+
+    @SerialName(value = "popularity") POPULARITY,
+    @SerialName(value = "healthiness") HEALTHINESS,
+    @SerialName(value = "price") PRICE,
+    @SerialName(value = "time") TIME,
+    @SerialName(value = "max-used-ingredients") MAX_USED_INGREDIENTS,
+    @SerialName(value = "min-missing-ingredients") MIN_MISSING_INGREDIENTS,
+    @SerialName(value = "energy") ENERGY,
+    @SerialName(value = "calories") CALORIES,
+    @SerialName(value = "carbs") CARBS,
+    @SerialName(value = "total-fat") TOTAL_FAT,
+    @SerialName(value = "protein") PROTEIN,
+    @SerialName(value = "sugar") SUGAR
 }
 
-enum class SortDirection(val value: String) {
+enum class SortDirection() {
 
-    ASC(value = "asc"),
-    DESC(value = "desc")
+    @SerialName(value = "asc") ASC,
+    @SerialName(value = "desc") DESC
 }

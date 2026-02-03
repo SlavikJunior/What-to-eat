@@ -9,3 +9,11 @@ data class RecipeComplex(
     val image: String,
     val imageType: String
 ): Recipe
+
+@Serializable
+data class RecipeComplexResult(
+    val recipeComplexList: List<RecipeComplex>,
+    val offset: Int,
+    val number: Int,
+    val totalResults: Int
+)
