@@ -16,4 +16,4 @@ data class RecipeComplexResult(
     val offset: Int,
     val number: Int,
     val totalResults: Int
-)
+): RecipeResult

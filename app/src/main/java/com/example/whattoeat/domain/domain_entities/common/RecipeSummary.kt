@@ -8,3 +8,7 @@ data class RecipeSummary(
     val title: String,
     val summary: String
 ): Recipe
+
+@JvmInline
+@Serializable
+value class RecipeSummaryResult(val recipeSummary: RecipeSummary)

@@ -33,3 +33,7 @@ data class RecipeFullInformation(
     val spoonacularScore: Double,
     val spoonacularSourceUrl: String
 ): Recipe
+
+@JvmInline
+@Serializable
+value class RecipeFullInformationResult(val recipeFullInformationResult: RecipeFullInformation)
