@@ -12,3 +12,7 @@ data class RecipeSimilar(
     val servings: Int,
     val sourceUrl: String
 ): Recipe
+
+@JvmInline
+@Serializable
+value class RecipeSimilarResult(val recipeSimilarResult: List<RecipeSimilar>)

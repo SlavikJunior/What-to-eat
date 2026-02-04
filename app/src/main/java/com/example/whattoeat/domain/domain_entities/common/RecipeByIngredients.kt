@@ -15,3 +15,7 @@ data class RecipeByIngredients(
     val unusedIngredients: List<Ingredient>,
     val likes: Int
 ): Recipe
+
+@JvmInline
+@Serializable
+value class RecipeByIngredientsResult(val recipeByIngredientsResult: List<RecipeByIngredients>)
