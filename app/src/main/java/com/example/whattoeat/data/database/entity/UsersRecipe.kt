@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.Index
 import com.example.whattoeat.data.database.entity.UsersRecipe.Companion.TABLE_NAME
+import com.example.whattoeat.domain.domain_entities.common.RecipeByIngredients
 import com.example.whattoeat.domain.domain_entities.common.RecipeByUser
 import com.example.whattoeat.domain.domain_entities.common.RecipeFullInformation
 import com.example.whattoeat.domain.domain_entities.support.Cuisines
@@ -29,8 +30,6 @@ data class UsersRecipe private constructor(
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis()
 ) : BaseRecipe() {
-
-    constructor(recipeByUser: RecipeByUser) : this(recipe = recipeByUser)
 
     @ColumnInfo(name = "id")
     override val id: Int = getId()
@@ -127,6 +126,19 @@ data class UsersRecipe private constructor(
             notes = "",
         )
     }
+
+    fun toRecipeByIngredients() =
+        RecipeByIngredients(
+            id = id,
+            title = title,
+            image = image,
+            usedIngredientCount = -1,
+            missedIngredientCount = -1,
+            missedIngredients = emptyList(),
+            usedIngredients = emptyList(),
+            unusedIngredients = emptyList(),
+            likes = -1
+        )
 
     companion object {
         const val TABLE_NAME = "users_recipes"

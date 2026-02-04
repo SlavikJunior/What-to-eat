@@ -2,6 +2,7 @@ package com.example.whattoeat.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.whattoeat.data.database.dao.*
 import com.example.whattoeat.data.database.entity.*
 
@@ -14,6 +15,7 @@ import com.example.whattoeat.data.database.entity.*
     version = WhatToEatDatabase.WHAT_TO_EAT_DATABASE_VERSION,
     exportSchema = false // TODO: костыль, возможно надо изменить настройки плагина
 )
+@TypeConverters(com.example.whattoeat.data.database.TypeConverters::class)
 abstract class WhatToEatDatabase : RoomDatabase() {
 
     abstract fun cachedRecipeDao(): CachedRecipeDao

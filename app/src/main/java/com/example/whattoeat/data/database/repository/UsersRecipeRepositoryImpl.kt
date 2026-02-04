@@ -1,12 +1,19 @@
 package com.example.whattoeat.data.database.repository
 
 import com.example.whattoeat.data.database.dao.UsersRecipeDao
+import com.example.whattoeat.data.database.entity.UsersRecipe
+import com.example.whattoeat.domain.domain_entities.common.RecipeByIngredients
 import com.example.whattoeat.domain.domain_entities.common.RecipeByUser
+import com.example.whattoeat.domain.domain_entities.common.RecipeComplex
+import com.example.whattoeat.domain.domain_entities.common.RecipeFullInformation
+import com.example.whattoeat.domain.domain_entities.support.Ingredient
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import com.example.whattoeat.domain.search.RecipeSearch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -33,29 +40,112 @@ class UsersRecipeRepositoryImpl(
         return cnt
     }
 
+    @Throws(IllegalArgumentException::class)
     override suspend fun getRecipes(recipeSearch: RecipeSearch): Flow<RecipeByUser> {
-        val usersRecipe = when (recipeSearch) {
-            is RecipeSearch.RecipeByIngredientsSearch -> {
-                val ingredients = recipeSearch.ingredients.split(",").take(3)
-                usersRecipeDao.selectByMultipleIngredients(
-                    ingredient1 = ingredients[0],
-                    ingredient2 = ingredients[1],
-                    ingredient3 = ingredients[2],
-                )
-            }
+        val usersRecipes: Flow<UsersRecipe>
+        withContext(Dispatchers.IO) {
+            usersRecipes = when (recipeSearch) {
+                is RecipeSearch.RecipeByIngredientsSearch -> {
+                    val ingredients = recipeSearch.ingredients.split(",").map { it.trim() }.take(3)
+                    usersRecipeDao.selectByMultipleIngredients(
+                        ingredient1 = ingredients[0],
+                        ingredient2 = ingredients[1],
+                        ingredient3 = ingredients[2],
+                    )
+                }
 
-            is RecipeSearch.RecipeComplexSearch -> {
-                val query = recipeSearch.query
-                if (query != null) {
-                    usersRecipeDao.selectByTitle(query)
-                } else
-                    throw IllegalArgumentException("Query title is null: $recipeSearch")
-            }
+                is RecipeSearch.RecipeComplexSearch -> {
+                    val query = recipeSearch.query
+                    if (query != null) {
+                        usersRecipeDao.selectByTitle(query)
+                    } else
+                        throw IllegalArgumentException("Query title is null: $recipeSearch")
+                }
 
-            else -> throw IllegalArgumentException("Not supported search: $recipeSearch")
+                else -> throw IllegalArgumentException("Not supported search: $recipeSearch")
+            }
         }
-        return usersRecipe.map { recipe ->
+        return usersRecipes.map { recipe ->
             recipe.toRecipeByUser()
+        }
+    }
+
+    @Throws(IllegalArgumentException::class)
+    override suspend fun getRecipesAsRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<RecipeComplex> {
+        val usersRecipes = withContext(Dispatchers.IO) {
+            val query = recipeSearch.query
+            if (query != null) {
+                usersRecipeDao.selectByTitle(query)
+            } else
+                throw IllegalArgumentException("Query title is null: $recipeSearch")
+        }
+        return usersRecipes.map { usersRecipe ->
+            RecipeComplex(
+                id = usersRecipe.id,
+                title = usersRecipe.title,
+                image = usersRecipe.image,
+                imageType = usersRecipe.imageType
+            )
+        }
+    }
+
+    override suspend fun getRecipesAsRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Flow<RecipeFullInformation> {
+        return withContext(Dispatchers.IO) {
+            val recipe = usersRecipeDao.selectById(recipeSearch.id)
+            if (recipe != null) {
+                flowOf(recipe.toRecipeFullInformation())
+            } else flow {}
+        }
+    }
+
+    override suspend fun getRecipesAsRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch): Flow<RecipeByIngredients> {
+        val ingredients = recipeSearch.ingredients.split(",").map { it.trim() }.take(3)
+        val usersRecipes: Flow<UsersRecipe>
+        withContext(Dispatchers.IO) {
+            usersRecipes = usersRecipeDao.selectByMultipleIngredients(
+                ingredient1 = ingredients[0],
+                ingredient2 = ingredients[1],
+                ingredient3 = ingredients[2]
+            )
+        }
+
+
+        return usersRecipes.map { usersRecipe ->
+            usersRecipe.toRecipeByIngredients().copy(
+                usedIngredients = usersRecipe.extendedIngredientsNames.filter { ingredient ->
+                    ingredients.contains(ingredient)
+                }.map {
+                    Ingredient(
+                        id = -1,
+                        name = it,
+                        originalName = null,
+                        amount = null,
+                        unit = null
+                    )
+                },
+                missedIngredients = usersRecipe.extendedIngredientsNames.filter { ingredient ->
+                    !ingredients.contains(ingredient)
+                }.map {
+                    Ingredient(
+                        id = -1,
+                        name = it,
+                        originalName = null,
+                        amount = null,
+                        unit = null
+                    )
+                },
+                unusedIngredients = ingredients.filter { ingredient ->
+                    !usersRecipe.extendedIngredientsNames.contains(ingredient)
+                }.map {
+                    Ingredient(
+                        id = -1,
+                        name = it,
+                        originalName = null,
+                        amount = null,
+                        unit = null
+                    )
+                }
+            )
         }
     }
 }
