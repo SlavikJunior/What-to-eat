@@ -38,7 +38,7 @@ object DomainModule {
         )
 
     @Provides
-    fun provideGetRecipesRecipesUseCase(repository: RecipeSearchRepository) =
+    fun provideGetRecipesUseCase(repository: RecipeSearchRepository) =
         GetRecipesUseCase(
             repository = repository
         )

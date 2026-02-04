@@ -25,7 +25,7 @@ interface UsersRecipeDao {
         from $TABLE_NAME
         where id = :id
     """)
-    suspend fun selectById(id: Int): UsersRecipe
+    suspend fun selectById(id: Int): UsersRecipe?
 
     @Query("""
         select *
