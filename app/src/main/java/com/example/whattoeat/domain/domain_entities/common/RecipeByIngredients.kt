@@ -18,4 +18,4 @@ data class RecipeByIngredients(
 
 @JvmInline
 @Serializable
-value class RecipeByIngredientsResult(val recipeByIngredientsResult: List<RecipeByIngredients>)
+value class RecipeByIngredientsResult(val recipeByIngredientsResult: List<RecipeByIngredients>): RecipeResult

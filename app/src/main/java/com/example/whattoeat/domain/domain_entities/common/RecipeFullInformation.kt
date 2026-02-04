@@ -36,4 +36,4 @@ data class RecipeFullInformation(
 
 @JvmInline
 @Serializable
-value class RecipeFullInformationResult(val recipeFullInformationResult: RecipeFullInformation)
+value class RecipeFullInformationResult(val recipeFullInformationResult: RecipeFullInformation): RecipeResult
