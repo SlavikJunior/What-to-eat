@@ -5,14 +5,14 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.example.whattoeat.data.database.entity.CachedRecipe.Companion.TABLE_NAME
 import com.example.whattoeat.data.database.entity.UsersRecipe
-import com.example.whattoeat.domain.domain_entities.common.RecipeByUser
+import com.example.whattoeat.domain.domain_entities.common.Recipe
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UsersRecipeDao {
 
     @Insert(entity = UsersRecipe::class)
-    fun insert(recipeByUser: RecipeByUser): Long
+    fun insert(recipeByUser: Recipe.RecipeByUser): Long
 
     @Query("""
         delete from $TABLE_NAME

@@ -6,17 +6,14 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.example.whattoeat.data.database.entity.CachedRecipe.Companion.TABLE_NAME
 import com.example.whattoeat.data.database.entity.FavoriteRecipe
-import com.example.whattoeat.data.database.entity.UsersRecipe
 import com.example.whattoeat.domain.domain_entities.common.Recipe
-import com.example.whattoeat.domain.domain_entities.common.RecipeByUser
-import com.example.whattoeat.domain.domain_entities.common.RecipeComplex
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FavoriteRecipeDao {
 
     @Insert(entity = FavoriteRecipe::class)
-    fun insert(recipe: RecipeComplex): Long
+    fun insert(recipe: Recipe.RecipeComplex): Long
 
     @Delete(entity = FavoriteRecipe::class)
     fun delete(id: Int): Int

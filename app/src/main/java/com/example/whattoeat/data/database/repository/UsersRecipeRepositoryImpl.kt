@@ -2,10 +2,7 @@ package com.example.whattoeat.data.database.repository
 
 import com.example.whattoeat.data.database.dao.UsersRecipeDao
 import com.example.whattoeat.data.database.entity.UsersRecipe
-import com.example.whattoeat.domain.domain_entities.common.RecipeByIngredients
-import com.example.whattoeat.domain.domain_entities.common.RecipeByUser
-import com.example.whattoeat.domain.domain_entities.common.RecipeComplex
-import com.example.whattoeat.domain.domain_entities.common.RecipeFullInformation
+import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.support.Ingredient
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import com.example.whattoeat.domain.search.RecipeSearch
@@ -20,7 +17,7 @@ import kotlinx.coroutines.withContext
 class UsersRecipeRepositoryImpl(
     val usersRecipeDao: UsersRecipeDao
 ) : UsersRecipeRepository {
-    override suspend fun uploadRecipe(recipe: RecipeByUser): Long {
+    override suspend fun uploadRecipe(recipe: Recipe.RecipeByUser): Long {
         val id: Long
         withContext(Dispatchers.IO) {
             id = async {
@@ -30,7 +27,7 @@ class UsersRecipeRepositoryImpl(
         return id
     }
 
-    override suspend fun deleteRecipe(recipe: RecipeByUser): Int {
+    override suspend fun deleteRecipe(recipe: Recipe.RecipeByUser): Int {
         val cnt: Int
         withContext(Dispatchers.IO) {
             cnt = async {
@@ -41,7 +38,7 @@ class UsersRecipeRepositoryImpl(
     }
 
     @Throws(IllegalArgumentException::class)
-    override suspend fun getRecipes(recipeSearch: RecipeSearch): Flow<RecipeByUser> {
+    override suspend fun getRecipes(recipeSearch: RecipeSearch): Flow<Recipe.RecipeByUser> {
         val usersRecipes: Flow<UsersRecipe>
         withContext(Dispatchers.IO) {
             usersRecipes = when (recipeSearch) {
@@ -71,7 +68,7 @@ class UsersRecipeRepositoryImpl(
     }
 
     @Throws(IllegalArgumentException::class)
-    override suspend fun getRecipesAsRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<RecipeComplex> {
+    override suspend fun getRecipesAsRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<Recipe.RecipeComplex> {
         val usersRecipes = withContext(Dispatchers.IO) {
             val query = recipeSearch.query
             if (query != null) {
@@ -80,7 +77,7 @@ class UsersRecipeRepositoryImpl(
                 throw IllegalArgumentException("Query title is null: $recipeSearch")
         }
         return usersRecipes.map { usersRecipe ->
-            RecipeComplex(
+            Recipe.RecipeComplex(
                 id = usersRecipe.id,
                 title = usersRecipe.title,
                 image = usersRecipe.image,
@@ -89,7 +86,7 @@ class UsersRecipeRepositoryImpl(
         }
     }
 
-    override suspend fun getRecipesAsRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Flow<RecipeFullInformation> {
+    override suspend fun getRecipesAsRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Flow<Recipe.RecipeFullInformation> {
         return withContext(Dispatchers.IO) {
             val recipe = usersRecipeDao.selectById(recipeSearch.id)
             if (recipe != null) {
@@ -98,7 +95,7 @@ class UsersRecipeRepositoryImpl(
         }
     }
 
-    override suspend fun getRecipesAsRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch): Flow<RecipeByIngredients> {
+    override suspend fun getRecipesAsRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch): Flow<Recipe.RecipeByIngredients> {
         val ingredients = recipeSearch.ingredients.split(",").map { it.trim() }.take(3)
         val usersRecipes: Flow<UsersRecipe>
         withContext(Dispatchers.IO) {

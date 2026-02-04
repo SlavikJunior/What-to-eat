@@ -2,7 +2,6 @@ package com.example.whattoeat.data.database.repository
 
 import com.example.whattoeat.data.database.dao.FavoriteRecipeDao
 import com.example.whattoeat.domain.domain_entities.common.Recipe
-import com.example.whattoeat.domain.domain_entities.common.RecipeComplex
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
 import com.example.whattoeat.domain.search.RecipeSearch
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +17,7 @@ class FavoriteRecipeRepositoryImpl @Inject constructor(
     override suspend fun addRecipe(recipe: Recipe): Long {
         val id: Long
 
-        if (recipe is RecipeComplex) {
+        if (recipe is Recipe.RecipeComplex) {
             withContext(Dispatchers.IO) {
                 id = async {
                     favoriteRecipeDao.insert(recipe)
@@ -33,7 +32,7 @@ class FavoriteRecipeRepositoryImpl @Inject constructor(
     override suspend fun removeRecipe(recipe: Recipe): Int {
         val cnt: Int
 
-        if (recipe is RecipeComplex) {
+        if (recipe is Recipe.RecipeComplex) {
             withContext(Dispatchers.IO) {
                 cnt = async {
                     favoriteRecipeDao.delete(recipe.id)

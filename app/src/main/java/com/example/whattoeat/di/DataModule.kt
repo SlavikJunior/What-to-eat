@@ -48,8 +48,8 @@ object DataModule {
     ): RecipeSearchRepositoryImpl =
         RecipeSearchRepositoryImpl(
             service = service,
-            usersRecipeDao = usersRecipeDao,
             cachedRecipeDao = cachedRecipeDao,
+            apiKey = TODO("provides apiKey here")
         )
 
     @Provides
