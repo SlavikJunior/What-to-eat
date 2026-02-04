@@ -1,5 +1,7 @@
 package com.example.whattoeat.data.net.repository
 
+import com.example.whattoeat.data.database.dao.CachedRecipeDao
+import com.example.whattoeat.data.database.dao.UsersRecipeDao
 import com.example.whattoeat.data.net.service.SpoonacularApiService
 import com.example.whattoeat.domain.domain_entities.common.RecipeByIngredients
 import com.example.whattoeat.domain.domain_entities.common.RecipeComplex
@@ -9,9 +11,12 @@ import com.example.whattoeat.domain.domain_entities.common.RecipeSummary
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.search.RecipeSearch
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class RecipeSearchRepositoryImpl(
-    service: SpoonacularApiService
+class RecipeSearchRepositoryImpl @Inject constructor(
+    val service: SpoonacularApiService,
+    val usersRecipeDao: UsersRecipeDao,
+    val cachedRecipeDao: CachedRecipeDao
 ): RecipeSearchRepository {
     override suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<RecipeComplex> {
         TODO("Not yet implemented")

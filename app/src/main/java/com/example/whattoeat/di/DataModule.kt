@@ -3,7 +3,11 @@ package com.example.whattoeat.di
 import android.content.Context
 import androidx.room.Room
 import com.example.whattoeat.data.database.WhatToEatDatabase
+import com.example.whattoeat.data.database.dao.CachedRecipeDao
+import com.example.whattoeat.data.database.dao.FavoriteRecipeDao
+import com.example.whattoeat.data.database.dao.UsersRecipeDao
 import com.example.whattoeat.data.database.repository.FavoriteRecipeRepositoryImpl
+import com.example.whattoeat.data.database.repository.UsersRecipeRepositoryImpl
 import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.data.net.service.SpoonacularApiService
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
@@ -30,9 +34,15 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideRecipeSearchRepository(service: SpoonacularApiService): RecipeSearchRepositoryImpl =
+    fun provideRecipeSearchRepository(
+        service: SpoonacularApiService,
+        usersRecipeDao: UsersRecipeDao,
+        cachedRecipeDao: CachedRecipeDao
+    ): RecipeSearchRepositoryImpl =
         RecipeSearchRepositoryImpl(
-            service = service
+            service = service,
+            usersRecipeDao = usersRecipeDao,
+            cachedRecipeDao = cachedRecipeDao,
         )
 
     @Provides
@@ -46,17 +56,31 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideRecipeDAO(whatToEatDatabase: WhatToEatDatabase) =
-        whatToEatDatabase.recipeDao()
+    fun provideCachedRecipeDao(whatToEatDatabase: WhatToEatDatabase) =
+        whatToEatDatabase.cachedRecipeDao()
 
     @Provides
     @Singleton
-    fun provideFavoriteRecipeRepository(recipeDAO: RecipeDAO): FavoriteRecipeRepository =
-        FavoriteRecipeRepositoryImpl(recipeDAO = recipeDAO)
+    fun provideFavoriteRecipeDao(whatToEatDatabase: WhatToEatDatabase) =
+        whatToEatDatabase.favoriteRecipeDao()
 
     @Provides
     @Singleton
-    fun provideUsersRecipeRepository(): UsersRecipeRepository =
-        TODO("Provide feature UsersRecipeRepositoryImpl here")
+    fun provideUsersRecipeDao(whatToEatDatabase: WhatToEatDatabase) =
+        whatToEatDatabase.usersRecipeDao()
+
+    @Provides
+    @Singleton
+    fun provideFavoriteRecipeRepository(favoriteRecipeDao: FavoriteRecipeDao): FavoriteRecipeRepository =
+        FavoriteRecipeRepositoryImpl(
+            favoriteRecipeDao = favoriteRecipeDao
+        )
+
+    @Provides
+    @Singleton
+    fun provideUsersRecipeRepository(usersRecipeDao: UsersRecipeDao): UsersRecipeRepository =
+        UsersRecipeRepositoryImpl(
+            usersRecipeDao = usersRecipeDao
+        )
 
 }
