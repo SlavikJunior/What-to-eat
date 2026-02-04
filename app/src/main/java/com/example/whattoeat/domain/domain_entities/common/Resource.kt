@@ -1,8 +1,11 @@
 package com.example.whattoeat.domain.domain_entities.common
 
-sealed class Resource<T>(val data: T? = null, val message: String? = null) {
+sealed class Resource<T>(
+    open val data: T? = null,
+    open val message: String? = null
+) {
 
-    class Loading<T>(data: T? = null) : Resource<T>(data)
-    class Success<T>(data: T?) : Resource<T>(data)
-    class Error<T>(message: String, data: T? = null) : Resource<T>(data, message)
+    class Loading<T> : Resource<T>()
+    class Success<T>(override val data: T?): Resource<T>(data = data)
+    class Error<T>(override val message: String): Resource<T>(message = message)
 }

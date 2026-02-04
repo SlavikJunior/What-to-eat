@@ -23,7 +23,7 @@ interface CachedRecipeDao {
         from $TABLE_NAME
         where id = :id
     """)
-    suspend fun selectById(id: Int): CachedRecipe
+    suspend fun selectById(id: Int): CachedRecipe?
 
     @Query("""
         select *
