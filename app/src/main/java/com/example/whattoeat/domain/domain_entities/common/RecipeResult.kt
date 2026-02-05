@@ -1,5 +1,6 @@
 package com.example.whattoeat.domain.domain_entities.common
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 sealed interface RecipeResult {
@@ -10,10 +11,10 @@ sealed interface RecipeResult {
 
     @Serializable
     data class RecipeComplexResult(
-        val recipeComplexList: List<Recipe.RecipeComplex>,
-        val offset: Int,
-        val number: Int,
-        val totalResults: Int
+        @SerialName("results") val recipeComplexList: List<Recipe.RecipeComplex>,
+        @SerialName("offset") val offset: Int,
+        @SerialName("number") val number: Int,
+        @SerialName("totalResults") val totalResults: Int
     ): RecipeResult
 
     @JvmInline

@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import javax.inject.Inject
@@ -24,25 +25,27 @@ class RecipeSearchRepositoryImpl @Inject constructor(
     val cachedRecipeDao: CachedRecipeDao
 ) : RecipeSearchRepository {
 
-    override suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch)=
+    override suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch) =
         flow {
             emit(Resource.Loading())
 
             service.recipeComplexSearch(
                 query = recipeSearch.toQueryMap(),
                 apiKey = apiKey
-            ).let { response ->
-                val resource = handleResponse(response)
+            ).let { result ->
 
-                val recipeComplexResult = resource.data?.let { it as RecipeResult.RecipeComplexResult }
-                if (recipeComplexResult != null && recipeComplexResult.totalResults > 0) {
-                    recipeComplexResult.recipeComplexList.forEach { recipeComplex ->
+                result.onSuccess { recipeComplexResult ->
+                    recipeComplexResult.recipeComplexList.forEach {recipeComplex ->
+                        Log.d(TAG, "Emitting... : $recipeComplex")
                         emit(Resource.Success(recipeComplex))
                     }
-                } else
+                }
+
+                result.onFailure {
                     emit(Resource.Error("Not found :/"))
+                }
             }
-        }
+        }.flowOn(Dispatchers.IO)
 
     override suspend fun getRecipeSimilar(recipeSearch: RecipeSearch.RecipeSimilarSearch): Flow<Resource<Recipe.RecipeSimilar>> {
         TODO("Not yet implemented")
@@ -60,16 +63,17 @@ class RecipeSearchRepositoryImpl @Inject constructor(
                 id = recipeSearch.id,
                 query = recipeSearch.toQueryMap(),
                 apiKey = apiKey
-            ).let { response ->
-                val resource = handleResponse(response)
+            ).let { result ->
 
-                val recipeFullInformationResult = resource.data?.let { it as RecipeResult.RecipeFullInformationResult }
-                if (recipeFullInformationResult != null)
-                    emit(Resource.Success(recipeFullInformationResult.recipeFullInformationResult))
-                else
+                result.onSuccess {
+                    emit(Resource.Success(it.recipeFullInformationResult))
+                }
+
+                result.onFailure {
                     emit(tryToGetFromCache(recipeSearch))
+                }
             }
-        }
+        }.flowOn(Dispatchers.IO)
 
     override suspend fun getRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch) =
         flow {
@@ -78,33 +82,26 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             service.recipeByIngredients(
                 query = recipeSearch.toQueryMap(),
                 apiKey = apiKey
-            ).let { response ->
-                val resource = handleResponse(response)
+            ).let { result ->
 
-                val recipeByIngredientsResult = resource.data?.let { it as RecipeResult.RecipeByIngredientsResult }
-                if (recipeByIngredientsResult != null) {
-                    recipeByIngredientsResult.recipeByIngredientsResult.forEach { recipeByIngredients ->
-
+                result.onSuccess {
+                    it.recipeByIngredientsResult.forEach { recipeByIngredients ->
                         emit(Resource.Success(recipeByIngredients))
                     }
-                } else emit(Resource.Error("Not found :/"))
-            }
-        }
+                }
 
-    private fun handleResponse(response: Response<out RecipeResult>) =
-        if (response.isSuccessful)
-            Resource.Success(response.body())
-        else {
-            Log.e(TAG, "Response isn't successful, code: ${response.code()}")
-            Resource.Error("Response isn't successful!")
-        }
+                result.onFailure {
+                    emit(Resource.Error("Not found :/"))
+                }
+            }
+        }.flowOn(Dispatchers.IO)
 
     @Suppress("UNCHECKED_CAST")
     private suspend fun tryToGetFromCache(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Resource<Recipe.RecipeFullInformation> {
         var fromCachedRecipe: Recipe.RecipeFullInformation? = null
         var cachedRecipe: CachedRecipe? = null
         withContext(Dispatchers.IO) {
-           cachedRecipe  = async {
+            cachedRecipe = async {
                 cachedRecipeDao.selectById(recipeSearch.id)
             }.await()
         }

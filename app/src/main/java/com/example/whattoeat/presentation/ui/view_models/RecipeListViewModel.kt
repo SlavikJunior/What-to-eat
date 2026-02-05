@@ -1,5 +1,6 @@
 package com.example.whattoeat.presentation.ui.view_models
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.domain.domain_entities.common.Recipe
@@ -14,9 +15,11 @@ import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.sort
 import kotlin.jvm.Throws
 
 open class RecipeListError(override val cause: Throwable?) : Throwable(cause) {
@@ -181,7 +184,9 @@ class RecipeListViewModel @Inject constructor(
     private suspend fun searchRecipes(recipeSearch: RecipeSearch) {
         try {
             getRecipesUseCase(recipeSearch)
-                .collect { resourceRecipe ->
+                .collectLatest { resourceRecipe ->
+                    Log.d(TAG, "Collected ressource: $resourceRecipe from getRecipesUseCase()")
+
                     when (resourceRecipe) {
                         is Resource.Loading<*> ->
                             _uiState.update { currentState ->
@@ -213,6 +218,7 @@ class RecipeListViewModel @Inject constructor(
                 currentState.getStateAfterSearchSuccess()
             }
         } catch (cause: Throwable) {
+            Log.e(TAG, "Cached throwable: $cause")
             _uiState.update { currentState ->
                 currentState.getStateAfterSearchError(cause)
             }
@@ -220,29 +226,38 @@ class RecipeListViewModel @Inject constructor(
     }
 
     @Throws(RecipeListError.NotEnoughArgumentsError::class)
-    private fun combineRecipeSearchByDataFromUi() = with(_uiState.value) {
-        if (isSearchByIngredientsEnabled) {
-            if (filter.includedProducts != null)
-                RecipeSearch.RecipeByIngredientsSearch(
-                    ingredients = filter.includedProducts,
+    private fun combineRecipeSearchByDataFromUi(): RecipeSearch {
+        val recipeSearch = with(_uiState.value) {
+            if (isSearchByIngredientsEnabled) {
+                if (filter.includedProducts != null)
+                    RecipeSearch.RecipeByIngredientsSearch(
+                        ingredients = filter.includedProducts,
+                        number = filter.number,
+                        ranking = filter.ranking,
+                        ignorePantry = filter.ignorePantry,
+                    )
+                else throw RecipeListError.NotEnoughArgumentsError(null)
+            } else
+                RecipeSearch.RecipeComplexSearch(
+                    query = filter.query,
+                    cuisines = filter.cuisines,
+                    diet = filter.diet,
+                    type = filter.type,
+                    instructionsRequired = filter.instructionsRequired,
+                    maxReadyTime = filter.maxReadyTime,
+                    minServings = filter.minServings,
+                    sort = filter.sort,
+                    sortDirection = filter.sortDirection,
+                    offset = filter.offset,
                     number = filter.number,
-                    ranking = filter.ranking,
-                    ignorePantry = filter.ignorePantry,
                 )
-            else throw RecipeListError.NotEnoughArgumentsError(null)
-        } else
-            RecipeSearch.RecipeComplexSearch(
-                query = filter.query,
-                cuisines = filter.cuisines,
-                diet = filter.diet,
-                type = filter.type,
-                instructionsRequired = filter.instructionsRequired,
-                maxReadyTime = filter.maxReadyTime,
-                minServings = filter.minServings,
-                sort = filter.sort,
-                sortDirection = filter.sortDirection,
-                offset = filter.offset,
-                number = filter.number,
-            )
+        }
+
+        Log.d(TAG, "Combined recipeSearch: $recipeSearch")
+        return recipeSearch
+    }
+
+    companion object {
+        private const val TAG = "TEST TAG"
     }
 }
