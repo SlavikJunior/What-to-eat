@@ -22,10 +22,15 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import okhttp3.Cache
+import okhttp3.CacheControl
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -35,13 +40,40 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient() =
-        OkHttpClient.Builder()
+    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
+        val cacheFile = File(context.cacheDir, "http-cache")
+        val cache = Cache(
+            directory = cacheFile,
+            maxSize = (50 * 1024 * 1024).toLong() // 50 MB
+        )
+
+        val cacheInterceptor = Interceptor { chain ->
+            val response = chain.proceed(chain.request())
+
+            val cacheControl = CacheControl.Builder()
+                .maxAge(7, TimeUnit.DAYS)
+                .maxStale(7, TimeUnit.DAYS)
+                .build()
+
+
+            response.newBuilder()
+                .removeHeader("Pragma")
+                .removeHeader("Cache-Control")
+                .header("Cache-Control", cacheControl.toString())
+                .build()
+        }
+        return OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
-            .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
+            .addNetworkInterceptor(cacheInterceptor)
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
+            .cache(cache)
             .build()
+
+    }
 
     @Provides
     @Singleton
