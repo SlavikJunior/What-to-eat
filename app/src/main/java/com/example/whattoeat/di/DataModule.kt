@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.whattoeat.BuildConfig
 import com.example.whattoeat.data.database.WhatToEatDatabase
-import com.example.whattoeat.data.database.dao.CachedRecipeDao
+import com.example.whattoeat.data.database.dao.CachedRecipeComplexDao
 import com.example.whattoeat.data.database.dao.FavoriteRecipeDao
 import com.example.whattoeat.data.database.dao.UsersRecipeDao
 import com.example.whattoeat.data.database.repository.FavoriteRecipeRepositoryImpl
@@ -27,7 +27,6 @@ import okhttp3.CacheControl
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import java.io.File
@@ -109,7 +108,7 @@ object DataModule {
     @Singleton
     fun provideRecipeSearchRepository(
         service: SpoonacularApiService,
-        cachedRecipeDao: CachedRecipeDao
+        cachedRecipeDao: CachedRecipeComplexDao
     ): RecipeSearchRepository {
         var apiKey: String = BuildConfig.SPOONACULAR_API_KEY
         if (apiKey.isEmpty() || apiKey == "\"\"")

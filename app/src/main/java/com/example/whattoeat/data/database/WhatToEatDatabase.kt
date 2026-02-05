@@ -8,7 +8,7 @@ import com.example.whattoeat.data.database.entity.*
 
 @Database(
     entities = [
-        CachedRecipe::class,
+        CachedRecipeComplex::class,
         UsersRecipe::class,
         FavoriteRecipe::class
     ],
@@ -18,7 +18,7 @@ import com.example.whattoeat.data.database.entity.*
 @TypeConverters(com.example.whattoeat.data.database.TypeConverters::class)
 abstract class WhatToEatDatabase : RoomDatabase() {
 
-    abstract fun cachedRecipeDao(): CachedRecipeDao
+    abstract fun cachedRecipeDao(): CachedRecipeComplexDao
     abstract fun favoriteRecipeDao(): FavoriteRecipeDao
     abstract fun usersRecipeDao(): UsersRecipeDao
 

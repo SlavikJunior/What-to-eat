@@ -1,11 +1,10 @@
 package com.example.whattoeat.data.net.repository
 
 import android.util.Log
-import com.example.whattoeat.data.database.dao.CachedRecipeDao
-import com.example.whattoeat.data.database.entity.CachedRecipe
+import com.example.whattoeat.data.database.dao.CachedRecipeComplexDao
+import com.example.whattoeat.data.database.entity.CachedRecipeComplex
 import com.example.whattoeat.data.net.service.SpoonacularApiService
 import com.example.whattoeat.domain.domain_entities.common.Recipe
-import com.example.whattoeat.domain.domain_entities.common.RecipeResult
 import com.example.whattoeat.domain.domain_entities.common.Resource
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.search.RecipeSearch
@@ -16,13 +15,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
-import retrofit2.Response
 import javax.inject.Inject
 
 class RecipeSearchRepositoryImpl @Inject constructor(
     val apiKey: String,
     val service: SpoonacularApiService,
-    val cachedRecipeDao: CachedRecipeDao
+    val cachedRecipeDao: CachedRecipeComplexDao
 ) : RecipeSearchRepository {
 
     override suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch) =
@@ -99,7 +97,7 @@ class RecipeSearchRepositoryImpl @Inject constructor(
     @Suppress("UNCHECKED_CAST")
     private suspend fun tryToGetFromCache(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Resource<Recipe.RecipeFullInformation> {
         var fromCachedRecipe: Recipe.RecipeFullInformation? = null
-        var cachedRecipe: CachedRecipe? = null
+        var cachedRecipe: CachedRecipeComplex? = null
         withContext(Dispatchers.IO) {
             cachedRecipe = async {
                 cachedRecipeDao.selectById(recipeSearch.id)
