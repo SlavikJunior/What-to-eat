@@ -1,11 +1,10 @@
 package com.example.whattoeat.data.net.repository
 
 import android.util.Log
-import com.example.whattoeat.data.database.dao.CachedRecipeDao
-import com.example.whattoeat.data.database.entity.CachedRecipe
+import com.example.whattoeat.data.database.dao.CachedRecipeComplexDao
+import com.example.whattoeat.data.database.entity.CachedRecipeComplex
 import com.example.whattoeat.data.net.service.SpoonacularApiService
 import com.example.whattoeat.domain.domain_entities.common.Recipe
-import com.example.whattoeat.domain.domain_entities.common.RecipeResult
 import com.example.whattoeat.domain.domain_entities.common.Resource
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.search.RecipeSearch
@@ -13,21 +12,29 @@ import com.example.whattoeat.domain.search.toQueryMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
-import retrofit2.Response
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 class RecipeSearchRepositoryImpl @Inject constructor(
+    val json: Json,
     val apiKey: String,
     val service: SpoonacularApiService,
-    val cachedRecipeDao: CachedRecipeDao
+    val cachedRecipeDao: CachedRecipeComplexDao
 ) : RecipeSearchRepository {
 
-    override suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch) =
-        flow {
+    override suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<Resource<Recipe.RecipeComplex>> {
+        var listFromCache: List<Recipe.RecipeComplex> = emptyList()
+        val flow = flow {
             emit(Resource.Loading())
+
+//            listFromCache = tryToGetFromCache(recipeSearch)
+//            if(listFromCache.isNotEmpty()) {
+//                return listFromCache.map { Resource.Success(data = it) }.asFlow()
+//            }
 
             service.recipeComplexSearch(
                 query = recipeSearch.toQueryMap(),
@@ -35,7 +42,7 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             ).let { result ->
 
                 result.onSuccess { recipeComplexResult ->
-                    recipeComplexResult.recipeComplexList.forEach {recipeComplex ->
+                    recipeComplexResult.recipeComplexList.forEach { recipeComplex ->
                         Log.d(TAG, "Emitting... : $recipeComplex")
                         emit(Resource.Success(recipeComplex))
                     }
@@ -46,6 +53,8 @@ class RecipeSearchRepositoryImpl @Inject constructor(
                 }
             }
         }.flowOn(Dispatchers.IO)
+        return flow
+    }
 
     override suspend fun getRecipeSimilar(recipeSearch: RecipeSearch.RecipeSimilarSearch): Flow<Resource<Recipe.RecipeSimilar>> {
         TODO("Not yet implemented")
@@ -70,7 +79,8 @@ class RecipeSearchRepositoryImpl @Inject constructor(
                 }
 
                 result.onFailure {
-                    emit(tryToGetFromCache(recipeSearch))
+                    emit(Resource.Error("Not found :/"))
+//                    emit(tryToGetFromCache(recipeSearch))
                 }
             }
         }.flowOn(Dispatchers.IO)
@@ -96,23 +106,27 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             }
         }.flowOn(Dispatchers.IO)
 
-    @Suppress("UNCHECKED_CAST")
-    private suspend fun tryToGetFromCache(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Resource<Recipe.RecipeFullInformation> {
-        var fromCachedRecipe: Recipe.RecipeFullInformation? = null
-        var cachedRecipe: CachedRecipe? = null
-        withContext(Dispatchers.IO) {
-            cachedRecipe = async {
-                cachedRecipeDao.selectById(recipeSearch.id)
-            }.await()
+
+    private suspend fun tryToGetFromCache(recipeSearch: RecipeSearch.RecipeComplexSearch): List<Recipe.RecipeComplex> {
+        val hash = getRecipeComplexSearchHash(recipeSearch)
+        try {
+            val list = cachedRecipeDao.selectByHash(hash)
+            return list.map { cachedRecipeComplex ->
+                decodeCachedRecipe(cachedRecipeComplex)
+            }
+        } catch (_: Throwable) {
+            return emptyList()
         }
-
-        if (cachedRecipe != null)
-            fromCachedRecipe = cachedRecipe.toRecipeFullInformation()
-
-        return if (fromCachedRecipe != null)
-            Resource.Success(cachedRecipe) as Resource<Recipe.RecipeFullInformation>
-        else Resource.Error("Not found :/")
     }
+
+    private fun decodeCachedRecipe(cachedRecipeComplex: CachedRecipeComplex) =
+        json.decodeFromString<Recipe.RecipeComplex>(cachedRecipeComplex.recipeComplexBody)
+
+    private fun getRecipeComplexSearchHash(recipeSearch: RecipeSearch.RecipeComplexSearch) =
+        recipeSearch.copy(
+            offset = null,
+            number = null
+        ).hashCode().toString()
 
     companion object {
         private const val TAG = "TEST TAG"
