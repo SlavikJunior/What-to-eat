@@ -1,9 +1,7 @@
 package com.example.whattoeat.presentation.ui.screens.custom_composable
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -68,7 +66,7 @@ fun FilterBottomSheet(
                     label = {
                         Text(stringResource(R.string.inclusive_products_text_field_label))
                     },
-                    value = uiState.value.filter.includedProducts,
+                    value = uiState.value.filter.includedProducts ?: "",
                     onValueChange = {
                         viewModel.reduce(
                             RecipeListPageEvent.IncludedProductsChange(it)
@@ -82,7 +80,7 @@ fun FilterBottomSheet(
                     label = {
                         Text(stringResource(R.string.exclusive_products_text_field_label))
                     },
-                    value = uiState.value.filter.excludedProducts,
+                    value = uiState.value.filter.excludedProducts ?: "",
                     onValueChange = {
                         viewModel.reduce(
                             RecipeListPageEvent.ExcludedProductsChange(it)
@@ -99,7 +97,7 @@ fun FilterBottomSheet(
 
 @Composable
 fun RecipeCard(
-    recipe: Recipe,
+    recipe: Recipe.RecipeComplex,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -107,8 +105,6 @@ fun RecipeCard(
 
     var backgroundColor by remember { mutableStateOf(Color(0xC8ABD6FC)) }
     var titleColor by remember { mutableStateOf(Color(0xFF2B2B2B)) }
-    var chipColor by remember { mutableStateOf(Color.White) }
-    var buttonColor by remember { mutableStateOf(Color(0xFFFF8A80)) }
 
     Card(
         onClick = { onClick() },
@@ -154,12 +150,6 @@ fun RecipeCard(
                                 titleColor = Color(
                                     it.getDarkVibrantColor(0xFF2B2B2B.toInt())
                                 )
-                                chipColor = Color(
-                                    it.getLightVibrantColor(0xFFFFFFFF.toInt())
-                                )
-                                buttonColor = Color(
-                                    it.getVibrantColor(0xFFFF8A80.toInt())
-                                )
                             }
                         }
                     isImageLoaded = true
@@ -182,30 +172,7 @@ fun RecipeCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Row {
-                    RecipeChip(recipe.cookingTime?.value ?: "быстро", chipColor)
-                    Spacer(Modifier.width(8.dp))
-                    RecipeChip("легко", chipColor)
-                }
             }
         }
-    }
-}
-
-@Composable
-private fun RecipeChip(
-    text: String,
-    background: Color
-) {
-    Box(
-        modifier = Modifier
-            .background(background, RoundedCornerShape(12.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp)
-    ) {
-        Text(
-            text = text,
-            fontSize = 12.sp,
-            color = Color.Black
-        )
     }
 }

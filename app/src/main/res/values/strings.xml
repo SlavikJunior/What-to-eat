@@ -13,7 +13,7 @@
     <!--  WhatToEatTopBottomBar END  -->
 
     <!--  RecipeList  -->
-    <string name="recipe_title_text_field_label">Recipe title</string>
+    <string name="query_text_field_label">Recipe title</string>
     <string name="inclusive_products_text_field_label">Inclusive products</string>
     <string name="exclusive_products_text_field_label">Exclusive products</string>
     <string name="search_button_text">Search</string>

@@ -3,7 +3,7 @@ package com.example.whattoeat.data.database.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.example.whattoeat.data.database.entity.CachedRecipe.Companion.TABLE_NAME
+import com.example.whattoeat.data.database.entity.UsersRecipe.Companion.TABLE_NAME
 import com.example.whattoeat.data.database.entity.UsersRecipe
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import kotlinx.coroutines.flow.Flow
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 interface UsersRecipeDao {
 
     @Insert(entity = UsersRecipe::class)
-    fun insert(recipeByUser: Recipe.RecipeByUser): Long
+    fun insert(recipeByUser: UsersRecipe): Long
 
     @Query("""
         delete from $TABLE_NAME
@@ -31,14 +31,14 @@ interface UsersRecipeDao {
         select *
         from $TABLE_NAME
     """)
-    suspend fun selectAll(): Flow<UsersRecipe>
+    fun selectAll(): Flow<UsersRecipe>
 
     @Query("""
         select *
         from $TABLE_NAME
         where title like '%' || :query || '%'
     """)
-    suspend fun selectByTitle(query: String): Flow<UsersRecipe>
+    fun selectByTitle(query: String): Flow<UsersRecipe>
 
     @Query("""
         select *
@@ -47,7 +47,7 @@ interface UsersRecipeDao {
            or extended_ingredients like '%' || :ingredient2 || '%'
            or extended_ingredients like '%' || :ingredient3 || '%'
     """)
-    suspend fun selectByMultipleIngredients(
+    fun selectByMultipleIngredients(
         ingredient1: String,
         ingredient2: String? = null,
         ingredient3: String? = null
