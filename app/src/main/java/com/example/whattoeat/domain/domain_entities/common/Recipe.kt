@@ -1,6 +1,7 @@
 package com.example.whattoeat.domain.domain_entities.common
 
 import com.example.whattoeat.domain.domain_entities.support.*
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -48,10 +49,10 @@ sealed interface Recipe {
 
     @Serializable
     data class RecipeComplex(
-        val id: Int,
-        val title: String,
-        val image: String,
-        val imageType: String
+        @SerialName("id") val id: Int,
+        @SerialName("title") val title: String,
+        @SerialName("image") val image: String,
+        @SerialName("imageType") val imageType: String
     ): Recipe
 
     @Serializable

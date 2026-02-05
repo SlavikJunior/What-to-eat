@@ -2,12 +2,14 @@ package com.example.whattoeat.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.whattoeat.BuildConfig
 import com.example.whattoeat.data.database.WhatToEatDatabase
 import com.example.whattoeat.data.database.dao.CachedRecipeDao
 import com.example.whattoeat.data.database.dao.FavoriteRecipeDao
 import com.example.whattoeat.data.database.dao.UsersRecipeDao
 import com.example.whattoeat.data.database.repository.FavoriteRecipeRepositoryImpl
 import com.example.whattoeat.data.database.repository.UsersRecipeRepositoryImpl
+import com.example.whattoeat.data.net.adapter.ResultCallAdapterFactory
 import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.data.net.service.SpoonacularApiService
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
@@ -21,7 +23,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -30,13 +35,42 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideSpoonacularApiService(): SpoonacularApiService {
-        val json = Json { ignoreUnknownKeys = true }
-        return Retrofit.Builder()
-            .baseUrl("https://api.spoonacular.com")
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+    fun provideOkHttpClient() =
+        OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY })
             .build()
-            .create(SpoonacularApiService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideJson() =
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            encodeDefaults = false
+            explicitNulls = false
+        }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(
+        okHttpClient: OkHttpClient,
+        json: Json
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://api.spoonacular.com/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addCallAdapterFactory(ResultCallAdapterFactory())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSpoonacularApiService(retrofit: Retrofit): SpoonacularApiService {
+        return retrofit.create(SpoonacularApiService::class.java)
     }
 
     @Provides
@@ -44,12 +78,19 @@ object DataModule {
     fun provideRecipeSearchRepository(
         service: SpoonacularApiService,
         cachedRecipeDao: CachedRecipeDao
-    ): RecipeSearchRepository =
-        RecipeSearchRepositoryImpl(
-            apiKey = System.getenv("SPOONACULAR_API_KEY")!!,
+    ): RecipeSearchRepository {
+        var apiKey: String = BuildConfig.SPOONACULAR_API_KEY
+        if (apiKey.isEmpty() || apiKey == "\"\"")
+            apiKey = System.getenv("SPOONACULAR_API_KEY")
+                ?: throw IllegalStateException("API key not found. Add SPOONACULAR_API_KEY to local.properties")
+
+        return RecipeSearchRepositoryImpl(
+            apiKey = apiKey,
             service = service,
             cachedRecipeDao = cachedRecipeDao
         )
+    }
+
 
     @Provides
     @Singleton
@@ -88,5 +129,4 @@ object DataModule {
         UsersRecipeRepositoryImpl(
             usersRecipeDao = usersRecipeDao
         )
-
 }
