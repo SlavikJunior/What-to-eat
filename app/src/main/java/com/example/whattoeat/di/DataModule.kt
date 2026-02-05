@@ -11,6 +11,7 @@ import com.example.whattoeat.data.database.repository.UsersRecipeRepositoryImpl
 import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.data.net.service.SpoonacularApiService
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
+import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -19,7 +20,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import javax.inject.Singleton
@@ -43,13 +43,12 @@ object DataModule {
     @Singleton
     fun provideRecipeSearchRepository(
         service: SpoonacularApiService,
-        usersRecipeDao: UsersRecipeDao,
         cachedRecipeDao: CachedRecipeDao
-    ): RecipeSearchRepositoryImpl =
+    ): RecipeSearchRepository =
         RecipeSearchRepositoryImpl(
+            apiKey = System.getenv("SPOONACULAR_API_KEY")!!,
             service = service,
-            cachedRecipeDao = cachedRecipeDao,
-            apiKey = TODO("provides apiKey here")
+            cachedRecipeDao = cachedRecipeDao
         )
 
     @Provides
