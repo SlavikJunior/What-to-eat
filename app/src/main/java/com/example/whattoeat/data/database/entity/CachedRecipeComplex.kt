@@ -8,10 +8,11 @@ import com.example.whattoeat.data.database.entity.CachedRecipeComplex.Companion.
 
 @Entity(
     tableName = TABLE_NAME,
-    indices = [Index("position")]
+    indices = [Index("position")],
+    primaryKeys = ["recipe_complex_search_hash", "position"]
 )
 data class CachedRecipeComplex(
-    @PrimaryKey
+    @ColumnInfo("recipe_complex_search_hash")
     val recipeComplexSearchHash: String, // хэш от запроса, не учитывая offset и number и сортировку???
     val position: Int,
     @ColumnInfo(name = "recipe_complex_body")

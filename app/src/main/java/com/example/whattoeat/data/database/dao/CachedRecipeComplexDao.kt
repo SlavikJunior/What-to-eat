@@ -17,9 +17,6 @@ interface CachedRecipeComplexDao {
     @Delete(entity = CachedRecipeComplex::class)
     suspend fun delete(recipe: CachedRecipeComplex): Int
 
-    @Query("select * from $TABLE_NAME where recipeComplexSearchHash = :recipeComplexSearchHash")
-    suspend fun selectById(recipeComplexSearchHash: String): CachedRecipeComplex?
-
-    @Query("select * from $TABLE_NAME where position between :from and :to")
-    fun selectRecipesByPositionsInterval(from: Int, to: Int): Flow<CachedRecipeComplex>
+    @Query("select * from $TABLE_NAME where recipe_complex_search_hash = :recipeComplexSearchHash")
+    suspend fun selectByHash(recipeComplexSearchHash: String): List<CachedRecipeComplex>
 }

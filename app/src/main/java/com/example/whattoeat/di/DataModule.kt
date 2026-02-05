@@ -107,18 +107,24 @@ object DataModule {
     @Provides
     @Singleton
     fun provideRecipeSearchRepository(
+        json: Json,
         service: SpoonacularApiService,
         cachedRecipeDao: CachedRecipeComplexDao
     ): RecipeSearchRepository {
-        var apiKey: String = BuildConfig.SPOONACULAR_API_KEY
-        if (apiKey.isEmpty() || apiKey == "\"\"")
-            apiKey = System.getenv("SPOONACULAR_API_KEY")
-                ?: throw IllegalStateException("API key not found. Add SPOONACULAR_API_KEY to local.properties")
+        var apiKey: String?
+        try {
+             apiKey = System.getenv("SPOONACULAR_API_KEY")
+            if (apiKey == null)
+                apiKey = BuildConfig.SPOONACULAR_API_KEY
+        } catch (_: Throwable) {
+            apiKey = BuildConfig.SPOONACULAR_API_KEY
+        }
 
         return RecipeSearchRepositoryImpl(
             apiKey = apiKey,
             service = service,
-            cachedRecipeDao = cachedRecipeDao
+            cachedRecipeDao = cachedRecipeDao,
+            json = json
         )
     }
 
