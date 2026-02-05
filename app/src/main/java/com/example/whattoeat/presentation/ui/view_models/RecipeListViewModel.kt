@@ -52,7 +52,7 @@ data class RecipeListFilter(
 data class RecipeListModel(
     val isFilterBottomSheetVisible: Boolean = false,
     val state: RecipeListState = RecipeListState.SearchReadyState,
-    val recipes: List<Recipe> = listOf(),
+    val recipes: List<Recipe.RecipeComplex> = listOf(),
     val isSearchByIngredientsEnabled: Boolean = false,
     val filter: RecipeListFilter = RecipeListFilter(),
     val isErrorShowing: Boolean = false,
@@ -183,28 +183,30 @@ class RecipeListViewModel @Inject constructor(
             getRecipesUseCase(recipeSearch)
                 .collect { resourceRecipe ->
                     when (resourceRecipe) {
-                        is Resource.Loading<*> -> {
+                        is Resource.Loading<*> ->
                             _uiState.update { currentState ->
                                 currentState.getStateSearchStarted()
                             }
-                        }
 
-                        is Resource.Success<*> -> {
-                            if (resourceRecipe.data != null)
+                        is Resource.Success<*> ->
+                            if (resourceRecipe.data != null) {
+                                val recipeComplex = resourceRecipe.data as Recipe.RecipeComplex
                                 _uiState.update { currentState ->
                                     currentState.copy(
-                                        recipes = currentState.recipes + resourceRecipe.data,
+                                        recipes = currentState.recipes + recipeComplex,
                                         isListShowing = true
                                     )
                                 }
-                        }
-
-                        is Resource.Error<*> -> {
-                            if (resourceRecipe.message != null)
-                            _uiState.update { currentState ->
-                                currentState.getStateAfterSearchError(RecipeListError.SearchError(null))
                             }
-                        }
+
+                        is Resource.Error<*> ->
+                            _uiState.update { currentState ->
+                                currentState.getStateAfterSearchError(
+                                    RecipeListError.SearchError(
+                                        null
+                                    )
+                                )
+                            }
                     }
                 }
             _uiState.update { currentState ->
