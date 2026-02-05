@@ -4,8 +4,12 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import com.example.whattoeat.data.database.entity.CachedRecipe.Companion.TABLE_NAME
-import com.example.whattoeat.domain.domain_entities.common.RecipeFullInformation
-import com.example.whattoeat.domain.domain_entities.support.*
+import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domain_entities.support.AnalyzedInstruction
+import com.example.whattoeat.domain.domain_entities.support.Cuisines
+import com.example.whattoeat.domain.domain_entities.support.Diets
+import com.example.whattoeat.domain.domain_entities.support.DishTypes
+import com.example.whattoeat.domain.domain_entities.support.Ingredient
 
 @Entity(
     tableName = TABLE_NAME,
@@ -57,7 +61,7 @@ data class CachedRecipe(
     val deleteTo: Long
 ) : BaseRecipe() {
 
-    override fun toRecipeFullInformation(): RecipeFullInformation {
+    override fun toRecipeFullInformation(): Recipe.RecipeFullInformation {
         val temp = super.toRecipeFullInformation()
         return temp.copy(
             vegetarian = vegetarian,
@@ -78,7 +82,7 @@ data class CachedRecipe(
         )
     }
 
-    fun fromRecipeFullInformation(recipe: RecipeFullInformation) = with(recipe) {
+    fun fromRecipeFullInformation(recipe: Recipe.RecipeFullInformation) = with(recipe) {
         CachedRecipe(
             id = id,
             image = image,

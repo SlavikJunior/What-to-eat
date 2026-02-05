@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.whattoeat.data.database.entity.FavoriteRecipe.Companion.TABLE_NAME
+import com.example.whattoeat.domain.domain_entities.common.Recipe
 
 @Entity(tableName = TABLE_NAME,)
 data class FavoriteRecipe(
@@ -14,5 +15,8 @@ data class FavoriteRecipe(
 ) {
     companion object {
         const val TABLE_NAME = "favorite_recipes"
+
+        fun fromRecipeComplex(recipe: Recipe.RecipeComplex) =
+            FavoriteRecipe(id = recipe.id)
     }
 }

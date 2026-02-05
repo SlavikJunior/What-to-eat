@@ -1,7 +1,6 @@
 package com.example.whattoeat.data.database.entity
 
-import com.example.whattoeat.domain.domain_entities.common.RecipeFullInformation
-import com.example.whattoeat.domain.domain_entities.support.AnalyzedInstruction
+import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.support.Cuisines
 import com.example.whattoeat.domain.domain_entities.support.Diets
 import com.example.whattoeat.domain.domain_entities.support.DishTypes
@@ -31,7 +30,7 @@ abstract class BaseRecipe {
     abstract val instructions: String?
 
     open fun toRecipeFullInformation() =
-        RecipeFullInformation(
+        Recipe.RecipeFullInformation(
             id = id,
             image = image,
             imageType = imageType,

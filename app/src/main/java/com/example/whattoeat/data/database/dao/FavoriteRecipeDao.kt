@@ -4,30 +4,29 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.example.whattoeat.data.database.entity.CachedRecipe.Companion.TABLE_NAME
+import com.example.whattoeat.data.database.entity.FavoriteRecipe.Companion.TABLE_NAME
 import com.example.whattoeat.data.database.entity.FavoriteRecipe
-import com.example.whattoeat.domain.domain_entities.common.Recipe
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FavoriteRecipeDao {
 
     @Insert(entity = FavoriteRecipe::class)
-    fun insert(recipe: Recipe.RecipeComplex): Long
+    suspend fun insert(recipe: FavoriteRecipe): Long
 
     @Delete(entity = FavoriteRecipe::class)
-    fun delete(id: Int): Int
+    suspend fun delete(recipe: FavoriteRecipe): Int
 
     @Query("""
         select *
         from $TABLE_NAME
         where id = :id
     """)
-    suspend fun selectById(id: Int): Flow<FavoriteRecipe>
+    suspend fun selectById(id: Int): FavoriteRecipe?
 
     @Query("""
         select *
         from $TABLE_NAME
     """)
-    suspend fun selectAll(): Flow<FavoriteRecipe>
+    fun selectAll(): Flow<FavoriteRecipe>
 }

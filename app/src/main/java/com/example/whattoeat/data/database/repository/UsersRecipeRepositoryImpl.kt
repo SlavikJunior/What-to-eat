@@ -21,7 +21,7 @@ class UsersRecipeRepositoryImpl(
         val id: Long
         withContext(Dispatchers.IO) {
             id = async {
-                usersRecipeDao.insert(recipe)
+                usersRecipeDao.insert(UsersRecipe.fromRecipe(recipe))
             }.await()
         }
         return id

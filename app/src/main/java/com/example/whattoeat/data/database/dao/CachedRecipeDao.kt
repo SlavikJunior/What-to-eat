@@ -6,28 +6,23 @@ import androidx.room.Query
 import androidx.room.Upsert
 import com.example.whattoeat.data.database.entity.CachedRecipe
 import com.example.whattoeat.data.database.entity.CachedRecipe.Companion.TABLE_NAME
-import com.example.whattoeat.domain.domain_entities.common.Recipe
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CachedRecipeDao {
 
     @Upsert(entity = CachedRecipe::class)
-    suspend fun upsert(recipe: Recipe.RecipeFullInformation): Long
+    suspend fun upsert(recipe: CachedRecipe): Long
 
     @Delete(entity = CachedRecipe::class)
-    suspend fun delete(id: Int): Int
+    suspend fun delete(recipe: CachedRecipe): Int
 
-    @Query("""
-        select *
-        from $TABLE_NAME
-        where id = :id
-    """)
+    @Query("select * from $TABLE_NAME where id = :id")
     suspend fun selectById(id: Int): CachedRecipe?
 
     @Query("""
         select *
         from $TABLE_NAME
     """)
-    suspend fun selectAll(): Flow<CachedRecipe>
+    fun selectAll(): Flow<CachedRecipe>
 }
