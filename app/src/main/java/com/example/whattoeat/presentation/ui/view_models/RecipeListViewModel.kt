@@ -3,8 +3,13 @@ package com.example.whattoeat.presentation.ui.view_models
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.domain.domain_entities.common.Recipe
-import com.example.whattoeat.domain.domain_entities.support.Product
-import com.example.whattoeat.domain.domain_entities.support.RecipeSearch
+import com.example.whattoeat.domain.domain_entities.common.Resource
+import com.example.whattoeat.domain.domain_entities.support.Cuisines
+import com.example.whattoeat.domain.domain_entities.support.Diets
+import com.example.whattoeat.domain.domain_entities.support.DishTypes
+import com.example.whattoeat.domain.domain_entities.support.SortDirection
+import com.example.whattoeat.domain.domain_entities.support.SortTypes
+import com.example.whattoeat.domain.search.RecipeSearch
 import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,11 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-enum class Cuisines {
-    ALL,
-    RUSSIAN
-}
+import kotlin.jvm.Throws
 
 open class RecipeListError(override val cause: Throwable?) : Throwable(cause) {
     data class NotEnoughArgumentsError(override val cause: Throwable?) : RecipeListError(cause)
@@ -31,25 +32,32 @@ sealed interface RecipeListState {
 }
 
 data class RecipeListFilter(
-    val recipeTitle: String = "", // ye
-    val cuisine: Cuisines = Cuisines.RUSSIAN, // ye
-    val isVegan: Boolean = false, // ye
-    val isSearchByDescription: Boolean = false, // ye
-    val includedProducts: String = "", // ye
-    val excludedProducts: String = "", // ye
-    val isNeedVideo: Boolean = false, // ye
-    val isNeedSteps: Boolean = false, // ye
-    val isAllProductsAndNotContained: Boolean = false, // ye
+    val query: String? = null,
+    val cuisines: List<Cuisines>? = null,
+    val diet: List<Diets>? = null,
+    val includedProducts: String? = null,
+    val excludedProducts: String? = null,
+    val type: DishTypes? = null,
+    val instructionsRequired: Boolean = false,
+    val maxReadyTime: Int? = null,
+    val minServings: Int? = null,
+    val sort: SortTypes? = null,
+    val sortDirection: SortDirection? = null,
+    val offset: Int = 0,
+    val number: Int = 5,
+    val ranking: Int = 2, // Максимально использовать имеющиеся (1), минимизировать недостающие ингредиенты (2)
+    val ignorePantry: Boolean = true // Игнорировать обычные продукты, такие как вода, соль...
 )
 
 data class RecipeListModel(
     val isFilterBottomSheetVisible: Boolean = false,
     val state: RecipeListState = RecipeListState.SearchReadyState,
     val recipes: List<Recipe> = listOf(),
+    val isSearchByIngredientsEnabled: Boolean = false,
     val filter: RecipeListFilter = RecipeListFilter(),
-    val isErrorShowing: Boolean = true,
-    private val isSearchButtonEnabled: Boolean = true,
-    private val isListShowing: Boolean = false, // ye
+    val isErrorShowing: Boolean = false,
+    val isSearchButtonEnabled: Boolean = true,
+    val isListShowing: Boolean = false
 )
 
 fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
@@ -58,6 +66,7 @@ fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
             RecipeListError.SearchError(cause)
         ),
         recipes = emptyList(),
+        isSearchByIngredientsEnabled = false,
         filter = RecipeListFilter(),
         isErrorShowing = true,
         isSearchButtonEnabled = true,
@@ -83,7 +92,7 @@ fun RecipeListModel.getStateSearchStarted() =
 
 sealed interface RecipeListPageEvent {
     data object SearchButtonClicked : RecipeListPageEvent
-    data class RecipeTitleChange(val recipeTitle: String) : RecipeListPageEvent
+    data class QueryChange(val query: String) : RecipeListPageEvent
     data class IncludedProductsChange(val includedProducts: String) : RecipeListPageEvent
     data class ExcludedProductsChange(val excludedProducts: String) : RecipeListPageEvent
     data class CuisineChange(private val cuisine: Cuisines) : RecipeListPageEvent
@@ -108,7 +117,7 @@ class RecipeListViewModel @Inject constructor(
         when (event) {
             is RecipeListPageEvent.SearchButtonClicked -> onClickSearchButton()
             is RecipeListPageEvent.IsFilterBottomSheetVisibleChange -> onChangeFilterShitVisible()
-            is RecipeListPageEvent.RecipeTitleChange -> onChangeRecipeTitle(event)
+            is RecipeListPageEvent.QueryChange -> onChangeQuery(event)
             is RecipeListPageEvent.IncludedProductsChange -> onChangeIncludedProducts(event)
             is RecipeListPageEvent.ExcludedProductsChange -> onChangeExcludedProducts(event)
             else -> {}
@@ -134,12 +143,13 @@ class RecipeListViewModel @Inject constructor(
         }
     }
 
-    private fun onChangeRecipeTitle(event: RecipeListPageEvent.RecipeTitleChange) {
+    private fun onChangeQuery(event: RecipeListPageEvent.QueryChange) {
         _uiState.update { currentState ->
             currentState.copy(
                 filter = currentState.filter.copy(
-                    recipeTitle = event.recipeTitle
-                )
+                    query = event.query
+                ),
+                isSearchByIngredientsEnabled = false
             )
         }
     }
@@ -153,40 +163,48 @@ class RecipeListViewModel @Inject constructor(
     }
 
     private fun onClickSearchButton() {
-        _uiState.update { currentState ->
-            currentState.getStateSearchStarted()
+        val recipeSearch: RecipeSearch
+        try {
+            recipeSearch = combineRecipeSearchByDataFromUi()
+        } catch (e: RecipeListError.NotEnoughArgumentsError) {
+            _uiState.update { currentState ->
+                currentState.getStateAfterSearchError(cause = e)
+            }
+            return
         }
 
         viewModelScope.launch {
-            searchRecipes()
+            searchRecipes(recipeSearch)
         }
     }
 
-    private fun combineRecipeSearchByDataFromUi() = with(_uiState.value) {
-        RecipeSearch(
-            title = filter.recipeTitle,
-            includedProducts = if (filter.includedProducts.isNotEmpty())
-                filter.includedProducts.split(",")
-                    .map { Product(it.trim()) } else null,
-            excludedProducts = if (filter.excludedProducts.isNotEmpty())
-                filter.excludedProducts.split(",")
-                    .map { Product(it.trim()) } else null,
-            isAllProductsIncluded = filter.isAllProductsAndNotContained,
-            isNeedVideo = filter.isNeedVideo,
-            isNeedSteps = filter.isNeedSteps
-        )
-    }
-
-    private suspend fun searchRecipes() {
-        val recipeSearch = combineRecipeSearchByDataFromUi()
+    private suspend fun searchRecipes(recipeSearch: RecipeSearch) {
         try {
             getRecipesUseCase(recipeSearch)
-                .collect { recipe ->
-                    _uiState.update { state ->
-                        state.copy(
-                            recipes = state.recipes + recipe,
-                            isListShowing = true
-                        )
+                .collect { resourceRecipe ->
+                    when (resourceRecipe) {
+                        is Resource.Loading<*> -> {
+                            _uiState.update { currentState ->
+                                currentState.getStateSearchStarted()
+                            }
+                        }
+
+                        is Resource.Success<*> -> {
+                            if (resourceRecipe.data != null)
+                                _uiState.update { currentState ->
+                                    currentState.copy(
+                                        recipes = currentState.recipes + resourceRecipe.data,
+                                        isListShowing = true
+                                    )
+                                }
+                        }
+
+                        is Resource.Error<*> -> {
+                            if (resourceRecipe.message != null)
+                            _uiState.update { currentState ->
+                                currentState.getStateAfterSearchError(RecipeListError.SearchError(null))
+                            }
+                        }
                     }
                 }
             _uiState.update { currentState ->
@@ -197,5 +215,32 @@ class RecipeListViewModel @Inject constructor(
                 currentState.getStateAfterSearchError(cause)
             }
         }
+    }
+
+    @Throws(RecipeListError.NotEnoughArgumentsError::class)
+    private fun combineRecipeSearchByDataFromUi() = with(_uiState.value) {
+        if (isSearchByIngredientsEnabled) {
+            if (filter.includedProducts != null)
+                RecipeSearch.RecipeByIngredientsSearch(
+                    ingredients = filter.includedProducts,
+                    number = filter.number,
+                    ranking = filter.ranking,
+                    ignorePantry = filter.ignorePantry,
+                )
+            else throw RecipeListError.NotEnoughArgumentsError(null)
+        } else
+            RecipeSearch.RecipeComplexSearch(
+                query = filter.query,
+                cuisines = filter.cuisines,
+                diet = filter.diet,
+                type = filter.type,
+                instructionsRequired = filter.instructionsRequired,
+                maxReadyTime = filter.maxReadyTime,
+                minServings = filter.minServings,
+                sort = filter.sort,
+                sortDirection = filter.sortDirection,
+                offset = filter.offset,
+                number = filter.number,
+            )
     }
 }

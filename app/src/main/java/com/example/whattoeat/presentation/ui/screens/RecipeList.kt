@@ -12,14 +12,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.whattoeat.R
 import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
 import com.example.whattoeat.presentation.ui.screens.custom_composable.FilterBottomSheet
 import com.example.whattoeat.presentation.ui.screens.custom_composable.RecipeCard
-import com.example.whattoeat.presentation.ui.view_models.RecipeDetailViewModel
 import com.example.whattoeat.presentation.ui.view_models.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.view_models.RecipeListViewModel
 
@@ -68,7 +66,7 @@ fun RecipeList(
             singleLine = true,
             onValueChange = {
                 viewModel.reduce(
-                    RecipeListPageEvent.RecipeTitleChange(it)
+                    RecipeListPageEvent.QueryChange(it)
                 )
             }
         )

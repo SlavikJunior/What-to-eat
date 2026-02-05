@@ -4,14 +4,8 @@ import android.util.Log
 import com.example.whattoeat.data.database.dao.CachedRecipeDao
 import com.example.whattoeat.data.database.entity.CachedRecipe
 import com.example.whattoeat.data.net.service.SpoonacularApiService
-import com.example.whattoeat.domain.domain_entities.common.RecipeByIngredients
-import com.example.whattoeat.domain.domain_entities.common.RecipeByIngredientsResult
-import com.example.whattoeat.domain.domain_entities.common.RecipeComplexResult
-import com.example.whattoeat.domain.domain_entities.common.RecipeFullInformation
-import com.example.whattoeat.domain.domain_entities.common.RecipeFullInformationResult
+import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.common.RecipeResult
-import com.example.whattoeat.domain.domain_entities.common.RecipeSimilar
-import com.example.whattoeat.domain.domain_entities.common.RecipeSummary
 import com.example.whattoeat.domain.domain_entities.common.Resource
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.search.RecipeSearch
@@ -40,7 +34,7 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             ).let { response ->
                 val resource = handleResponse(response)
 
-                val recipeComplexResult = resource.data?.let { it as RecipeComplexResult }
+                val recipeComplexResult = resource.data?.let { it as RecipeResult.RecipeComplexResult }
                 if (recipeComplexResult != null && recipeComplexResult.totalResults > 0) {
                     recipeComplexResult.recipeComplexList.forEach { recipeComplex ->
                         emit(Resource.Success(recipeComplex))
@@ -50,16 +44,16 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun getRecipeSimilar(recipeSearch: RecipeSearch.RecipeSimilarSearch): Flow<Resource<RecipeSimilar>> {
+    override suspend fun getRecipeSimilar(recipeSearch: RecipeSearch.RecipeSimilarSearch): Flow<Resource<Recipe.RecipeSimilar>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getRecipeSummary(recipeSearch: RecipeSearch.RecipeSummarySearch): Flow<Resource<RecipeSummary>> {
+    override suspend fun getRecipeSummary(recipeSearch: RecipeSearch.RecipeSummarySearch): Flow<Resource<Recipe.RecipeSummary>> {
         TODO("Not yet implemented")
     }
 
     override suspend fun getRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch) =
-        flow<Resource<RecipeFullInformation>> {
+        flow {
             emit(Resource.Loading())
 
             service.recipeFullInformation(
@@ -69,7 +63,7 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             ).let { response ->
                 val resource = handleResponse(response)
 
-                val recipeFullInformationResult = resource.data?.let { it as RecipeFullInformationResult }
+                val recipeFullInformationResult = resource.data?.let { it as RecipeResult.RecipeFullInformationResult }
                 if (recipeFullInformationResult != null)
                     emit(Resource.Success(recipeFullInformationResult.recipeFullInformationResult))
                 else
@@ -78,7 +72,7 @@ class RecipeSearchRepositoryImpl @Inject constructor(
         }
 
     override suspend fun getRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch) =
-        flow<Resource<RecipeByIngredients>> {
+        flow {
             emit(Resource.Loading())
 
             service.recipeByIngredients(
@@ -87,7 +81,7 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             ).let { response ->
                 val resource = handleResponse(response)
 
-                val recipeByIngredientsResult = resource.data?.let { it as RecipeByIngredientsResult }
+                val recipeByIngredientsResult = resource.data?.let { it as RecipeResult.RecipeByIngredientsResult }
                 if (recipeByIngredientsResult != null) {
                     recipeByIngredientsResult.recipeByIngredientsResult.forEach { recipeByIngredients ->
 
@@ -106,8 +100,8 @@ class RecipeSearchRepositoryImpl @Inject constructor(
         }
 
     @Suppress("UNCHECKED_CAST")
-    private suspend fun tryToGetFromCache(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Resource<RecipeFullInformation> {
-        var fromCachedRecipe: RecipeFullInformation? = null
+    private suspend fun tryToGetFromCache(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Resource<Recipe.RecipeFullInformation> {
+        var fromCachedRecipe: Recipe.RecipeFullInformation? = null
         var cachedRecipe: CachedRecipe? = null
         withContext(Dispatchers.IO) {
            cachedRecipe  = async {
@@ -119,7 +113,7 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             fromCachedRecipe = cachedRecipe.toRecipeFullInformation()
 
         return if (fromCachedRecipe != null)
-            Resource.Success(cachedRecipe) as Resource<RecipeFullInformation>
+            Resource.Success(cachedRecipe) as Resource<Recipe.RecipeFullInformation>
         else Resource.Error("Not found :/")
     }
 

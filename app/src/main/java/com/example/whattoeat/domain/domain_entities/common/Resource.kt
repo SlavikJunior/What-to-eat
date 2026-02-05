@@ -6,6 +6,6 @@ sealed class Resource<T>(
 ) {
 
     class Loading<T> : Resource<T>()
-    class Success<T>(override val data: T?): Resource<T>(data = data)
+    class Success<T>(override val data: T): Resource<T>(data = data)
     class Error<T>(override val message: String): Resource<T>(message = message)
 }
