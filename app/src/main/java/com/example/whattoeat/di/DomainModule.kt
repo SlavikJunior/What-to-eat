@@ -8,6 +8,7 @@ import com.example.whattoeat.domain.use_cases.DeleteUsersRecipeUseCase
 import com.example.whattoeat.domain.use_cases.GetFavoriteRecipesUseCase
 import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
 import com.example.whattoeat.domain.use_cases.GetUsersRecipesUseCase
+import com.example.whattoeat.domain.use_cases.IsFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.UploadUsersRecipeUseCase
 import dagger.Module
@@ -18,6 +19,12 @@ import dagger.hilt.android.components.ViewModelComponent
 @Module
 @InstallIn(ViewModelComponent::class)
 object DomainModule {
+
+    @Provides
+    fun provideIsFavoriteRecipeUseCase(repository: FavoriteRecipeRepository) =
+        IsFavoriteRecipeUseCase(
+            repository = repository
+        )
 
     @Provides
     fun provideAddFavoriteRecipeUseCase(repository: FavoriteRecipeRepository) =

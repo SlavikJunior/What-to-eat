@@ -21,14 +21,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.whattoeat.R
-import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
 import com.example.whattoeat.presentation.ui.screens.custom_composable.FilterBottomSheet
+import com.example.whattoeat.presentation.ui.screens.custom_composable.OffsetNavigationRow
 import com.example.whattoeat.presentation.ui.screens.custom_composable.RecipeCard
 import com.example.whattoeat.presentation.ui.view_models.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.view_models.RecipeListViewModel
@@ -98,6 +96,10 @@ fun RecipeList(
 
         Spacer(Modifier.height(16.dp))
 
+        OffsetNavigationRow(viewModel = viewModel)
+
+        Spacer(Modifier.height(16.dp))
+
         LazyColumn(
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(horizontal = 16.dp)
@@ -105,11 +107,7 @@ fun RecipeList(
             items(uiState.value.recipes) { recipe ->
                 RecipeCard(
                     recipe = recipe,
-                    onClick = {
-                        navController.navigate(
-                            RecipeDetailDataObject(recipe)
-                        )
-                    }
+                    viewModel = viewModel
                 )
                 Spacer(Modifier.height(16.dp))
             }
@@ -117,10 +115,4 @@ fun RecipeList(
     }
 
     FilterBottomSheet(viewModel)
-}
-
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun RecipeListPreview() {
-    RecipeList(navController = rememberNavController())
 }
