@@ -72,9 +72,11 @@ data class RecipeListModel(
     val offset: Int = 0, // устанавливается кнопками навигации по списку
     val totalResults: Int = 0, // количество рецептов в базе
     val countOfRecipesOnPage: Int = 5, // отображаемое количество, часто = filter.number, но может быть меньше, если с бека пришло мало рецептов
-    val isIncreaseOffsetButtonEnabled: Boolean = offset < totalResults,
-    val isDecreaseOffsetButtonEnabled: Boolean = offset >= filter.number,
-)
+) {
+    fun isIncreaseOffsetButtonEnabled() = offset < totalResults
+
+    fun isDecreaseOffsetButtonEnabled() = offset >= filter.number
+}
 
 fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
     this.copy(

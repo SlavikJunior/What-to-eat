@@ -13,14 +13,20 @@
     <!--  WhatToEatTopBottomBar END  -->
 
     <!--  RecipeList  -->
-    <string name="query_text_field_label">Recipe title</string>
+    <string name="query_text_field_label">Search query (NLP)</string>
     <string name="inclusive_products_text_field_label">Inclusive products</string>
     <string name="exclusive_products_text_field_label">Exclusive products</string>
     <string name="search_button_text">Search</string>
-
-        <!--  RecipeCard  -->
-        <string name="recipe_card_image_content_description">Image for recipe: %1$s</string>
-        <!--  RecipeCard END -->
-
+    <string name="filter_button_content_description">Фильтры</string>
+    <string name="search_by_name_mode">По названию</string>
+    <string name="search_by_ingredients_mode">По ингредиентам</string>
+    <string name="no_recipes_found">Рецепты не найдены</string>
+    <string name="previous_page">Предыдущая страница</string>
+    <string name="next_page">Следующая страница</string>
+    <string name="page_number">Страница %d</string>
     <!--  RecipeList END  -->
+
+    <!--  RecipeCard  -->
+    <string name="recipe_card_image_content_description">Image for recipe: %1$s</string>
+    <!--  RecipeCard END -->
 </resources>

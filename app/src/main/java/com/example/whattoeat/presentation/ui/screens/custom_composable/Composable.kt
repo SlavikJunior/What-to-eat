@@ -6,15 +6,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -33,6 +41,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.palette.graphics.Palette
@@ -97,33 +106,26 @@ fun FilterBottomSheet(
 
 @Composable
 fun RecipeCard(
-    recipe: Recipe.RecipeComplex,
-    onClick: () -> Unit,
+    recipe: Recipe.RecipeComplexExt,
+    viewModel: RecipeListViewModel,
     modifier: Modifier = Modifier
 ) {
     var isImageLoaded by remember { mutableStateOf(false) }
 
-    var backgroundColor by remember { mutableStateOf(Color(0xC8ABD6FC)) }
-    var titleColor by remember { mutableStateOf(Color(0xFF2B2B2B)) }
-
     Card(
-        onClick = { onClick() },
+        onClick = { viewModel.reduce(event = TODO()) },
         modifier = modifier
-            .then(
-                Modifier
-                    .fillMaxWidth()
-                    .then(if (!isImageLoaded) Modifier.shimmer() else Modifier)
-                    .clickable(enabled = isImageLoaded) { onClick() }
-            ),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(4.dp)) {
+            .fillMaxWidth()
+            .height(120.dp)
+            .then(if (!isImageLoaded) Modifier.shimmer() else Modifier),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
         Row(
-            modifier = Modifier
-                .height(120.dp)
-                .padding(12.dp),
+            modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Изображение рецепта
             AsyncImage(
                 model = recipe.image,
                 contentDescription = stringResource(
@@ -132,47 +134,99 @@ fun RecipeCard(
                 ),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(90.dp)
-                    .clip(RoundedCornerShape(18.dp)),
-                onSuccess = { success ->
-                    val bitmap = success.result.image.toBitmap(
-                        success.result.image.width,
-                        success.result.image.height
-                    )
-
-                    Palette.from(bitmap)
-                        .maximumColorCount(16)
-                        .generate { palette ->
-                            palette?.let {
-                                backgroundColor = Color(
-                                    it.getLightMutedColor(0xFFEAF6FF.toInt())
-                                )
-                                titleColor = Color(
-                                    it.getDarkVibrantColor(0xFF2B2B2B.toInt())
-                                )
-                            }
-                        }
+                    .height(120.dp)
+                    .width(120.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                onSuccess = {
                     isImageLoaded = true
                 }
             )
 
-            Spacer(modifier = Modifier.width(width = 12.dp))
-
+            // Информация о рецепте
             Column(
-                modifier = Modifier.fillMaxHeight(),
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-
+                // Заголовок
                 Text(
                     text = recipe.title,
-                    color = titleColor,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 20.sp
                 )
 
+                // Дополнительная информация
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "ID: ${recipe.id}",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+
+                    IconButton(
+                        onClick = {
+                            viewModel.reduce(
+                                event = RecipeListPageEvent.FavoriteRecipeChange(
+                                    recipe = recipe
+                                )
+                            )
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (recipe.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = null
+                        )
+                    }
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun OffsetNavigationRow(
+    viewModel: RecipeListViewModel
+) {
+    val uiState = viewModel.uiState.collectAsState()
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        // Кнопка назад
+        IconButton(
+            onClick = {
+                viewModel.reduce(RecipeListPageEvent.DecreaseOffsetChange)
+            },
+            enabled = uiState.value.isDecreaseOffsetButtonEnabled()
+        ) {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowUp,
+                contentDescription = stringResource(R.string.previous_page)
+            )
+        }
+
+        // Кнопка вперед
+        IconButton(
+            onClick = {
+                viewModel.reduce(RecipeListPageEvent.IncreaseOffsetChange)
+            },
+            enabled = uiState.value.isIncreaseOffsetButtonEnabled()
+        ) {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = stringResource(R.string.next_page)
+            )
         }
     }
 }
