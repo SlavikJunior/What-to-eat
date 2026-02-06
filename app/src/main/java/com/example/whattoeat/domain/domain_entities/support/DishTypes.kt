@@ -17,5 +17,4 @@ enum class DishTypes {
     @SerialName("fingerfood")FINGERFOOD, // закуски, которые можно есть руками
     @SerialName("snack")SNACK, // перекус
     @SerialName("drink")DRINK, // напиток
-    @SerialName("unknown")UNKNOWN
 }

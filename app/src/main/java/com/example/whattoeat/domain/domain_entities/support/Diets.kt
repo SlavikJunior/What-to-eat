@@ -15,5 +15,4 @@ enum class Diets {
     @SerialName("primal")PRIMAL, // https://www.google.com/search?q=primal+diet
     @SerialName("low fodmap")LOW_FODMAP, // https://www.google.com/search?q=low+foodmap+diet
     @SerialName("whole 30")WHOLE_30, // https://www.google.com/search?q=whole+30+diet
-    @SerialName("unknown")UNKNOWN
 }
