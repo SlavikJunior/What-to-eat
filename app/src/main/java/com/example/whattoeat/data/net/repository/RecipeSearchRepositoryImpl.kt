@@ -5,6 +5,7 @@ import com.example.whattoeat.data.database.dao.CachedRecipeComplexDao
 import com.example.whattoeat.data.database.entity.CachedRecipeComplex
 import com.example.whattoeat.data.net.service.SpoonacularApiService
 import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domain_entities.common.RecipeResult
 import com.example.whattoeat.domain.domain_entities.common.Resource
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.search.RecipeSearch
@@ -26,7 +27,7 @@ class RecipeSearchRepositoryImpl @Inject constructor(
     val cachedRecipeDao: CachedRecipeComplexDao
 ) : RecipeSearchRepository {
 
-    override suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<Resource<Recipe.RecipeComplex>> {
+    override suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<Resource<RecipeResult.RecipeComplexResult>> {
         var listFromCache: List<Recipe.RecipeComplex> = emptyList()
         val flow = flow {
             emit(Resource.Loading())
@@ -42,10 +43,9 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             ).let { result ->
 
                 result.onSuccess { recipeComplexResult ->
-                    recipeComplexResult.recipeComplexList.forEach { recipeComplex ->
-                        Log.d(TAG, "Emitting... : $recipeComplex")
-                        emit(Resource.Success(recipeComplex))
-                    }
+                    Log.d(TAG, "Emitting... : $recipeComplexResult")
+                    emit(Resource.Success(recipeComplexResult))
+
                 }
 
                 result.onFailure {
