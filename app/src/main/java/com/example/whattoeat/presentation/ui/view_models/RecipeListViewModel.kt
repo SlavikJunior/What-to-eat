@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domain_entities.common.RecipeResult
 import com.example.whattoeat.domain.domain_entities.common.Resource
 import com.example.whattoeat.domain.domain_entities.support.Cuisines
 import com.example.whattoeat.domain.domain_entities.support.Diets
@@ -11,16 +12,24 @@ import com.example.whattoeat.domain.domain_entities.support.DishTypes
 import com.example.whattoeat.domain.domain_entities.support.SortDirection
 import com.example.whattoeat.domain.domain_entities.support.SortTypes
 import com.example.whattoeat.domain.search.RecipeSearch
+import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
+import com.example.whattoeat.domain.use_cases.IsFavoriteRecipeUseCase
+import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.sort
 import kotlin.jvm.Throws
+
+enum class SearchType {
+    COMPLEX_SEARCH,
+    SEARCH_BY_INGREDIENTS
+}
 
 open class RecipeListError(override val cause: Throwable?) : Throwable(cause) {
     data class NotEnoughArgumentsError(override val cause: Throwable?) : RecipeListError(cause)
@@ -46,7 +55,6 @@ data class RecipeListFilter(
     val minServings: Int? = null,
     val sort: SortTypes? = null,
     val sortDirection: SortDirection? = null,
-    val offset: Int = 0,
     val number: Int = 5,
     val ranking: Int = 2, // Максимально использовать имеющиеся (1), минимизировать недостающие ингредиенты (2)
     val ignorePantry: Boolean = true // Игнорировать обычные продукты, такие как вода, соль...
@@ -55,12 +63,17 @@ data class RecipeListFilter(
 data class RecipeListModel(
     val isFilterBottomSheetVisible: Boolean = false,
     val state: RecipeListState = RecipeListState.SearchReadyState,
-    val recipes: List<Recipe.RecipeComplex> = listOf(),
-    val isSearchByIngredientsEnabled: Boolean = false,
+    val recipes: List<Recipe.RecipeComplexExt> = listOf(),
+    val searchType: SearchType = SearchType.COMPLEX_SEARCH,
     val filter: RecipeListFilter = RecipeListFilter(),
     val isErrorShowing: Boolean = false,
     val isSearchButtonEnabled: Boolean = true,
-    val isListShowing: Boolean = false
+    val isListShowing: Boolean = false,
+    val offset: Int = 0, // устанавливается кнопками навигации по списку
+    val totalResults: Int = 0, // количество рецептов в базе
+    val countOfRecipesOnPage: Int = 5, // отображаемое количество, часто = filter.number, но может быть меньше, если с бека пришло мало рецептов
+    val isIncreaseOffsetButtonEnabled: Boolean = offset < totalResults,
+    val isDecreaseOffsetButtonEnabled: Boolean = offset >= filter.number,
 )
 
 fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
@@ -69,7 +82,7 @@ fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
             RecipeListError.SearchError(cause)
         ),
         recipes = emptyList(),
-        isSearchByIngredientsEnabled = false,
+        searchType = SearchType.COMPLEX_SEARCH,
         filter = RecipeListFilter(),
         isErrorShowing = true,
         isSearchButtonEnabled = true,
@@ -94,23 +107,37 @@ fun RecipeListModel.getStateSearchStarted() =
     )
 
 sealed interface RecipeListPageEvent {
-    data object SearchButtonClicked : RecipeListPageEvent
     data class QueryChange(val query: String) : RecipeListPageEvent
     data class IncludedProductsChange(val includedProducts: String) : RecipeListPageEvent
     data class ExcludedProductsChange(val excludedProducts: String) : RecipeListPageEvent
-    data class CuisineChange(private val cuisine: Cuisines) : RecipeListPageEvent
+    data class SearchTypeChange(val searchType: SearchType) : RecipeListPageEvent
+    data class CuisineChange(val cuisine: Cuisines? = null) : RecipeListPageEvent
+    data class DietChange(val diet: Diets? = null) : RecipeListPageEvent
+    data class DishTypeChange(val type: DishTypes? = null) : RecipeListPageEvent
+    data class MaxReadyTimeChange(val max: Int? = null) : RecipeListPageEvent
+    data class MinServingsChange(val min: Int? = null) : RecipeListPageEvent
+    data class SortTypeChange(val sortType: SortTypes?? = null) : RecipeListPageEvent
+    data class SortDirectionChange(val sortDirection: SortDirection? = null) : RecipeListPageEvent
+    data class OffsetChange(val offset: Int = 0) : RecipeListPageEvent
+    data class NumberChange(val number: Int = 5) : RecipeListPageEvent
+    data class RankingChange(val ranking: Int = 2) : RecipeListPageEvent
+    data class OffsetOnPageChange(val offsetOnPage: Int) : RecipeListPageEvent
+    data class FavoriteRecipeChange(val recipe: Recipe) : RecipeListPageEvent
+    data object IncreaseOffsetChange : RecipeListPageEvent
+    data object DecreaseOffsetChange : RecipeListPageEvent
+    data object IgnorePantryChange : RecipeListPageEvent
+    data object InstructionsRequiredChange : RecipeListPageEvent
     data object IsListShowingChange : RecipeListPageEvent
-    data object IsVeganChange : RecipeListPageEvent
-    data object IsNeedVideoChange : RecipeListPageEvent
-    data object IsNeedStepsChange : RecipeListPageEvent
-    data object IsNeedAllProductsChange : RecipeListPageEvent
-    data object IsSearchByDescriptionChange : RecipeListPageEvent
     data object IsFilterBottomSheetVisibleChange : RecipeListPageEvent
+    data object SearchButtonClicked : RecipeListPageEvent
 }
 
 @HiltViewModel
 class RecipeListViewModel @Inject constructor(
-    private val getRecipesUseCase: GetRecipesUseCase
+    private val getRecipesUseCase: GetRecipesUseCase,
+    private val isFavoriteRecipeUseCase: IsFavoriteRecipeUseCase,
+    private val addFavoriteRecipesUseCase: AddFavoriteRecipeUseCase,
+    private val removeFavoriteRecipeUseCase: RemoveFavoriteRecipeUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecipeListModel())
@@ -123,8 +150,65 @@ class RecipeListViewModel @Inject constructor(
             is RecipeListPageEvent.QueryChange -> onChangeQuery(event)
             is RecipeListPageEvent.IncludedProductsChange -> onChangeIncludedProducts(event)
             is RecipeListPageEvent.ExcludedProductsChange -> onChangeExcludedProducts(event)
+            is RecipeListPageEvent.SearchTypeChange -> onChangeSearchType(event)
+            is RecipeListPageEvent.FavoriteRecipeChange -> onChangeFavoriteRecipe(event)
+            is RecipeListPageEvent.IncreaseOffsetChange -> onChangeIncreaseOffset()
+            is RecipeListPageEvent.DecreaseOffsetChange -> onChangeDecreaseOffset()
             else -> {}
         }
+
+    private fun onChangeDecreaseOffset() {
+        val newOffset = _uiState.value.offset - _uiState.value.filter.number
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                offset = newOffset,
+                countOfRecipesOnPage = _uiState.value.filter.number
+            )
+        }
+
+        onClickSearchButton() // авто-клик
+    }
+
+    private fun onChangeIncreaseOffset() {
+        val newOffset = _uiState.value.offset + _uiState.value.filter.number
+
+        _uiState.update { currentSate ->
+            currentSate.copy(
+                offset = newOffset,
+                countOfRecipesOnPage = _uiState.value.totalResults - newOffset
+            )
+        }
+
+        onClickSearchButton() // авто-клик
+    }
+
+    private fun onChangeFavoriteRecipe(event: RecipeListPageEvent.FavoriteRecipeChange) {
+        val recipe = event.recipe
+
+        viewModelScope.launch {
+            val isFavorite = async {
+                isFavoriteRecipeUseCase(recipe)
+            }.await()
+
+            if (isFavorite)
+                removeFavoriteRecipeUseCase(recipe)
+            else
+                addFavoriteRecipesUseCase(recipe)
+        }
+    }
+
+    private fun onChangeSearchType(event: RecipeListPageEvent.SearchTypeChange) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                searchType = event.searchType,
+                isFilterBottomSheetVisible = false,
+                filter = RecipeListFilter(),
+                isListShowing = false,
+                isErrorShowing = false
+            )
+        }
+    }
 
     private fun onChangeExcludedProducts(event: RecipeListPageEvent.ExcludedProductsChange) {
         _uiState.update { currentState ->
@@ -151,8 +235,7 @@ class RecipeListViewModel @Inject constructor(
             currentState.copy(
                 filter = currentState.filter.copy(
                     query = event.query
-                ),
-                isSearchByIngredientsEnabled = false
+                )
             )
         }
     }
@@ -184,22 +267,33 @@ class RecipeListViewModel @Inject constructor(
     private suspend fun searchRecipes(recipeSearch: RecipeSearch) {
         try {
             getRecipesUseCase(recipeSearch)
-                .collectLatest { resourceRecipe ->
-                    Log.d(TAG, "Collected ressource: $resourceRecipe from getRecipesUseCase()")
+                .collectLatest { resourceRecipeResult ->
+                    Log.d(
+                        TAG,
+                        "Collected ressource: $resourceRecipeResult from getRecipesUseCase()"
+                    )
 
-                    when (resourceRecipe) {
+                    when (resourceRecipeResult) {
                         is Resource.Loading<*> ->
                             _uiState.update { currentState ->
                                 currentState.getStateSearchStarted()
                             }
 
                         is Resource.Success<*> ->
-                            if (resourceRecipe.data != null) {
-                                val recipeComplex = resourceRecipe.data as Recipe.RecipeComplex
+                            if (resourceRecipeResult.data != null) {
+                                val recipeComplexResult =
+                                    resourceRecipeResult.data as RecipeResult.RecipeComplexResult
                                 _uiState.update { currentState ->
                                     currentState.copy(
-                                        recipes = currentState.recipes + recipeComplex,
-                                        isListShowing = true
+                                        recipes = currentState.recipes + recipeComplexResult.recipeComplexList.map {
+                                            Recipe.RecipeComplexExt(
+                                                recipe = it,
+                                                isFavorite = isFavoriteRecipeUseCase(it)
+                                            )
+                                        },
+                                        isListShowing = true,
+                                        totalResults = recipeComplexResult.totalResults,
+                                        offset = recipeComplexResult.offset
                                     )
                                 }
                             }
@@ -228,7 +322,7 @@ class RecipeListViewModel @Inject constructor(
     @Throws(RecipeListError.NotEnoughArgumentsError::class)
     private fun combineRecipeSearchByDataFromUi(): RecipeSearch {
         val recipeSearch = with(_uiState.value) {
-            if (isSearchByIngredientsEnabled) {
+            if (searchType == SearchType.SEARCH_BY_INGREDIENTS) {
                 if (filter.includedProducts != null)
                     RecipeSearch.RecipeByIngredientsSearch(
                         ingredients = filter.includedProducts,
@@ -248,7 +342,7 @@ class RecipeListViewModel @Inject constructor(
                     minServings = filter.minServings,
                     sort = filter.sort,
                     sortDirection = filter.sortDirection,
-                    offset = filter.offset,
+                    offset = offset,
                     number = filter.number,
                 )
         }
