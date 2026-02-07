@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.whattoeat.domain.repositories.TranslateApiRepository
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.nl.languageid.LanguageIdentification
+import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
 import kotlinx.coroutines.tasks.await
@@ -30,8 +31,8 @@ class TranslateApiRepositoryImpl() : TranslateApiRepository {
         }
 
         val translatorOptions = TranslatorOptions.Builder()
-            .setSourceLanguage(detectedLanguage)
-            .setTargetLanguage(targetLanguage.bcp47Code)
+            .setSourceLanguage(TranslateLanguage.RUSSIAN)
+            .setTargetLanguage(TranslateLanguage.ENGLISH)
             .build()
 
         val translator = Translation.getClient(translatorOptions)

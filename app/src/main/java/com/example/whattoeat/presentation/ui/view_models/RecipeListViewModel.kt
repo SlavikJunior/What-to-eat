@@ -16,6 +16,7 @@ import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
 import com.example.whattoeat.domain.use_cases.IsFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
+import com.example.whattoeat.domain.use_cases.TranslateTextUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -144,6 +145,7 @@ class RecipeListViewModel @Inject constructor(
     private val isFavoriteRecipeUseCase: IsFavoriteRecipeUseCase,
     private val addFavoriteRecipesUseCase: AddFavoriteRecipeUseCase,
     private val removeFavoriteRecipeUseCase: RemoveFavoriteRecipeUseCase,
+    private val translateTextUseCase: TranslateTextUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecipeListModel())
@@ -186,7 +188,9 @@ class RecipeListViewModel @Inject constructor(
             )
         }
 
+
         onClickSearchButton() // авто-клик
+
     }
 
     private fun onChangeFavoriteRecipe(event: RecipeListPageEvent.FavoriteRecipeChange) {
@@ -269,6 +273,11 @@ class RecipeListViewModel @Inject constructor(
     }
 
     private fun onClickSearchButton() {
+        viewModelScope.launch {
+            async {
+                translateDataFromUi()
+            }.await()
+        }
         val recipeSearch: RecipeSearch
         try {
             recipeSearch = combineRecipeSearchByDataFromUi()
@@ -369,6 +378,16 @@ class RecipeListViewModel @Inject constructor(
 
         Log.d(TAG, "Combined recipeSearch: $recipeSearch")
         return recipeSearch
+    }
+
+    private suspend fun translateDataFromUi() {
+        withContext(Dispatchers.IO) {
+            _uiState.value.copy(
+                filter = _uiState.value.filter.copy(
+                    query = _uiState.value.filter.query?.let { translateTextUseCase(it) } ?: ""
+                )
+            )
+        }
     }
 
     companion object {
