@@ -17,12 +17,14 @@ import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
 import com.example.whattoeat.domain.use_cases.IsFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.jvm.Throws
 
@@ -72,11 +74,13 @@ data class RecipeListModel(
     val offset: Int = 0, // устанавливается кнопками навигации по списку
     val totalResults: Int = 0, // количество рецептов в базе
     val countOfRecipesOnPage: Int = 5, // отображаемое количество, часто = filter.number, но может быть меньше, если с бека пришло мало рецептов
-) {
-    fun isIncreaseOffsetButtonEnabled() = offset < totalResults
+)
 
-    fun isDecreaseOffsetButtonEnabled() = offset >= filter.number
-}
+fun RecipeListModel.numberOfCurrentPage() = (offset / filter.number) + 1
+
+fun RecipeListModel.isIncreaseOffsetButtonEnabled() = offset < totalResults
+
+fun RecipeListModel.isDecreaseOffsetButtonEnabled() = offset >= filter.number
 
 fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
     this.copy(
@@ -188,15 +192,29 @@ class RecipeListViewModel @Inject constructor(
     private fun onChangeFavoriteRecipe(event: RecipeListPageEvent.FavoriteRecipeChange) {
         val recipe = event.recipe
 
+        var isFavorite: Boolean
         viewModelScope.launch {
-            val isFavorite = async {
+            isFavorite = async {
                 isFavoriteRecipeUseCase(recipe)
             }.await()
 
-            if (isFavorite)
-                removeFavoriteRecipeUseCase(recipe)
-            else
-                addFavoriteRecipesUseCase(recipe)
+            if (isFavorite) removeFavoriteRecipeUseCase(recipe)
+            else addFavoriteRecipesUseCase(recipe)
+
+            val updatedRecipes = _uiState.value.recipes.map { tempRecipe ->
+                if (tempRecipe == recipe)
+                    tempRecipe.copy(isFavorite = !tempRecipe.isFavorite)
+                else
+                    tempRecipe
+            }
+
+            withContext(Dispatchers.Main) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        recipes = updatedRecipes
+                    )
+                }
+            }
         }
     }
 

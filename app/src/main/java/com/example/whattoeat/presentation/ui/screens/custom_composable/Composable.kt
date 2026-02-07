@@ -1,17 +1,17 @@
 package com.example.whattoeat.presentation.ui.screens.custom_composable
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -40,17 +41,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.palette.graphics.Palette
 import coil3.compose.AsyncImage
-import coil3.toBitmap
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.presentation.ui.view_models.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.view_models.RecipeListViewModel
+import com.example.whattoeat.presentation.ui.view_models.isDecreaseOffsetButtonEnabled
+import com.example.whattoeat.presentation.ui.view_models.isIncreaseOffsetButtonEnabled
+import com.example.whattoeat.presentation.ui.view_models.numberOfCurrentPage
 import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -214,6 +216,33 @@ fun OffsetNavigationRow(
                 imageVector = Icons.Default.KeyboardArrowUp,
                 contentDescription = stringResource(R.string.previous_page)
             )
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(24.dp),
+                shape = RoundedCornerShape(4.dp),
+                shadowElevation = 4.dp
+            ) {
+                Text(
+                    text = uiState.value.numberOfCurrentPage().toString(),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Surface(
+                modifier = Modifier.size(24.dp),
+                shape = RoundedCornerShape(4.dp),
+                shadowElevation = 4.dp
+            ) {
+                Text(
+                    text = uiState.value.totalResults.toString()
+                )
+            }
         }
 
         // Кнопка вперед
