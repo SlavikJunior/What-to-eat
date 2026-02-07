@@ -1,5 +1,6 @@
 package com.example.whattoeat.data.mlkit
 
+import android.util.Log
 import com.example.whattoeat.domain.repositories.TranslateApiRepository
 import com.google.mlkit.common.model.DownloadConditions
 import com.google.mlkit.nl.languageid.LanguageIdentification
@@ -14,10 +15,17 @@ class TranslateApiRepositoryImpl() : TranslateApiRepository {
 
     @Throws(Throwable::class)
     override suspend fun translateText(input: String, targetLanguage: Languages): String {
+        Log.d(TAG, "Input text: $input")
+
         var detectedLanguage: String = languageIdentifier.identifyLanguage(input).await()
 
-        if (detectedLanguage == Languages.UNDEFINED.bcp47Code)
+        Log.d(TAG, "Detected language by mlkit: $detectedLanguage")
+
+        if (detectedLanguage == Languages.UNDEFINED.bcp47Code) {
             detectedLanguage = Locale.getDefault().language
+
+            Log.d(TAG, "Detected language from locale: $detectedLanguage")
+        }
 
         val translatorOptions = TranslatorOptions.Builder()
             .setSourceLanguage(detectedLanguage)
@@ -29,11 +37,19 @@ class TranslateApiRepositoryImpl() : TranslateApiRepository {
         return try {
             val conditions = DownloadConditions.Builder().requireWifi().build()
             translator.downloadModelIfNeeded(conditions).await()
-            translator.translate(input).await()
+            val result = translator.translate(input).await()
+
+            Log.d(TAG, "From $input on $detectedLanguage language translated to $result on $targetLanguage language")
+
+            result
         } catch (e: Throwable) {
             throw e
         } finally {
             translator.close()
         }
+    }
+
+    companion object {
+        private const val TAG = "TEST TAG"
     }
 }
