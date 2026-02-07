@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.whattoeat.data.database.dao.CachedRecipeComplexDao
 import com.example.whattoeat.data.database.entity.CachedRecipeComplex
 import com.example.whattoeat.data.net.service.SpoonacularApiService
+import com.example.whattoeat.di.SpoonacularJson
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.common.RecipeResult
 import com.example.whattoeat.domain.domain_entities.common.Resource
@@ -21,7 +22,7 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 class RecipeSearchRepositoryImpl @Inject constructor(
-    val json: Json,
+    @SpoonacularJson val json: Json,
     val apiKey: String,
     val service: SpoonacularApiService,
     val cachedRecipeDao: CachedRecipeComplexDao

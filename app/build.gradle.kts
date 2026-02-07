@@ -19,6 +19,8 @@ val localProperties = Properties().apply {
 }
 
 val spoonacularApiKey: String = localProperties.getProperty("SPOONACULAR_API_KEY", "\"\"")
+val yandexApiKey: String = localProperties.getProperty("YANDEX_TRANSLATE_API_KEY", "\"\"")
+val folderId: String = localProperties.getProperty("FOLDER_ID", "\"\"")
 
 android {
     namespace = "com.example.whattoeat"
@@ -34,6 +36,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "SPOONACULAR_API_KEY", "\"$spoonacularApiKey\"")
+        buildConfigField("String", "YANDEX_TRANSLATE_API_KEY", "\"$yandexApiKey\"")
+        buildConfigField("String", "FOLDER_ID", "\"$folderId\"")
     }
 
     buildTypes {
@@ -83,11 +87,6 @@ dependencies {
     implementation(libs.retrofit.serialization)
     implementation(libs.kotlin.reflect)
     implementation(libs.okhttp.logging)
-    implementation(libs.mlkit.lang.id) {
-        exclude(group = "com.google.mlkit", module = "language-id-common")
-    }
-    implementation(libs.mlkit.translate)
-    implementation(libs.coroutines.play.services)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
