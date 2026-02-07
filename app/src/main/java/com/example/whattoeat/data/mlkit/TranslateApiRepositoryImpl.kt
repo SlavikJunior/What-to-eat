@@ -21,6 +21,8 @@ class TranslateApiRepositoryImpl() : TranslateApiRepository {
 
         Log.d(TAG, "Detected language by mlkit: $detectedLanguage")
 
+        if (detectedLanguage == Languages.ENGLISH.bcp47Code) return input
+
         if (detectedLanguage == Languages.UNDEFINED.bcp47Code) {
             detectedLanguage = Locale.getDefault().language
 
