@@ -1,6 +1,9 @@
 package com.example.whattoeat.domain.repositories
 
+import com.example.whattoeat.data.mlkit.Languages
+
 interface TranslateApiRepository {
 
-    suspend fun translateText(input: String , targetLang: String): String
+    @Throws(Throwable::class)
+    suspend fun translateText(input: String , targetLanguage: Languages = Languages.ENGLISH): String
 }

@@ -83,6 +83,11 @@ dependencies {
     implementation(libs.retrofit.serialization)
     implementation(libs.kotlin.reflect)
     implementation(libs.okhttp.logging)
+    implementation(libs.mlkit.lang.id) {
+        exclude(group = "com.google.mlkit", module = "language-id-common")
+    }
+    implementation(libs.mlkit.translate)
+    implementation(libs.coroutines.play.services)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
