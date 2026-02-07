@@ -9,11 +9,13 @@ import com.example.whattoeat.data.database.dao.FavoriteRecipeDao
 import com.example.whattoeat.data.database.dao.UsersRecipeDao
 import com.example.whattoeat.data.database.repository.FavoriteRecipeRepositoryImpl
 import com.example.whattoeat.data.database.repository.UsersRecipeRepositoryImpl
+import com.example.whattoeat.data.mlkit.TranslateApiRepositoryImpl
 import com.example.whattoeat.data.net.adapter.ResultCallAdapterFactory
 import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.data.net.service.SpoonacularApiService
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
+import com.example.whattoeat.domain.repositories.TranslateApiRepository
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -36,6 +38,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DataModule {
+
+    @Provides
+    @Singleton
+    fun provideTranslateApiRepository(): TranslateApiRepository = TranslateApiRepositoryImpl()
 
     @Provides
     @Singleton

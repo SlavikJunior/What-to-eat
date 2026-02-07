@@ -2,6 +2,7 @@ package com.example.whattoeat.di
 
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
+import com.example.whattoeat.domain.repositories.TranslateApiRepository
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.DeleteUsersRecipeUseCase
@@ -10,6 +11,7 @@ import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
 import com.example.whattoeat.domain.use_cases.GetUsersRecipesUseCase
 import com.example.whattoeat.domain.use_cases.IsFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
+import com.example.whattoeat.domain.use_cases.TranslateTextUseCase
 import com.example.whattoeat.domain.use_cases.UploadUsersRecipeUseCase
 import dagger.Module
 import dagger.Provides
@@ -19,6 +21,10 @@ import dagger.hilt.android.components.ViewModelComponent
 @Module
 @InstallIn(ViewModelComponent::class)
 object DomainModule {
+
+    @Provides
+    fun provideTranslateTextUseCase(repository: TranslateApiRepository) =
+        TranslateTextUseCase(repository = repository)
 
     @Provides
     fun provideIsFavoriteRecipeUseCase(repository: FavoriteRecipeRepository) =
