@@ -1,4 +1,4 @@
-package com.example.whattoeat.data.mlkit
+package com.example.whattoeat.data.yandex_translate.models
 
 enum class Languages(
     val bcp47Code: String

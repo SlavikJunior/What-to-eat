@@ -16,6 +16,7 @@ import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
 import com.example.whattoeat.domain.use_cases.IsFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
+import com.example.whattoeat.domain.use_cases.TranslateTextUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -92,7 +93,9 @@ fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
         filter = RecipeListFilter(),
         isErrorShowing = true,
         isSearchButtonEnabled = true,
-        isListShowing = false
+        isListShowing = false,
+        totalResults = 0,
+        offset = 0
     )
 
 fun RecipeListModel.getStateAfterSearchSuccess() =
@@ -144,6 +147,7 @@ class RecipeListViewModel @Inject constructor(
     private val isFavoriteRecipeUseCase: IsFavoriteRecipeUseCase,
     private val addFavoriteRecipesUseCase: AddFavoriteRecipeUseCase,
     private val removeFavoriteRecipeUseCase: RemoveFavoriteRecipeUseCase,
+    private val translateTextUseCase: TranslateTextUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecipeListModel())
@@ -173,7 +177,9 @@ class RecipeListViewModel @Inject constructor(
             )
         }
 
-        onClickSearchButton() // авто-клик
+        viewModelScope.launch {
+            onClickSearchButton() // авто-клик
+        }
     }
 
     private fun onChangeIncreaseOffset() {
@@ -186,7 +192,10 @@ class RecipeListViewModel @Inject constructor(
             )
         }
 
-        onClickSearchButton() // авто-клик
+
+        viewModelScope.launch {
+            onClickSearchButton() // авто-клик
+        }
     }
 
     private fun onChangeFavoriteRecipe(event: RecipeListPageEvent.FavoriteRecipeChange) {
@@ -269,21 +278,58 @@ class RecipeListViewModel @Inject constructor(
     }
 
     private fun onClickSearchButton() {
-        val recipeSearch: RecipeSearch
-        try {
-            recipeSearch = combineRecipeSearchByDataFromUi()
-        } catch (e: RecipeListError.NotEnoughArgumentsError) {
-            _uiState.update { currentState ->
-                currentState.getStateAfterSearchError(cause = e)
-            }
-            return
-        }
-
         viewModelScope.launch {
-            searchRecipes(recipeSearch)
+            try {
+                // 1. Обновляем состояние
+                _uiState.update { currentState ->
+                    currentState.getStateSearchStarted()
+                }
+
+                // 2. Получаем исходные данные
+                val originalQuery = _uiState.value.filter.query ?: ""
+                val originalIncluded = _uiState.value.filter.includedProducts ?: ""
+                val originalExcluded = _uiState.value.filter.excludedProducts ?: ""
+
+                // 3. Выполняем перевод (ОЖИДАЕМ завершения!)
+                val translated = translateTextUseCase(
+                    input = listOf(originalQuery, originalIncluded, originalExcluded)
+                )
+
+                // 4. Обновляем фильтр с переведенным текстом
+                if (translated.size >= 3) {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            filter = currentState.filter.copy(
+                                query = translated[0],
+                                includedProducts = translated[1],
+                                excludedProducts = translated[2]
+                            )
+                        )
+                    }
+                    Log.d(TAG, "Search with translated query: ${translated[0]}")
+                }
+
+                // 5. Создаем RecipeSearch с ОБНОВЛЕННЫМИ данными
+                val recipeSearch = combineRecipeSearchByDataFromUi()
+                Log.d(TAG, "Search after translation: $recipeSearch")
+
+                // 6. Выполняем поиск
+                searchRecipes(recipeSearch)
+
+            } catch (e: RecipeListError.NotEnoughArgumentsError) {
+                _uiState.update { currentState ->
+                    currentState.getStateAfterSearchError(cause = e)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Search error: ${e.message}", e)
+                _uiState.update { currentState ->
+                    currentState.getStateAfterSearchError(
+                        RecipeListError.SearchError(e)
+                    )
+                }
+            }
         }
     }
-
     private suspend fun searchRecipes(recipeSearch: RecipeSearch) {
         try {
             getRecipesUseCase(recipeSearch)
