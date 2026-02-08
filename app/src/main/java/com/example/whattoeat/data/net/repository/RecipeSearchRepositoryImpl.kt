@@ -57,16 +57,41 @@ class RecipeSearchRepositoryImpl @Inject constructor(
         return flow
     }
 
-    override suspend fun getRecipeSimilar(recipeSearch: RecipeSearch.RecipeSimilarSearch): Flow<Resource<Recipe.RecipeSimilar>> {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getRecipeSimilar(recipeSearch: RecipeSearch.RecipeSimilarSearch): Flow<Resource<RecipeResult.RecipeSimilarResult>> =
+        flow {
+            Log.d(TAG, "RecipeSearch: $recipeSearch")
+
+            emit(Resource.Loading())
+
+            service.recipeSimilar(
+                id = recipeSearch.id,
+                query = recipeSearch.toQueryMap(),
+                apiKey = apiKey
+            ).let { result ->
+
+                result.onSuccess {
+                    Log.d(TAG, "Success emiting: ${it.recipeSimilarResult}")
+
+                    emit(Resource.Success(RecipeResult.RecipeSimilarResult(it.recipeSimilarResult)))
+                }
+
+                result.onFailure {
+                    Log.d(TAG, "Error emiting! Throwable: $it")
+
+                    emit(Resource.Error("Not found :/"))
+//                    emit(tryToGetFromCache(recipeSearch))
+                }
+            }
+        }
 
     override suspend fun getRecipeSummary(recipeSearch: RecipeSearch.RecipeSummarySearch): Flow<Resource<Recipe.RecipeSummary>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch) =
+    override suspend fun getRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Flow<Resource<RecipeResult.RecipeFullInformationResult>> =
         flow {
+            Log.d(TAG, "RecipeSearch: $recipeSearch")
+
             emit(Resource.Loading())
 
             service.recipeFullInformation(
@@ -76,10 +101,14 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             ).let { result ->
 
                 result.onSuccess {
-                    emit(Resource.Success(it.recipeFullInformationResult))
+                    Log.d(TAG, "Success emiting: ${it.recipeFullInformationResult}")
+
+                    emit(Resource.Success(RecipeResult.RecipeFullInformationResult(it.recipeFullInformationResult)))
                 }
 
                 result.onFailure {
+                    Log.d(TAG, "Error emiting! Throwable: $it")
+
                     emit(Resource.Error("Not found :/"))
 //                    emit(tryToGetFromCache(recipeSearch))
                 }

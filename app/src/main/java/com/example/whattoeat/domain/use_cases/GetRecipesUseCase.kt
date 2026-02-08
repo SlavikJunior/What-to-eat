@@ -17,6 +17,6 @@ class GetRecipesUseCase @Inject constructor(
         }
 
     companion object {
-        private const val TAG = "GetRecipesUseCase"
+        private const val TAG = "TEST TAG"
     }
 }

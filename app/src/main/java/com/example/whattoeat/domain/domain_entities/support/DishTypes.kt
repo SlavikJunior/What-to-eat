@@ -4,9 +4,17 @@ import kotlinx.serialization.SerialName
 
 enum class DishTypes {
     @SerialName("main course")MAIN_COURSE, // второе блюдо
-    @SerialName("side dish") SIDE_DISH, // гарнир
+    @SerialName("side dish")SIDE_DISH, // гарнир
+    @SerialName("main dish")MAIN_DISH, // гарнир
     @SerialName("dessert")DESSERT,
     @SerialName("appetizer")APPETIZER, // закуска
+    @SerialName("starter")STARTER,
+    @SerialName("antipasto")ANTIPASTO,
+    @SerialName("lunch")LUNCH,
+    @SerialName("antipasti")ANTIPASTI,
+    @SerialName("morning meal")MORNING_MEAL,
+    @SerialName("brunch")BRUNCH,
+    @SerialName("dinner")DINNER,
     @SerialName("salad")SALAD,
     @SerialName("bread")BREAD,
     @SerialName("breakfast")BREAKFAST,
