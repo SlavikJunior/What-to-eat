@@ -1,7 +1,6 @@
 package com.example.whattoeat.presentation.ui.screens.custom_composable
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -23,6 +21,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -45,9 +45,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
 import com.example.whattoeat.presentation.ui.view_models.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.view_models.RecipeListViewModel
 import com.example.whattoeat.presentation.ui.view_models.isDecreaseOffsetButtonEnabled
@@ -108,6 +110,7 @@ fun FilterBottomSheet(
 
 @Composable
 fun RecipeCard(
+    navController: NavHostController,
     recipe: Recipe.RecipeComplexExt,
     viewModel: RecipeListViewModel,
     modifier: Modifier = Modifier
@@ -115,7 +118,7 @@ fun RecipeCard(
     var isImageLoaded by remember { mutableStateOf(false) }
 
     Card(
-        onClick = { viewModel.reduce(event = TODO()) },
+        onClick = { navController.navigate(RecipeDetailDataObject(recipeId = recipe.id)) },
         modifier = modifier
             .fillMaxWidth()
             .height(120.dp)
@@ -193,7 +196,7 @@ fun RecipeCard(
 }
 
 @Composable
-fun OffsetNavigationRow(
+fun OffsetRecipeListNavigationRow(
     viewModel: RecipeListViewModel
 ) {
     val uiState = viewModel.uiState.collectAsState()
@@ -256,6 +259,65 @@ fun OffsetNavigationRow(
                 imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = stringResource(R.string.next_page)
             )
+        }
+    }
+}
+
+@Composable
+fun SimilarRecipeCard(
+    recipe: Recipe.RecipeSimilarExt,
+    onClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var imageLoaded by remember { mutableStateOf(false) }
+
+    Card(
+        onClick = onClick,
+        modifier = modifier
+            .width(160.dp)
+            .height(200.dp)
+            .then(if (!imageLoaded) Modifier.shimmer() else Modifier),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column {
+            AsyncImage(
+                model = recipe.image,
+                contentDescription = recipe.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                onSuccess = { imageLoaded = true }
+            )
+
+            Column(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = recipe.title,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    IconButton(onClick = onFavoriteClick) {
+                        Icon(
+                            if (recipe.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = null,
+                            tint = if (recipe.isFavorite) MaterialTheme.colorScheme.primary else LocalContentColor.current
+                        )
+                    }
+                }
+            }
         }
     }
 }

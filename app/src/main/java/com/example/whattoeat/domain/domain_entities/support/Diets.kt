@@ -9,6 +9,7 @@ enum class Diets {
     @SerialName("vegetarian")VEGETARIAN, // Мясо или мясные субпродукты
     @SerialName("lacto vegetarian")LACTO_VEGETARIAN, // Вегетарианские, и ни один из ингредиентов не может содержать яйца.
     @SerialName("ovo vegetarian")OVO_VEGETARIAN, // Вегетарианские, и ни один из ингредиентов не может содержать молочные продукты.
+    @SerialName("lacto ovo vegetarian")LACTO_OVO_VEGETARIAN,
     @SerialName("vegan")VEGAN, // Мясо или мясные субпродукты, а также яйца, молочные продукты и мёд
     @SerialName("pescetarian")PESCETARIAN, // Всё, кроме мяса и мясных субпродуктов — некоторые едят яйца и молочные продукты, другие — нет.
     @SerialName("paleo")PALEO, // https://www.google.com/search?q=paleo+diet

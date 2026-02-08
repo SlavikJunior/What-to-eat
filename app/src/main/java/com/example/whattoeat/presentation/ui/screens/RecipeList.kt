@@ -25,7 +25,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -33,10 +32,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.whattoeat.R
 import com.example.whattoeat.presentation.ui.screens.custom_composable.FilterBottomSheet
-import com.example.whattoeat.presentation.ui.screens.custom_composable.OffsetNavigationRow
+import com.example.whattoeat.presentation.ui.screens.custom_composable.OffsetRecipeListNavigationRow
 import com.example.whattoeat.presentation.ui.screens.custom_composable.RecipeCard
 import com.example.whattoeat.presentation.ui.view_models.RecipeListPageEvent
-import com.example.whattoeat.presentation.ui.view_models.RecipeListState
+import com.example.whattoeat.presentation.ui.view_models.RecipeListModelState
 import com.example.whattoeat.presentation.ui.view_models.RecipeListViewModel
 
 @Composable
@@ -105,8 +104,8 @@ fun RecipeList(
         Spacer(Modifier.height(16.dp))
 
         if (uiState.value.isListShowing) {
-            OffsetNavigationRow(viewModel = viewModel)
-        } else if (!uiState.value.isListShowing && uiState.value.state is RecipeListState.SearchingState) {
+            OffsetRecipeListNavigationRow(viewModel = viewModel)
+        } else if (!uiState.value.isListShowing && uiState.value.modelState is RecipeListModelState.LoadingState) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -132,6 +131,7 @@ fun RecipeList(
         ) {
             items(uiState.value.recipes) { recipe ->
                 RecipeCard(
+                    navController = navController,
                     recipe = recipe,
                     viewModel = viewModel
                 )

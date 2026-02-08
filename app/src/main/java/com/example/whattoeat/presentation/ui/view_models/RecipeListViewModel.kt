@@ -34,16 +34,16 @@ enum class SearchType {
     SEARCH_BY_INGREDIENTS
 }
 
-open class RecipeListError(override val cause: Throwable?) : Throwable(cause) {
+sealed class RecipeListError(override val cause: Throwable?) : Throwable(cause) {
     data class NotEnoughArgumentsError(override val cause: Throwable?) : RecipeListError(cause)
     data class ConflictFilterError(override val cause: Throwable?) : RecipeListError(cause)
     data class SearchError(override val cause: Throwable?) : RecipeListError(cause)
 }
 
-sealed interface RecipeListState {
-    data object SearchReadyState : RecipeListState
-    data object SearchingState : RecipeListState
-    data class ErrorState(private val error: RecipeListError) : RecipeListState
+sealed interface RecipeListModelState {
+    data object DefaultState : RecipeListModelState
+    data object LoadingState : RecipeListModelState
+    data class ErrorState(val error: RecipeListError) : RecipeListModelState
 }
 
 data class RecipeListFilter(
@@ -65,7 +65,7 @@ data class RecipeListFilter(
 
 data class RecipeListModel(
     val isFilterBottomSheetVisible: Boolean = false,
-    val state: RecipeListState = RecipeListState.SearchReadyState,
+    val modelState: RecipeListModelState = RecipeListModelState.DefaultState,
     val recipes: List<Recipe.RecipeComplexExt> = listOf(),
     val searchType: SearchType = SearchType.COMPLEX_SEARCH,
     val filter: RecipeListFilter = RecipeListFilter(),
@@ -85,7 +85,7 @@ fun RecipeListModel.isDecreaseOffsetButtonEnabled() = offset >= filter.number
 
 fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
     this.copy(
-        state = RecipeListState.ErrorState(
+        modelState = RecipeListModelState.ErrorState(
             RecipeListError.SearchError(cause)
         ),
         recipes = emptyList(),
@@ -100,15 +100,15 @@ fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
 
 fun RecipeListModel.getStateAfterSearchSuccess() =
     this.copy(
-        state = RecipeListState.SearchReadyState,
+        modelState = RecipeListModelState.DefaultState,
         isErrorShowing = false,
         isSearchButtonEnabled = true,
         isListShowing = true
     )
 
-fun RecipeListModel.getStateSearchStarted() =
+fun RecipeListModel.getStateAfterSearchStarted() =
     this.copy(
-        state = RecipeListState.SearchingState,
+        modelState = RecipeListModelState.LoadingState,
         recipes = emptyList(),
         isListShowing = false,
         isSearchButtonEnabled = false,
@@ -282,7 +282,7 @@ class RecipeListViewModel @Inject constructor(
             try {
                 // 1. Обновляем состояние
                 _uiState.update { currentState ->
-                    currentState.getStateSearchStarted()
+                    currentState.getStateAfterSearchStarted()
                 }
 
                 // 2. Получаем исходные данные
@@ -342,7 +342,7 @@ class RecipeListViewModel @Inject constructor(
                     when (resourceRecipeResult) {
                         is Resource.Loading<*> ->
                             _uiState.update { currentState ->
-                                currentState.getStateSearchStarted()
+                                currentState.getStateAfterSearchStarted()
                             }
 
                         is Resource.Success<*> ->

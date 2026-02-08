@@ -7,6 +7,7 @@ import kotlinx.serialization.descriptors.PrimitiveKind
 import java.lang.reflect.Field
 import kotlin.collections.forEach
 import kotlin.reflect.KProperty
+import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
@@ -59,42 +60,38 @@ fun RecipeSearch.toQueryMap(): Map<String, String> {
     val map = mutableMapOf<String, String>()
 
     this::class.memberProperties.forEach { property ->
-        if (property.findAnnotation<IdFromPath>() != null) {
-            return@forEach
-        }
 
-        val value = property.getter.call(this)
+        if (property.findAnnotation<IdFromPath>() != null) return@forEach
 
-        if (value != null) {
-            val paramName = property.name
+        val value = property.getter.call(this) ?: return@forEach
+        val paramName = property.name
 
-            when (value) {
-                is Enum<*> -> {
-                    value as KProperty<*>
-                    val serialName = value.findAnnotation<SerialName>()
-                    if (serialName != null)
-                        map[paramName] = serialName.value
-                }
-                is List<*> -> {
-                    map[paramName] = value.joinToString(",")
-                }
-                is Boolean -> map[paramName] = value.toString()
-                is Number -> map[paramName] = value.toString()
-                is String -> map[paramName] = value
-                else -> {
-                    try {
-                        value.toString()
-                    } catch (_: Exception) {
-                        throw IllegalArgumentException("Don't known how serialize value of $value field from object ${this::class.simpleName}")
-                    }
-                }
+        when (value) {
+            is Enum<*> -> {
+                val serialName = value::class.java
+                    .getField(value.name)
+                    .getAnnotation(SerialName::class.java)
+
+                map[paramName] = serialName?.value ?: value.name
             }
+
+            is List<*> ->
+                map[paramName] = value.joinToString(",")
+
+            is Boolean, is Number, is String ->
+                map[paramName] = value.toString()
+
+            else ->
+                throw IllegalArgumentException(
+                    "Don't know how to serialize field '$paramName' from ${this::class.simpleName}"
+                )
         }
     }
 
     return map
 }
 
-@Target(AnnotationTarget.FIELD)
+
+@Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class IdFromPath
