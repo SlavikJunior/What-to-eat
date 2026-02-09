@@ -29,4 +29,15 @@
     <!--  RecipeCard  -->
     <string name="recipe_card_image_content_description">Image for recipe: %1$s</string>
     <!--  RecipeCard END -->
+
+    <!--  RecipeDetail  -->
+    <string name="instructions_section_title">Инструкция</string>
+    <string name="similar_recipes_title">Похожие рецепты</string>
+    <string name="ready_in_minutes_title">%1$d мин</string>
+    <string name="servings_title">%1$d порций</string>
+    <string name="agregate_likes_title">❤ %1$d</string>
+    <string name="health_title">Health %1$d</string>
+    <string name="score_title">Score %1$d</string>
+    <string name="error_state_label">Ошибка загрузки рецепта</string>
+    <!--  RecipeDetail END  -->
 </resources>

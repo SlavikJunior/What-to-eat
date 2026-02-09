@@ -1,5 +1,6 @@
 package com.example.whattoeat.presentation.ui.view_models
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.domain.domain_entities.common.Recipe.*
@@ -34,24 +35,14 @@ data class RecipeDetailModel(
     val modelState: RecipeDetailModelState = DefaultState,
     val recipe: RecipeFullInformationExt? = null,
     val similarRecipes: List<RecipeSimilarExt> = listOf(),
-    val offset: Int = 0,
     val totalResults: Int = 0,
     val countOfSimilar: Int = 5
 )
 
-fun RecipeDetailModel.numberOfCurrentPage() = (offset / countOfSimilar) + 1
-fun RecipeDetailModel.isIncreaseOffsetButtonEnabled() = offset < totalResults
-
-fun RecipeDetailModel.isDecreaseOffsetButtonEnabled() = offset >= countOfSimilar
-
 sealed interface RecipeDetailPageEvent {
     data class LoadRecipe(val recipeId: Int) : RecipeDetailPageEvent
-    data class FavoriteSimilarRecipeChange(val recipe: RecipeSimilarExt) :
-        RecipeDetailPageEvent
-
+    data class FavoriteSimilarRecipeChange(val recipe: RecipeSimilarExt) : RecipeDetailPageEvent
     data object FavoriteCurrentRecipeChange : RecipeDetailPageEvent
-    data object IncreaseOffsetChange : RecipeDetailPageEvent
-    data object DecreaseOffsetChange : RecipeDetailPageEvent
 }
 
 @HiltViewModel
@@ -70,16 +61,18 @@ class RecipeDetailViewModel @Inject constructor(
             is RecipeDetailPageEvent.LoadRecipe -> onLoadRecipe(event)
             is RecipeDetailPageEvent.FavoriteCurrentRecipeChange -> onToggleCurrentFavorite()
             is RecipeDetailPageEvent.FavoriteSimilarRecipeChange -> onToggleSimilarFavorite(event)
-            is RecipeDetailPageEvent.IncreaseOffsetChange -> onIncreaseSimilarOffset()
-            is RecipeDetailPageEvent.DecreaseOffsetChange -> onDecreaseSimilarOffset()
         }
 
     private fun onLoadRecipe(event: RecipeDetailPageEvent.LoadRecipe) {
+        Log.d(TAG, "Loading recipe with id: ${event.recipeId}")
+
         viewModelScope.launch {
             _uiState.update { it.copy(modelState = LoadingState) }
 
             getRecipesUseCase(RecipeSearch.RecipeFullInformationSearch(id = event.recipeId))
                 .collectLatest { resource ->
+                    Log.d(TAG, "Collected resource: $resource")
+
                     when (resource) {
                         is Resource.Success -> {
                             val result = resource.data as? RecipeResult.RecipeFullInformationResult
@@ -95,6 +88,8 @@ class RecipeDetailViewModel @Inject constructor(
                                         modelState = DefaultState
                                     )
                                 }
+
+                                Log.d(TAG, "Loading similar for recipe: ${ext.recipe.title}")
                                 loadSimilarRecipes(event.recipeId)
                             }
                         }
@@ -122,9 +117,13 @@ class RecipeDetailViewModel @Inject constructor(
     }
 
     private fun loadSimilarRecipes(recipeId: Int) {
+        Log.d(TAG, "Loading similar for recipe with id: $recipeId")
+
         viewModelScope.launch {
             getRecipesUseCase(RecipeSearch.RecipeSimilarSearch(id = recipeId, number = _uiState.value.countOfSimilar))
                 .collectLatest { resource ->
+                    Log.d(TAG, "Collected: $resource")
+
                     if (resource is Resource.Success) {
                         val similarResult = resource.data as? RecipeResult.RecipeSimilarResult
                         val similarList = similarResult?.recipeSimilarResult?.map {
@@ -166,12 +165,6 @@ class RecipeDetailViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    private fun onIncreaseSimilarOffset() { /* пока заглушка, если нужна пагинация похожих */
-    }
-
-    private fun onDecreaseSimilarOffset() { /* пока заглушка */
     }
 
     companion object {

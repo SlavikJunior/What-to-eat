@@ -1,26 +1,47 @@
 package com.example.whattoeat.presentation.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,17 +50,12 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domain_entities.support.AnalyzedInstruction
+import com.example.whattoeat.domain.domain_entities.support.Step
 import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
-import com.example.whattoeat.presentation.ui.screens.custom_composable.OffsetRecipeListNavigationRow
-import com.example.whattoeat.presentation.ui.screens.custom_composable.SimilarRecipeCard
 import com.example.whattoeat.presentation.ui.view_models.RecipeDetailModelState
 import com.example.whattoeat.presentation.ui.view_models.RecipeDetailPageEvent
 import com.example.whattoeat.presentation.ui.view_models.RecipeDetailViewModel
-import com.example.whattoeat.presentation.ui.view_models.RecipeListPageEvent
-import com.example.whattoeat.presentation.ui.view_models.RecipeListViewModel
-import com.example.whattoeat.presentation.ui.view_models.isDecreaseOffsetButtonEnabled
-import com.example.whattoeat.presentation.ui.view_models.isIncreaseOffsetButtonEnabled
-import com.example.whattoeat.presentation.ui.view_models.numberOfCurrentPage
 import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,119 +63,75 @@ import com.valentinilk.shimmer.shimmer
 fun RecipeDetail(
     navController: NavHostController,
     dataObject: RecipeDetailDataObject,
+    paddingValues: PaddingValues,
     viewModel: RecipeDetailViewModel = hiltViewModel()
 ) {
     val uiState = viewModel.uiState.collectAsState().value
-    val recipe = uiState.recipe?.recipe
-    val isFavorite = uiState.recipe?.isFavorite ?: false
+    val recipe = uiState.recipe
 
     LaunchedEffect(Unit) {
         viewModel.reduce(RecipeDetailPageEvent.LoadRecipe(dataObject.recipeId))
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Рецепт") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, "Назад")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.reduce(RecipeDetailPageEvent.FavoriteCurrentRecipeChange) }) {
-                        Icon(
-                            if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "Избранное",
-                            tint = if (isFavorite) MaterialTheme.colorScheme.primary else LocalContentColor.current
+    when (uiState.modelState) {
+        RecipeDetailModelState.LoadingState -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        RecipeDetailModelState.DefaultState -> {
+            recipe?.let {
+                RecipeDetailContent(
+                    recipe = it.recipe,
+                    similarRecipes = uiState.similarRecipes,
+                    padding = paddingValues,
+                    onSimilarClick = { id ->
+                        navController.navigate(RecipeDetailDataObject(id))
+                    },
+                    onSimilarFavorite = {
+                        viewModel.reduce(
+                            RecipeDetailPageEvent.FavoriteSimilarRecipeChange(it)
                         )
                     }
-                }
-            )
-        }
-    ) { padding ->
-        when (uiState.modelState) {
-            RecipeDetailModelState.LoadingState -> LoadingContent(padding)
-            RecipeDetailModelState.DefaultState -> {
-                if (recipe != null) {
-                    Content(
-                        recipe = recipe,
-                        isFavorite = isFavorite,
-                        similarRecipes = uiState.similarRecipes,
-                        paddingValues = padding,
-                        onSimilarRecipeClick = { similarId ->
-                            navController.navigate(RecipeDetailDataObject(similarId))
-                        },
-                        onSimilarFavoriteClick = { similar ->
-                            viewModel.reduce(RecipeDetailPageEvent.FavoriteSimilarRecipeChange(similar))
-                        },
-                        viewModel = viewModel
-                    )
-                }
+                )
             }
-            is RecipeDetailModelState.ErrorState -> ErrorContent(padding, "Error state :/")
         }
-    }
-}
-@Composable
-private fun LoadingContent(padding: PaddingValues) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
 
-@Composable
-private fun ErrorContent(padding: PaddingValues, message: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_error),
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.error
-            )
-            Text(
-                text = message,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.error
-            )
+        is RecipeDetailModelState.ErrorState -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = stringResource(R.string.error_state_label))
+            }
         }
     }
 }
 
 @Composable
-private fun Content(
+private fun RecipeDetailContent(
     recipe: Recipe.RecipeFullInformation,
-    isFavorite: Boolean,
     similarRecipes: List<Recipe.RecipeSimilarExt>,
-    paddingValues: PaddingValues,
-    onSimilarRecipeClick: (Int) -> Unit,
-    onSimilarFavoriteClick: (Recipe.RecipeSimilarExt) -> Unit,
-    viewModel: RecipeDetailViewModel
+    padding: PaddingValues,
+    onSimilarClick: (Int) -> Unit,
+    onSimilarFavorite: (Recipe.RecipeSimilarExt) -> Unit
 ) {
-    var imageLoaded by remember { mutableStateOf(false) }
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues),
+            .padding(padding),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Фото
+
         item {
             AsyncImage(
                 model = recipe.image,
@@ -169,256 +141,156 @@ private fun Content(
                     .fillMaxWidth()
                     .height(260.dp)
                     .clip(RoundedCornerShape(20.dp))
-                    .then(if (!imageLoaded) Modifier.shimmer() else Modifier),
-                onSuccess = { imageLoaded = true }
             )
         }
 
-        // Заголовок
         item {
             Text(
-                text = recipe.title,
+                recipe.title,
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                lineHeight = 32.sp
+                fontWeight = FontWeight.Bold
             )
         }
 
-        // Метрики
         item {
             FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                RecipeChip(painterResource(R.drawable.ic_timer), "${recipe.readyInMinutes} мин")
-                RecipeChip(painterResource(R.drawable.ic_people), "${recipe.servings} порций")
-                RecipeChip(Icons.Default.Favorite, "${recipe.aggregateLikes}", MaterialTheme.colorScheme.primary)
-                if (recipe.healthScore > 0) {
-                    RecipeChip(painterResource(R.drawable.ic_heart), "Здоровье: ${recipe.healthScore.toInt()}", MaterialTheme.colorScheme.tertiary)
-                }
+                Chip(stringResource(R.string.ready_in_minutes_title, recipe.readyInMinutes))
+                Chip(stringResource(R.string.servings_title, recipe.servings))
+                Chip(stringResource(R.string.agregate_likes_title, recipe.aggregateLikes))
+                Chip(stringResource(R.string.health_title, recipe.healthScore.toInt()))
+                Chip(stringResource(R.string.score_title, recipe.spoonacularScore.toInt()))
             }
         }
 
-        item { HorizontalDivider() }
-
-        // Особенности
-        if (recipe.vegetarian || recipe.vegan || recipe.glutenFree || recipe.dairyFree || recipe.veryHealthy) {
-            item {
-                Text("Особенности", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(8.dp))
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    if (recipe.vegetarian) DietChip("Вегетарианское")
-                    if (recipe.vegan) DietChip("Веганское")
-                    if (recipe.glutenFree) DietChip("Без глютена")
-                    if (recipe.dairyFree) DietChip("Без лактозы")
-                    if (recipe.veryHealthy) DietChip("Очень полезно")
-                }
-            }
-        }
-
-        // Описание
         item {
-            Text("Описание", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(8.dp))
             Text(
-                text = recipe.summary.replace(Regex("<[^>]*>"), ""),
+                recipe.summary.replace(Regex("<[^>]*>"), ""),
                 style = MaterialTheme.typography.bodyLarge,
                 lineHeight = 24.sp
             )
         }
 
-        // === ПОХОЖИЕ РЕЦЕПТЫ ===
         item {
-            SimilarRecipesSection(
-                similarRecipes = similarRecipes,
-                viewModel = viewModel,
-                onSimilarRecipeClick = onSimilarRecipeClick,
-                onSimilarFavoriteClick = onSimilarFavoriteClick
+            InstructionsSection(
+                analyzedInstructions = recipe.analyzedInstructions,
+                fallbackText = recipe.instructions
             )
         }
 
-        item { Spacer(Modifier.height(80.dp)) }
+        if (similarRecipes.isNotEmpty()) {
+            item {
+                Text(
+                    text = stringResource(R.string.similar_recipes_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(similarRecipes) { similar ->
+                        SimilarRecipeCard(
+                            recipe = similar,
+                            onClick = { onSimilarClick(similar.id) },
+                            onFavoriteClick = { onSimilarFavorite(similar) }
+                        )
+                    }
+                }
+            }
+        }
+
+        item { Spacer(Modifier.height(60.dp)) }
     }
 }
 
 @Composable
-private fun SimilarRecipesSection(
-    similarRecipes: List<Recipe.RecipeSimilarExt>,
-    viewModel: RecipeDetailViewModel,
-    onSimilarRecipeClick: (Int) -> Unit,
-    onSimilarFavoriteClick: (Recipe.RecipeSimilarExt) -> Unit
+private fun InstructionsSection(
+    analyzedInstructions: List<AnalyzedInstruction>,
+    fallbackText: String
 ) {
+    Text(
+        text = stringResource(R.string.instructions_section_title),
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold
+    )
+
+    Spacer(Modifier.height(12.dp))
+
+    if (analyzedInstructions.isNotEmpty()) {
+        analyzedInstructions.forEach { block ->
+            if (block.name.isNotBlank()) {
+                Text(
+                    block.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
+            block.steps.forEach { step ->
+                StepItem(step)
+                Spacer(Modifier.height(12.dp))
+            }
+        }
+    } else {
+        Text(
+            fallbackText,
+            style = MaterialTheme.typography.bodyLarge,
+            lineHeight = 24.sp
+        )
+    }
+}
+
+@Composable
+private fun StepItem(step: Step) {
     Column {
-        Text(
-            text = "Похожие рецепты",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        // Кнопки навигации (как в RecipeList)
-        OffsetRecipeDetailNavigationRow(viewModel = viewModel)   // можно потом сделать отдельную для similar
-
-        Spacer(Modifier.height(12.dp))
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp)
-        ) {
-            items(items = similarRecipes) { similar ->
-                SimilarRecipeCard(
-                    recipe = similar,
-                    onClick = { onSimilarRecipeClick(similar.id) },
-                    onFavoriteClick = { onSimilarFavoriteClick(similar) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun OffsetRecipeDetailNavigationRow(
-    viewModel: RecipeDetailViewModel
-) {
-    val uiState = viewModel.uiState.collectAsState()
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        // Кнопка назад
-        IconButton(
-            onClick = {
-                viewModel.reduce(RecipeDetailPageEvent.DecreaseOffsetChange)
-            },
-            enabled = uiState.value.isDecreaseOffsetButtonEnabled()
-        ) {
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowUp,
-                contentDescription = stringResource(R.string.previous_page)
-            )
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(verticalAlignment = Alignment.Top) {
             Surface(
-                modifier = Modifier.size(24.dp),
-                shape = RoundedCornerShape(4.dp),
-                shadowElevation = 4.dp
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(32.dp)
             ) {
-                Text(
-                    text = uiState.value.numberOfCurrentPage().toString(),
-                    textAlign = TextAlign.Center
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Text(step.number.toString(), fontWeight = FontWeight.Bold)
+                }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(Modifier.width(12.dp))
 
-            Surface(
-                modifier = Modifier.size(24.dp),
-                shape = RoundedCornerShape(4.dp),
-                shadowElevation = 4.dp
-            ) {
-                Text(
-                    text = uiState.value.totalResults.toString()
-                )
-            }
+            Text(
+                step.step,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
 
-        // Кнопка вперед
-        IconButton(
-            onClick = {
-                viewModel.reduce(RecipeDetailPageEvent.IncreaseOffsetChange)
-            },
-            enabled = uiState.value.isIncreaseOffsetButtonEnabled()
-        ) {
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = stringResource(R.string.next_page)
-            )
+        if (step.ingredients.isNotEmpty()) {
+            Spacer(Modifier.height(6.dp))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                step.ingredients.forEach {
+                    Chip(it.name)
+                }
+            }
         }
     }
 }
 
-
 @Composable
-private fun RecipeChip(
-    painter: Painter,
-    text: String,
-    tint: Color = LocalContentColor.current
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                shape = RoundedCornerShape(20.dp)
-            )
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Icon(
-            painter = painter,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = tint
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun RecipeChip(
-    imageVector: ImageVector,
-    text: String,
-    tint: Color = LocalContentColor.current
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                shape = RoundedCornerShape(20.dp)
-            )
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Icon(
-            imageVector = imageVector,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = tint
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun DietChip(text: String) {
+private fun Chip(text: String) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Text(
-            text = text,
+            text,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             style = MaterialTheme.typography.labelMedium
         )
@@ -437,11 +309,10 @@ fun SimilarRecipeCard(
     Card(
         onClick = onClick,
         modifier = modifier
-            .width(164.dp)
-            .height(210.dp)
+            .width(160.dp)
+            .height(200.dp)
             .then(if (!imageLoaded) Modifier.shimmer() else Modifier),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(6.dp)
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column {
             AsyncImage(
@@ -450,14 +321,14 @@ fun SimilarRecipeCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(130.dp),
+                    .height(120.dp),
                 onSuccess = { imageLoaded = true }
             )
 
             Column(
                 modifier = Modifier
                     .padding(12.dp)
-                    .fillMaxWidth(),
+                    .weight(1f),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
