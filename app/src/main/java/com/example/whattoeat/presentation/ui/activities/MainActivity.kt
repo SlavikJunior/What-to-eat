@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
                     contentWindowInsets = WindowInsets.Companion.systemBars,
                     topBar = { WhatToEatTopAppBar(navController = navController) },
                     bottomBar = { WhatToEatBottomAppBar(navController = navController) },
-                    modifier = Modifier.Companion.fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                 ) { paddingValues ->
                     WhatToEatNavHost(navController = navController, paddingValues = paddingValues)
                 }
