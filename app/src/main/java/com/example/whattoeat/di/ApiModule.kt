@@ -15,6 +15,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import okio.Buffer
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -29,7 +30,7 @@ object ApiModule {
     fun provideTranslateApiRetrofit(
         @YandexTranslateJson json: Json,
         @YandexTranslateOkHttpClient client: OkHttpClient
-    ) =
+    ): Retrofit =
         Retrofit.Builder()
             .baseUrl("https://translate.api.cloud.yandex.net")
             .client(client)
@@ -71,7 +72,7 @@ object ApiModule {
                 Log.d("TEST TAG", "Headers: ${newRequest.headers}")
 
                 if (newRequest.body != null) {
-                    val buffer = okio.Buffer()
+                    val buffer = Buffer()
                     newRequest.body!!.writeTo(buffer)
                     Log.d("TEST TAG", "Request Body: ${buffer.readUtf8()}")
                 }
