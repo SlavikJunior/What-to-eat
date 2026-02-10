@@ -12,13 +12,6 @@ sealed interface BottomNavItem {
     val isStarted: Boolean
     val index: Int
     val route: Any
-
-    fun getRouteString(): String = when (route) {
-        is RecipeListDataObject -> "RecipeListDataObject"
-        is FavoriteRecipesDataObject -> "FavoriteRecipesDataObject"
-        is UsersRecipesDataObject -> "UsersRecipesDataObject"
-        else -> route.toString()
-    }
 }
 
 data object RecipeListBottomNavItem : BottomNavItem {
