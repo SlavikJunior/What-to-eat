@@ -73,7 +73,7 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.icons)
-    implementation(libs.compose.navigation)
+    implementation(libs.androidx.navigation3.runtime)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines)
     implementation(libs.jsoup)

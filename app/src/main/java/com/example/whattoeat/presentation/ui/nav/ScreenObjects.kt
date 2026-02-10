@@ -11,3 +11,6 @@ value class RecipeDetailDataObject(val recipeId: Int)
 
 @Serializable
 data object FavoriteRecipesDataObject
+
+@Serializable
+data object UsersRecipesDataObject

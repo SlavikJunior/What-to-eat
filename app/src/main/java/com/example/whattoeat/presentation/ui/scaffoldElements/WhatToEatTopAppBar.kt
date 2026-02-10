@@ -1,4 +1,4 @@
-package com.example.whattoeat.presentation.ui.bars
+package com.example.whattoeat.presentation.ui.scaffoldElements
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -14,7 +14,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.whattoeat.R
+import com.example.whattoeat.presentation.ui.nav.FavoriteRecipesDataObject
 import com.example.whattoeat.presentation.ui.nav.RecipeListDataObject
+import com.example.whattoeat.presentation.ui.nav.UsersRecipesDataObject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,10 +27,11 @@ fun WhatToEatTopAppBar(
 
     val currentRoute = backStackEntry?.destination?.route.orEmpty()
 
-    val isRecipeList = currentRoute.contains(
-        other = RecipeListDataObject::class.java.simpleName,
-        ignoreCase = true
-    )
+    val isBottomNavRoot = listOf(
+        RecipeListDataObject::class.java.simpleName,
+        FavoriteRecipesDataObject::class.java.simpleName,
+        UsersRecipesDataObject::class.java.simpleName
+    ).any { currentRoute.contains(it, ignoreCase = true) }
 
     CenterAlignedTopAppBar(
         title = {
@@ -38,7 +41,7 @@ fun WhatToEatTopAppBar(
             )
         },
         navigationIcon = {
-            if (!isRecipeList) {
+            if (!isBottomNavRoot) {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,

@@ -1,5 +1,6 @@
 package com.example.whattoeat.presentation.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -55,6 +57,7 @@ import com.example.whattoeat.R
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
 import com.example.whattoeat.presentation.ui.screens.custom_composable.FilterBottomSheet
+import com.example.whattoeat.presentation.ui.theme.Black
 import com.example.whattoeat.presentation.ui.view_models.RecipeListModelState
 import com.example.whattoeat.presentation.ui.view_models.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.view_models.RecipeListViewModel
@@ -63,6 +66,7 @@ import com.example.whattoeat.presentation.ui.view_models.isIncreaseOffsetButtonE
 import com.example.whattoeat.presentation.ui.view_models.numberOfCurrentPage
 import com.valentinilk.shimmer.shimmer
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeList(
     navController: NavHostController,
@@ -104,7 +108,7 @@ fun RecipeList(
             label = {
                 Text(stringResource(R.string.query_text_field_label))
             },
-            value = uiState.value.filter.query ?: "",
+            value = uiState.value.filter.query.orEmpty(),
             singleLine = true,
             onValueChange = {
                 viewModel.reduce(
@@ -116,6 +120,10 @@ fun RecipeList(
         Spacer(Modifier.height(12.dp))
 
         OutlinedButton(
+            border = BorderStroke(
+                width = 1.5.dp,
+                color = Black
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
