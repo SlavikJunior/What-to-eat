@@ -25,3 +25,19 @@ annotation class SpoonacularJson
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class YandexTranslateJson
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class IoDispatcher
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class MainDispatcher
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class UnconfinedDispatcher
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class DefaultDispatcher

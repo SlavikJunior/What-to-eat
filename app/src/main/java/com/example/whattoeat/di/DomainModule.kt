@@ -17,6 +17,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import kotlinx.coroutines.Dispatchers
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -73,4 +74,20 @@ object DomainModule {
         GetUsersRecipesUseCase(
             repository = repository
         )
+
+    @Provides
+    @IoDispatcher
+    fun providesIoDispatcher() = Dispatchers.IO
+
+    @Provides
+    @MainDispatcher
+    fun providesMainDispatcher() = Dispatchers.Main
+
+    @Provides
+    @UnconfinedDispatcher
+    fun providesUnconfinedDispatcher() = Dispatchers.Unconfined
+
+    @Provides
+    @DefaultDispatcher
+    fun providesDefaultDispatcher() = Dispatchers.Default
 }
