@@ -1,8 +1,9 @@
-package com.example.whattoeat.presentation.ui.view_models
+package com.example.whattoeat.presentation.ui.viewModels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.whattoeat.di.IoDispatcher
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.common.RecipeResult
 import com.example.whattoeat.domain.domain_entities.common.Resource
@@ -18,14 +19,12 @@ import com.example.whattoeat.domain.use_cases.IsFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.TranslateTextUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.jvm.Throws
 
@@ -63,7 +62,7 @@ data class RecipeListFilter(
     val ignorePantry: Boolean = true // Игнорировать обычные продукты, такие как вода, соль...
 )
 
-data class RecipeListModel(
+internal data class RecipeListModel(
     val isFilterBottomSheetVisible: Boolean = false,
     val modelState: RecipeListModelState = RecipeListModelState.DefaultState,
     val recipes: List<Recipe.RecipeComplexExt> = listOf(),
@@ -77,13 +76,13 @@ data class RecipeListModel(
     val countOfRecipesOnPage: Int = 5, // отображаемое количество, часто = filter.number, но может быть меньше, если с бека пришло мало рецептов
 )
 
-fun RecipeListModel.numberOfCurrentPage() = (offset / filter.number) + 1
+internal fun RecipeListModel.numberOfCurrentPage() = (offset / filter.number) + 1
 
-fun RecipeListModel.isIncreaseOffsetButtonEnabled() = offset < totalResults
+internal fun RecipeListModel.isIncreaseOffsetButtonEnabled() = offset < totalResults
 
-fun RecipeListModel.isDecreaseOffsetButtonEnabled() = offset >= filter.number
+internal fun RecipeListModel.isDecreaseOffsetButtonEnabled() = offset >= filter.number
 
-fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
+internal fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
     this.copy(
         modelState = RecipeListModelState.ErrorState(
             RecipeListError.SearchError(cause)
@@ -98,7 +97,7 @@ fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
         offset = 0
     )
 
-fun RecipeListModel.getStateAfterSearchSuccess() =
+internal fun RecipeListModel.getStateAfterSearchSuccess() =
     this.copy(
         modelState = RecipeListModelState.DefaultState,
         isErrorShowing = false,
@@ -106,7 +105,7 @@ fun RecipeListModel.getStateAfterSearchSuccess() =
         isListShowing = true
     )
 
-fun RecipeListModel.getStateAfterSearchStarted() =
+internal fun RecipeListModel.getStateAfterSearchStarted() =
     this.copy(
         modelState = RecipeListModelState.LoadingState,
         recipes = emptyList(),
@@ -143,15 +142,17 @@ sealed interface RecipeListPageEvent {
 
 @HiltViewModel
 class RecipeListViewModel @Inject constructor(
-    private val getRecipesUseCase: GetRecipesUseCase,
-    private val isFavoriteRecipeUseCase: IsFavoriteRecipeUseCase,
-    private val addFavoriteRecipesUseCase: AddFavoriteRecipeUseCase,
-    private val removeFavoriteRecipeUseCase: RemoveFavoriteRecipeUseCase,
-    private val translateTextUseCase: TranslateTextUseCase
+    @IoDispatcher
+    private val ioDispatcher: CoroutineDispatcher,
+    private val getRecipes: GetRecipesUseCase,
+    private val isFavoriteRecipe: IsFavoriteRecipeUseCase,
+    private val addFavoriteRecipe: AddFavoriteRecipeUseCase,
+    private val removeFavoriteRecipe: RemoveFavoriteRecipeUseCase,
+    private val translateText: TranslateTextUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecipeListModel())
-    val uiState = _uiState.asStateFlow()
+    internal val uiState = _uiState.asStateFlow()
 
     fun reduce(event: RecipeListPageEvent) =
         when (event) {
@@ -201,14 +202,11 @@ class RecipeListViewModel @Inject constructor(
     private fun onChangeFavoriteRecipe(event: RecipeListPageEvent.FavoriteRecipeChange) {
         val recipe = event.recipe
 
-        var isFavorite: Boolean
         viewModelScope.launch {
-            isFavorite = async {
-                isFavoriteRecipeUseCase(recipe)
-            }.await()
+            val isFavorite = isFavoriteRecipe(recipe)
 
-            if (isFavorite) removeFavoriteRecipeUseCase(recipe)
-            else addFavoriteRecipesUseCase(recipe)
+            if (isFavorite) removeFavoriteRecipe(recipe)
+            else addFavoriteRecipe(recipe)
 
             val updatedRecipes = _uiState.value.recipes.map { tempRecipe ->
                 if (tempRecipe == recipe)
@@ -217,12 +215,8 @@ class RecipeListViewModel @Inject constructor(
                     tempRecipe
             }
 
-            withContext(Dispatchers.Main) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        recipes = updatedRecipes
-                    )
-                }
+            _uiState.update { currentState ->
+                currentState.copy(recipes = updatedRecipes)
             }
         }
     }
@@ -280,22 +274,18 @@ class RecipeListViewModel @Inject constructor(
     private fun onClickSearchButton() {
         viewModelScope.launch {
             try {
-                // 1. Обновляем состояние
                 _uiState.update { currentState ->
                     currentState.getStateAfterSearchStarted()
                 }
 
-                // 2. Получаем исходные данные
                 val originalQuery = _uiState.value.filter.query ?: ""
                 val originalIncluded = _uiState.value.filter.includedProducts ?: ""
                 val originalExcluded = _uiState.value.filter.excludedProducts ?: ""
 
-                // 3. Выполняем перевод (ОЖИДАЕМ завершения!)
-                val translated = translateTextUseCase(
+                val translated = translateText(
                     input = listOf(originalQuery, originalIncluded, originalExcluded)
                 )
 
-                // 4. Обновляем фильтр с переведенным текстом
                 if (translated.size >= 3) {
                     _uiState.update { currentState ->
                         currentState.copy(
@@ -309,11 +299,9 @@ class RecipeListViewModel @Inject constructor(
                     Log.d(TAG, "Search with translated query: ${translated[0]}")
                 }
 
-                // 5. Создаем RecipeSearch с ОБНОВЛЕННЫМИ данными
                 val recipeSearch = combineRecipeSearchByDataFromUi()
                 Log.d(TAG, "Search after translation: $recipeSearch")
 
-                // 6. Выполняем поиск
                 searchRecipes(recipeSearch)
 
             } catch (e: RecipeListError.NotEnoughArgumentsError) {
@@ -332,7 +320,7 @@ class RecipeListViewModel @Inject constructor(
     }
     private suspend fun searchRecipes(recipeSearch: RecipeSearch) {
         try {
-            getRecipesUseCase(recipeSearch)
+            getRecipes(recipeSearch)
                 .collectLatest { resourceRecipeResult ->
                     Log.d(
                         TAG,
@@ -354,7 +342,7 @@ class RecipeListViewModel @Inject constructor(
                                         recipes = currentState.recipes + recipeComplexResult.recipeComplexList.map {
                                             Recipe.RecipeComplexExt(
                                                 recipe = it,
-                                                isFavorite = isFavoriteRecipeUseCase(it)
+                                                isFavorite = isFavoriteRecipe(it)
                                             )
                                         },
                                         isListShowing = true,

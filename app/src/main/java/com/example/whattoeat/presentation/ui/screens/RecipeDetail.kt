@@ -53,9 +53,9 @@ import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.support.AnalyzedInstruction
 import com.example.whattoeat.domain.domain_entities.support.Step
 import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
-import com.example.whattoeat.presentation.ui.view_models.RecipeDetailModelState
-import com.example.whattoeat.presentation.ui.view_models.RecipeDetailPageEvent
-import com.example.whattoeat.presentation.ui.view_models.RecipeDetailViewModel
+import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailModelState
+import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailPageEvent
+import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailViewModel
 import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)

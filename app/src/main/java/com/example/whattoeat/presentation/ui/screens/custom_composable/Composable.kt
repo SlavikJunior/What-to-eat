@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.whattoeat.R
-import com.example.whattoeat.presentation.ui.view_models.RecipeListPageEvent
-import com.example.whattoeat.presentation.ui.view_models.RecipeListViewModel
+import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
+import com.example.whattoeat.presentation.ui.viewModels.RecipeListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
