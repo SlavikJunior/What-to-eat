@@ -1,8 +1,9 @@
-package com.example.whattoeat.presentation.ui.view_models
+package com.example.whattoeat.presentation.ui.viewModels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.whattoeat.di.IoDispatcher
 import com.example.whattoeat.domain.domain_entities.common.Recipe.*
 import com.example.whattoeat.domain.domain_entities.common.RecipeResult
 import com.example.whattoeat.domain.domain_entities.common.Resource
@@ -11,9 +12,10 @@ import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
 import com.example.whattoeat.domain.use_cases.IsFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
-import com.example.whattoeat.presentation.ui.view_models.RecipeDetailError.*
-import com.example.whattoeat.presentation.ui.view_models.RecipeDetailModelState.*
+import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailError.*
+import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailModelState.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -47,10 +49,12 @@ sealed interface RecipeDetailPageEvent {
 
 @HiltViewModel
 class RecipeDetailViewModel @Inject constructor(
-    private val getRecipesUseCase: GetRecipesUseCase,
-    private val isFavoriteRecipeUseCase: IsFavoriteRecipeUseCase,
-    private val addFavoriteRecipeUseCase: AddFavoriteRecipeUseCase,
-    private val removeFavoriteRecipeUseCase: RemoveFavoriteRecipeUseCase
+    @IoDispatcher
+    private val ioDispatcher: CoroutineDispatcher,
+    private val getRecipes: GetRecipesUseCase,
+    private val isFavoriteRecipe: IsFavoriteRecipeUseCase,
+    private val addFavoriteRecipe: AddFavoriteRecipeUseCase,
+    private val removeFavoriteRecipe: RemoveFavoriteRecipeUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecipeDetailModel())
@@ -69,7 +73,7 @@ class RecipeDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(modelState = LoadingState) }
 
-            getRecipesUseCase(RecipeSearch.RecipeFullInformationSearch(id = event.recipeId))
+            getRecipes(RecipeSearch.RecipeFullInformationSearch(id = event.recipeId))
                 .collectLatest { resource ->
                     Log.d(TAG, "Collected resource: $resource")
 
@@ -80,7 +84,7 @@ class RecipeDetailViewModel @Inject constructor(
                             if (recipe != null) {
                                 val ext = RecipeFullInformationExt(
                                     recipe = recipe,
-                                    isFavorite = isFavoriteRecipeUseCase(recipe)
+                                    isFavorite = isFavoriteRecipe(recipe)
                                 )
                                 _uiState.update {
                                     it.copy(
@@ -120,7 +124,7 @@ class RecipeDetailViewModel @Inject constructor(
         Log.d(TAG, "Loading similar for recipe with id: $recipeId")
 
         viewModelScope.launch {
-            getRecipesUseCase(RecipeSearch.RecipeSimilarSearch(id = recipeId, number = _uiState.value.countOfSimilar))
+            getRecipes(RecipeSearch.RecipeSimilarSearch(id = recipeId, number = _uiState.value.countOfSimilar))
                 .collectLatest { resource ->
                     Log.d(TAG, "Collected: $resource")
 
@@ -129,7 +133,7 @@ class RecipeDetailViewModel @Inject constructor(
                         val similarList = similarResult?.recipeSimilarResult?.map {
                             RecipeSimilarExt(
                                 recipe = it,
-                                isFavorite = isFavoriteRecipeUseCase(it)
+                                isFavorite = isFavoriteRecipe(it)
                             )
                         } ?: emptyList()
 
@@ -142,8 +146,8 @@ class RecipeDetailViewModel @Inject constructor(
     private fun onToggleCurrentFavorite() {
         val current = _uiState.value.recipe ?: return
         viewModelScope.launch {
-            if (current.isFavorite) removeFavoriteRecipeUseCase(current.recipe)
-            else addFavoriteRecipeUseCase(current.recipe)
+            if (current.isFavorite) removeFavoriteRecipe(current.recipe)
+            else addFavoriteRecipe(current.recipe)
 
             _uiState.update {
                 it.copy(recipe = it.recipe?.copy(isFavorite = !current.isFavorite))
@@ -154,8 +158,8 @@ class RecipeDetailViewModel @Inject constructor(
     private fun onToggleSimilarFavorite(event: RecipeDetailPageEvent.FavoriteSimilarRecipeChange) {
         val recipe = event.recipe
         viewModelScope.launch {
-            if (recipe.isFavorite) removeFavoriteRecipeUseCase(recipe.recipe)
-            else addFavoriteRecipeUseCase(recipe.recipe)
+            if (recipe.isFavorite) removeFavoriteRecipe(recipe.recipe)
+            else addFavoriteRecipe(recipe.recipe)
 
             _uiState.update { state ->
                 state.copy(

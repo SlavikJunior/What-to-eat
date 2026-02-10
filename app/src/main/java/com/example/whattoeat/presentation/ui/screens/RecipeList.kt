@@ -58,12 +58,12 @@ import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
 import com.example.whattoeat.presentation.ui.screens.custom_composable.FilterBottomSheet
 import com.example.whattoeat.presentation.ui.theme.Black
-import com.example.whattoeat.presentation.ui.view_models.RecipeListModelState
-import com.example.whattoeat.presentation.ui.view_models.RecipeListPageEvent
-import com.example.whattoeat.presentation.ui.view_models.RecipeListViewModel
-import com.example.whattoeat.presentation.ui.view_models.isDecreaseOffsetButtonEnabled
-import com.example.whattoeat.presentation.ui.view_models.isIncreaseOffsetButtonEnabled
-import com.example.whattoeat.presentation.ui.view_models.numberOfCurrentPage
+import com.example.whattoeat.presentation.ui.viewModels.RecipeListModelState
+import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
+import com.example.whattoeat.presentation.ui.viewModels.RecipeListViewModel
+import com.example.whattoeat.presentation.ui.viewModels.isDecreaseOffsetButtonEnabled
+import com.example.whattoeat.presentation.ui.viewModels.isIncreaseOffsetButtonEnabled
+import com.example.whattoeat.presentation.ui.viewModels.numberOfCurrentPage
 import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
