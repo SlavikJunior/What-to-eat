@@ -1,6 +1,7 @@
 package com.example.whattoeat.presentation.ui.nav
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -14,14 +15,19 @@ import com.example.whattoeat.presentation.ui.screens.UsersRecipes
 @Composable
 fun WhatToEatNavHost(
     navController: NavHostController,
-    paddingValues: PaddingValues = PaddingValues()
+    paddingValues: PaddingValues = PaddingValues(),
+    snackbarHostState: SnackbarHostState
 ) {
     NavHost(
         navController = navController,
         startDestination = RecipeListDataObject
     ) {
         composable<RecipeListDataObject> { navBackStackEntry ->
-            RecipeList(navController = navController, paddingValues = paddingValues)
+            RecipeList(
+                navController = navController,
+                snackbarHostState = snackbarHostState,
+                paddingValues = paddingValues
+            )
         }
         composable<RecipeDetailDataObject> { navBackStackEntry ->
             val dataObject: RecipeDetailDataObject = navBackStackEntry.toRoute<RecipeDetailDataObject>()

@@ -20,6 +20,7 @@ import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
 import com.example.whattoeat.domain.use_cases.TranslateTextUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -68,7 +69,10 @@ internal data class RecipeListModel(
     val recipes: List<Recipe.RecipeComplexExt> = listOf(),
     val searchType: SearchType = SearchType.COMPLEX_SEARCH,
     val filter: RecipeListFilter = RecipeListFilter(),
-    val isErrorShowing: Boolean = false,
+    val isInfoSnackbarShowing: Boolean = false,
+    val isSuccessSnackbarShowing: Boolean = false,
+    val isWarningSnackbarShowing: Boolean = false,
+    val isErrorSnackbarShowing: Boolean = false,
     val isSearchButtonEnabled: Boolean = true,
     val isListShowing: Boolean = false,
     val offset: Int = 0, // устанавливается кнопками навигации по списку
@@ -90,7 +94,7 @@ internal fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
         recipes = emptyList(),
         searchType = SearchType.COMPLEX_SEARCH,
         filter = RecipeListFilter(),
-        isErrorShowing = true,
+        isErrorSnackbarShowing = true,
         isSearchButtonEnabled = true,
         isListShowing = false,
         totalResults = 0,
@@ -100,7 +104,7 @@ internal fun RecipeListModel.getStateAfterSearchError(cause: Throwable) =
 internal fun RecipeListModel.getStateAfterSearchSuccess() =
     this.copy(
         modelState = RecipeListModelState.DefaultState,
-        isErrorShowing = false,
+        isSuccessSnackbarShowing = false,
         isSearchButtonEnabled = true,
         isListShowing = true
     )
@@ -111,7 +115,7 @@ internal fun RecipeListModel.getStateAfterSearchStarted() =
         recipes = emptyList(),
         isListShowing = false,
         isSearchButtonEnabled = false,
-        isErrorShowing = false
+        isInfoSnackbarShowing = true,
     )
 
 sealed interface RecipeListPageEvent {
@@ -153,6 +157,8 @@ class RecipeListViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(RecipeListModel())
     internal val uiState = _uiState.asStateFlow()
+
+    private var searchJob: Job? = null
 
     fun reduce(event: RecipeListPageEvent) =
         when (event) {
@@ -228,7 +234,6 @@ class RecipeListViewModel @Inject constructor(
                 isFilterBottomSheetVisible = false,
                 filter = RecipeListFilter(),
                 isListShowing = false,
-                isErrorShowing = false
             )
         }
     }
@@ -272,7 +277,9 @@ class RecipeListViewModel @Inject constructor(
     }
 
     private fun onClickSearchButton() {
-        viewModelScope.launch {
+        searchJob?.cancel() // canceling previous search request
+
+        searchJob = viewModelScope.launch {
             try {
                 _uiState.update { currentState ->
                     currentState.getStateAfterSearchStarted()
@@ -318,6 +325,7 @@ class RecipeListViewModel @Inject constructor(
             }
         }
     }
+
     private suspend fun searchRecipes(recipeSearch: RecipeSearch) {
         try {
             getRecipes(recipeSearch)
@@ -365,6 +373,8 @@ class RecipeListViewModel @Inject constructor(
             _uiState.update { currentState ->
                 currentState.getStateAfterSearchSuccess()
             }
+
+            searchJob = null
         } catch (cause: Throwable) {
             Log.e(TAG, "Cached throwable: $cause")
             _uiState.update { currentState ->
