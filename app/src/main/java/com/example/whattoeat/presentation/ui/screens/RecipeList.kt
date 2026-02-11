@@ -39,7 +39,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,8 +58,6 @@ import coil3.compose.AsyncImage
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
-import com.example.whattoeat.presentation.ui.scaffoldElements.SnackbarVisualsCustom
-import com.example.whattoeat.presentation.ui.scaffoldElements.WhatToEatSnackbar
 import com.example.whattoeat.presentation.ui.screens.custom_composable.FilterBottomSheet
 import com.example.whattoeat.presentation.ui.theme.Black
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListModelState
@@ -70,7 +67,6 @@ import com.example.whattoeat.presentation.ui.viewModels.isDecreaseOffsetButtonEn
 import com.example.whattoeat.presentation.ui.viewModels.isIncreaseOffsetButtonEnabled
 import com.example.whattoeat.presentation.ui.viewModels.numberOfCurrentPage
 import com.valentinilk.shimmer.shimmer
-import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -182,38 +178,6 @@ fun RecipeList(
     }
 
     FilterBottomSheet(viewModel)
-
-    if (uiState.value.isInfoSnackbarShowing) {
-        rememberCoroutineScope().launch {
-            snackbarHostState.showSnackbar(SnackbarVisualsCustom(
-                message = "Search started"
-            ))
-        }
-    }
-
-    if (uiState.value.isSuccessSnackbarShowing) {
-        rememberCoroutineScope().launch {
-            snackbarHostState.showSnackbar(SnackbarVisualsCustom(
-                message = "Success"
-            ))
-        }
-    }
-
-    if (uiState.value.isWarningSnackbarShowing) {
-        rememberCoroutineScope().launch {
-            snackbarHostState.showSnackbar(SnackbarVisualsCustom(
-                message = "Warning"
-            ))
-        }
-    }
-
-    if (uiState.value.isErrorSnackbarShowing) {
-        rememberCoroutineScope().launch {
-            snackbarHostState.showSnackbar(SnackbarVisualsCustom(
-                message = "Error"
-            ))
-        }
-    }
 }
 
 @Composable
