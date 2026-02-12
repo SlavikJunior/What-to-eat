@@ -11,7 +11,7 @@ interface FavoriteRecipeRepository {
 
     suspend fun removeRecipe(recipe: Recipe): Int
 
-    suspend fun getRecipes(recipeSearch: RecipeSearch): Flow<FavoriteRecipe>
+    suspend fun getRecipes(): Flow<List<FavoriteRecipe>>
 
     suspend fun isFavorite(id: Int): Boolean
 }

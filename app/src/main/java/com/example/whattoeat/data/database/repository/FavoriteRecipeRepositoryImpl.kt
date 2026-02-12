@@ -49,38 +49,7 @@ class FavoriteRecipeRepositoryImpl @Inject constructor(
         return -1
     }
 
-    override suspend fun getRecipes(recipeSearch: RecipeSearch): Flow<FavoriteRecipe> =
-        when (recipeSearch) {
-            is RecipeSearch.RecipeByIngredientsSearch -> {
-                withContext(Dispatchers.IO) {
-                    favoriteRecipeDao.selectAll()
-                }
-            }
-
-            is RecipeSearch.RecipeComplexSearch -> {
-                withContext(Dispatchers.IO) {
-                    favoriteRecipeDao.selectAll()
-                }
-            }
-
-            is RecipeSearch.RecipeSimilarSearch -> {
-                withContext(Dispatchers.IO) {
-                    favoriteRecipeDao.selectById(recipeSearch.id).let { flow { it } }
-                }
-            }
-
-            is RecipeSearch.RecipeSummarySearch -> {
-                withContext(Dispatchers.IO) {
-                    favoriteRecipeDao.selectById(recipeSearch.id).let { flow { it } }
-                }
-            }
-
-            is RecipeSearch.RecipeFullInformationSearch -> {
-                withContext(Dispatchers.IO) {
-                    favoriteRecipeDao.selectById(recipeSearch.id).let { flow { it } }
-                }
-            }
-        }
+    override suspend fun getRecipes(): Flow<List<FavoriteRecipe>> = favoriteRecipeDao.selectAll()
 
     override suspend fun isFavorite(id: Int): Boolean {
         var selected: FavoriteRecipe? = null

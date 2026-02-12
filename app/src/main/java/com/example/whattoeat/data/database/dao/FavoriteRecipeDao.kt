@@ -28,5 +28,5 @@ interface FavoriteRecipeDao {
         select *
         from $TABLE_NAME
     """)
-    fun selectAll(): Flow<FavoriteRecipe>
+    fun selectAll(): Flow<List<FavoriteRecipe>>
 }

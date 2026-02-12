@@ -167,7 +167,7 @@ fun RecipeList(
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             items(uiState.value.recipes) { recipe ->
-                RecipeCard(
+                RecipeComplexExtCard(
                     navController = navController,
                     recipe = recipe,
                     viewModel = viewModel
@@ -181,7 +181,7 @@ fun RecipeList(
 }
 
 @Composable
-fun RecipeCard(
+private fun RecipeComplexExtCard(
     navController: NavHostController,
     recipe: Recipe.RecipeComplexExt,
     viewModel: RecipeListViewModel,

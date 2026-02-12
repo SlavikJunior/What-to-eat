@@ -128,7 +128,7 @@ sealed interface RecipeListPageEvent {
     data class DishTypeChange(val type: DishTypes? = null) : RecipeListPageEvent
     data class MaxReadyTimeChange(val max: Int? = null) : RecipeListPageEvent
     data class MinServingsChange(val min: Int? = null) : RecipeListPageEvent
-    data class SortTypeChange(val sortType: SortTypes?? = null) : RecipeListPageEvent
+    data class SortTypeChange(val sortType: SortTypes? = null) : RecipeListPageEvent
     data class SortDirectionChange(val sortDirection: SortDirection? = null) : RecipeListPageEvent
     data class OffsetChange(val offset: Int = 0) : RecipeListPageEvent
     data class NumberChange(val number: Int = 5) : RecipeListPageEvent
@@ -330,10 +330,7 @@ class RecipeListViewModel @Inject constructor(
         try {
             getRecipes(recipeSearch)
                 .collectLatest { resourceRecipeResult ->
-                    Log.d(
-                        TAG,
-                        "Collected ressource: $resourceRecipeResult from getRecipesUseCase()"
-                    )
+                    Log.d(TAG, "Collected ressource: $resourceRecipeResult from getRecipes()")
 
                     when (resourceRecipeResult) {
                         is Resource.Loading<*> ->

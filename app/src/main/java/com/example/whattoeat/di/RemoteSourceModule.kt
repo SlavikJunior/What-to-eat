@@ -118,7 +118,6 @@ object RemoteSourceModule {
         return RecipeSearchRepositoryImpl(
             apiKey = apiKey,
             service = service,
-            cachedRecipeDao = cachedRecipeDao,
             json = json
         )
     }

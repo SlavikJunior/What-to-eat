@@ -8,6 +8,6 @@ class GetFavoriteRecipesUseCase @Inject constructor(
     private val repository: FavoriteRecipeRepository
 ) {
 
-    suspend operator fun invoke(recipeSearch: RecipeSearch) =
-        repository.getRecipes(recipeSearch)
+    suspend operator fun invoke() =
+        repository.getRecipes()
 }

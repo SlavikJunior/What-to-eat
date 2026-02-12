@@ -1,9 +1,15 @@
 package com.example.whattoeat.domain.domain_entities.support
 
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+object DietsSerializer : EnumFallbackSerializer<Diets>(Diets.entries.toTypedArray(), Diets.UNKNOWN)
+
+@Serializable(with = DietsSerializer::class)
 enum class Diets {
     @SerialName("dairy free")DAIRY_FREE,
+    @SerialName("pescatarian")PESCATARIAN,
+    @SerialName("paleolithic")PALEOLITHIC,
     @SerialName("gluten free")GLUTEN_FREE, // Исключение глютена
     @SerialName("ketogenic")KETOGENIC, // Кетогенная диета: 55-80% жиров, 15-35% белков и менее 10% углеводов.
     @SerialName("vegetarian")VEGETARIAN, // Мясо или мясные субпродукты
@@ -16,4 +22,5 @@ enum class Diets {
     @SerialName("primal")PRIMAL, // https://www.google.com/search?q=primal+diet
     @SerialName("low fodmap")LOW_FODMAP, // https://www.google.com/search?q=low+foodmap+diet
     @SerialName("whole 30")WHOLE_30, // https://www.google.com/search?q=whole+30+diet
+    UNKNOWN
 }
