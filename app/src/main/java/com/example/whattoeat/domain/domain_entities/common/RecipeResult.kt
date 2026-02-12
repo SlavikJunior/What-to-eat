@@ -23,6 +23,10 @@ sealed interface RecipeResult {
 
     @JvmInline
     @Serializable
+    value class RecipeFullInformationBulkResult(val recipeFullInformationBulkResult: List<Recipe.RecipeFullInformation>): RecipeResult
+
+    @JvmInline
+    @Serializable
     value class RecipeSimilarResult(val recipeSimilarResult: List<Recipe.RecipeSimilar>): RecipeResult
 
     @JvmInline

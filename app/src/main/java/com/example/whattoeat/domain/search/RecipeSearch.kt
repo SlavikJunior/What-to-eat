@@ -45,6 +45,11 @@ sealed interface RecipeSearch {
         val includeNutrition: Boolean = true // Включите в описание рецепта информацию о пищевой ценности на одну порцию.
     ): RecipeSearch
 
+    data class RecipeFullInformationBulkSearch(
+        val ids: String, // Separated by ','
+        val includeNutrition: Boolean = true // Включите в описание рецепта информацию о пищевой ценности на одну порцию.
+    ): RecipeSearch
+
     data class RecipeSimilarSearch(
         @IdFromPath val id: Int, // Идентификатор рецепта, для которого нужно найти похожие рецепты. не парметр - часть в path!!!
         val number: Int = 3 // Количество случайных рецептов, которые должны быть возвращены (от 1 до 100).
