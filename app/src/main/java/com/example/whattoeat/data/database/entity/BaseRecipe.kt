@@ -8,8 +8,8 @@ import com.example.whattoeat.domain.domain_entities.support.Ingredient
 
 abstract class BaseRecipe {
     abstract val id: Int
-    abstract val image: String
-    abstract val imageType: String
+    abstract val image: String?
+    abstract val imageType: String?
     abstract val title: String
     abstract val readyInMinutes: Int
     abstract val servings: Int?
@@ -21,7 +21,7 @@ abstract class BaseRecipe {
     abstract val veryHealthy: Boolean?
     abstract val cheap: Boolean?
     abstract val cookingMinutes: String?
-    abstract val extendedIngredients: List<Ingredient>
+    abstract val extendedIngredients: List<Ingredient>?
     abstract val summary: String?
     abstract val cuisines: List<Cuisines>?
     abstract val dishTypes: List<DishTypes>?
@@ -32,12 +32,12 @@ abstract class BaseRecipe {
     open fun toRecipeFullInformation() =
         Recipe.RecipeFullInformation(
             id = id,
-            image = image,
-            imageType = imageType,
+            image = image.orEmpty(),
+            imageType = imageType.orEmpty(),
             title = title,
             readyInMinutes = readyInMinutes,
             servings = servings ?: -1,
-            sourceUrl = sourceUrl ?: "",
+            sourceUrl = sourceUrl.orEmpty(),
             vegetarian = vegetarian ?: false,
             vegan = vegan ?: false,
             glutenFree = glutenFree ?: false,
@@ -48,13 +48,13 @@ abstract class BaseRecipe {
             cookingMinutes = cookingMinutes,
             aggregateLikes = -1,
             healthScore = -1.0,
-            extendedIngredients = extendedIngredients,
-            summary = summary ?: "",
+            extendedIngredients = extendedIngredients ?: emptyList(),
+            summary = summary.orEmpty(),
             cuisines = cuisines ?: emptyList(),
             dishTypes = dishTypes ?: emptyList(),
             diets = diets ?: emptyList(),
             occasions = occasions ?: emptyList(),
-            instructions = instructions ?: "",
+            instructions = instructions.orEmpty(),
             analyzedInstructions = emptyList(),
             spoonacularScore = -1.0,
             spoonacularSourceUrl = ""

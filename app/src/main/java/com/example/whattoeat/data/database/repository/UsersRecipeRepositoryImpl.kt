@@ -2,12 +2,13 @@ package com.example.whattoeat.data.database.repository
 
 import com.example.whattoeat.data.database.dao.UsersRecipeDao
 import com.example.whattoeat.data.database.entity.UsersRecipe
+import com.example.whattoeat.di.IoDispatcher
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.support.Ingredient
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import com.example.whattoeat.domain.search.RecipeSearch
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -15,32 +16,24 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class UsersRecipeRepositoryImpl(
+    @IoDispatcher
+    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     val usersRecipeDao: UsersRecipeDao
 ) : UsersRecipeRepository {
-    override suspend fun uploadRecipe(recipe: Recipe.RecipeByUser): Long {
-        val id: Long
-        withContext(Dispatchers.IO) {
-            id = async {
-                usersRecipeDao.insert(UsersRecipe.fromRecipe(recipe))
-            }.await()
+    override suspend fun uploadRecipe(recipe: Recipe.RecipeByUser) =
+        withContext(ioDispatcher) {
+            usersRecipeDao.insert(UsersRecipe.fromRecipe(recipe))
         }
-        return id
-    }
 
-    override suspend fun deleteRecipe(recipe: Recipe.RecipeByUser): Int {
-        val cnt: Int
+    override suspend fun deleteRecipe(recipe: Recipe.RecipeByUser) =
         withContext(Dispatchers.IO) {
-            cnt = async {
-                usersRecipeDao.delete(recipe.image)
-            }.await()
+                usersRecipeDao.delete(recipe.title)
         }
-        return cnt
-    }
 
     @Throws(IllegalArgumentException::class)
     override suspend fun getRecipes(recipeSearch: RecipeSearch): Flow<Recipe.RecipeByUser> {
         val usersRecipes: Flow<UsersRecipe>
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             usersRecipes = when (recipeSearch) {
                 is RecipeSearch.RecipeByIngredientsSearch -> {
                     val ingredients = recipeSearch.ingredients.split(",").map { it.trim() }.take(3)
@@ -80,8 +73,8 @@ class UsersRecipeRepositoryImpl(
             Recipe.RecipeComplex(
                 id = usersRecipe.id,
                 title = usersRecipe.title,
-                image = usersRecipe.image,
-                imageType = usersRecipe.imageType
+                image = usersRecipe.image.orEmpty(),
+                imageType = usersRecipe.imageType.orEmpty()
             )
         }
     }
@@ -98,7 +91,7 @@ class UsersRecipeRepositoryImpl(
     override suspend fun getRecipesAsRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch): Flow<Recipe.RecipeByIngredients> {
         val ingredients = recipeSearch.ingredients.split(",").map { it.trim() }.take(3)
         val usersRecipes: Flow<UsersRecipe>
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             usersRecipes = usersRecipeDao.selectByMultipleIngredients(
                 ingredient1 = ingredients[0],
                 ingredient2 = ingredients[1],

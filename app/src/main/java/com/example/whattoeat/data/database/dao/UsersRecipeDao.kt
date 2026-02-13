@@ -16,9 +16,9 @@ interface UsersRecipeDao {
 
     @Query("""
         delete from $TABLE_NAME
-        where image = :image
+        where title = :title
     """)
-    fun delete(image: String): Int
+    fun delete(title: String): Int
 
     @Query("""
         select *
