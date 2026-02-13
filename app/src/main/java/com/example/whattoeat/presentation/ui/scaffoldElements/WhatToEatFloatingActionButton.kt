@@ -15,6 +15,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.whattoeat.R
+import com.example.whattoeat.presentation.ui.nav.RecipeListDataObject
 import com.example.whattoeat.presentation.ui.nav.UsersRecipesDataObject
 
 @SuppressLint("RestrictedApi")
@@ -25,9 +26,9 @@ fun WhatToEatFloatingActionButton(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    val isAddRecipeScreen = currentDestination?.hasRoute<UsersRecipesDataObject>() == true
+    val isRecipeList = currentDestination?.hasRoute<RecipeListDataObject>() == true
 
-    if (!isAddRecipeScreen) {
+    if (isRecipeList) {
         FloatingActionButton(
             onClick = {
                 navController.navigate(route = UsersRecipesDataObject) {
@@ -40,7 +41,7 @@ fun WhatToEatFloatingActionButton(
             },
             content = {
                 Icon(
-                    painter = painterResource(R.drawable.ic_upload),
+                    painter = painterResource(R.drawable.ic_plus),
                     contentDescription = "Upload recipe",
                     modifier = Modifier.padding(16.dp)
                 )

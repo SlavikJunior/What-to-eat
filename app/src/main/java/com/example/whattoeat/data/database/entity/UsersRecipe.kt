@@ -2,6 +2,7 @@ package com.example.whattoeat.data.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.whattoeat.data.database.entity.UsersRecipe.Companion.TABLE_NAME
@@ -23,51 +24,51 @@ data class UsersRecipe(
     @PrimaryKey(autoGenerate = true)
     override val id: Int = 0,
     @ColumnInfo(name = "image")
-    override val image: String,
+    override val image: String? = null,
     @ColumnInfo(name = "image_type")
-    override val imageType: String,
+    override val imageType: String? = null,
     @ColumnInfo(name = "title")
     override val title: String,
     @ColumnInfo(name = "ready_in_minutes")
     override val readyInMinutes: Int,
     @ColumnInfo(name = "servings")
-    override val servings: Int?,
+    override val servings: Int? = null,
     @ColumnInfo(name = "source_url")
-    override val sourceUrl: String?,
+    override val sourceUrl: String? = null,
     @ColumnInfo(name = "vegetarian")
-    override val vegetarian: Boolean?,
+    override val vegetarian: Boolean? = null,
     @ColumnInfo(name = "vegan")
-    override val vegan: Boolean?,
+    override val vegan: Boolean? = null,
     @ColumnInfo(name = "gluten_free")
-    override val glutenFree: Boolean?,
+    override val glutenFree: Boolean? = null,
     @ColumnInfo(name = "dairy_free")
-    override val dairyFree: Boolean?,
+    override val dairyFree: Boolean? = null,
     @ColumnInfo(name = "very_healthy")
-    override val veryHealthy: Boolean?,
+    override val veryHealthy: Boolean? = null,
     @ColumnInfo(name = "cheap")
-    override val cheap: Boolean?,
+    override val cheap: Boolean? = null,
     @ColumnInfo(name = "cooking_minutes")
-    override val cookingMinutes: String?,
+    override val cookingMinutes: String? = null,
     @ColumnInfo(name = "extended_ingredients")
-    override val extendedIngredients: List<Ingredient>,
+    override val extendedIngredients: List<Ingredient>? = null,
     @ColumnInfo(name = "summary")
-    override val summary: String?,
+    override val summary: String? = null,
     @ColumnInfo(name = "cuisines")
-    override val cuisines: List<Cuisines>?,
+    override val cuisines: List<Cuisines>? = null,
     @ColumnInfo(name = "dish_types")
-    override val dishTypes: List<DishTypes>?,
+    override val dishTypes: List<DishTypes>? = null,
     @ColumnInfo(name = "diets")
-    override val diets: List<Diets>?,
+    override val diets: List<Diets>? = null,
     @ColumnInfo(name = "occasions")
-    override val occasions: List<String>?,
+    override val occasions: List<String>? = null,
     @ColumnInfo(name = "instructions")
-    override val instructions: String?,
+    override val instructions: String? = null,
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis()
 ) : BaseRecipe() {
 
-    val extendedIngredientsNames: List<String>
-        get() = extendedIngredients.map { it.name }
+    @Ignore
+    val extendedIngredientsNames: List<String> = extendedIngredients?.map { it.name } ?: emptyList()
 
     fun toRecipeByUser(): Recipe.RecipeByUser {
         return Recipe.RecipeByUser(
@@ -78,19 +79,19 @@ data class UsersRecipe(
             veryHealthy = veryHealthy ?: false,
             cheap = cheap ?: false,
             healthScore = -1.0,
-            summary = summary ?: "",
+            summary = summary.orEmpty(),
             cuisines = cuisines ?: emptyList(),
             dishTypes = dishTypes ?: emptyList(),
             diets = diets ?: emptyList(),
             occasions = occasions ?: emptyList(),
-            instructions = instructions ?: "",
+            instructions = instructions.orEmpty(),
             image = image,
             imageType = imageType,
             title = title,
             readyInMinutes = readyInMinutes,
             servings = servings ?: -1,
-            sourceUrl = sourceUrl ?: "",
-            cookingMinutes = cookingMinutes ?: "",
+            sourceUrl = sourceUrl.orEmpty(),
+            cookingMinutes = cookingMinutes.orEmpty(),
             extendedIngredients = extendedIngredients,
             steps = emptyList(),
             notes = "",
@@ -101,7 +102,7 @@ data class UsersRecipe(
         Recipe.RecipeByIngredients(
             id = id,
             title = title,
-            image = image,
+            image = image.orEmpty(),
             usedIngredientCount = -1,
             missedIngredientCount = -1,
             missedIngredients = emptyList(),
