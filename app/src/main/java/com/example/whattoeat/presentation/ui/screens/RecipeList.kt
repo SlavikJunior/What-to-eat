@@ -58,7 +58,7 @@ import coil3.compose.AsyncImage
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
-import com.example.whattoeat.presentation.ui.screens.custom_composable.FilterBottomSheet
+import com.example.whattoeat.presentation.ui.screens.custom.FilterBottomSheet
 import com.example.whattoeat.presentation.ui.theme.Black
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListModelState
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
@@ -73,7 +73,6 @@ import com.valentinilk.shimmer.shimmer
 @Composable
 fun RecipeList(
     navController: NavHostController,
-    snackbarHostState: SnackbarHostState,
     viewModel: RecipeListViewModel = hiltViewModel(),
     paddingValues: PaddingValues = PaddingValues()
 ) {
@@ -140,9 +139,7 @@ fun RecipeList(
 
         Spacer(Modifier.height(16.dp))
 
-        if (uiState.value.isListShowing) {
-            OffsetRecipeListNavigationRow(viewModel = viewModel)
-        } else if (!uiState.value.isListShowing && uiState.value.modelState is RecipeListModelState.LoadingState) {
+        if (!uiState.value.isListShowing && uiState.value.modelState is RecipeListModelState.LoadingState) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -158,21 +155,23 @@ fun RecipeList(
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(64.dp))
             }
-        }
+        } else if (uiState.value.isListShowing && uiState.value.totalResults > 0) {
+            OffsetRecipeListNavigationRow(viewModel = viewModel)
 
-        Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(horizontal = 16.dp)
-        ) {
-            items(uiState.value.recipes) { recipe ->
-                RecipeComplexExtCard(
-                    navController = navController,
-                    recipe = recipe,
-                    viewModel = viewModel
-                )
-                Spacer(Modifier.height(16.dp))
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+                items(uiState.value.recipes) { recipe ->
+                    RecipeComplexExtCard(
+                        navController = navController,
+                        recipe = recipe,
+                        viewModel = viewModel
+                    )
+                    Spacer(Modifier.height(16.dp))
+                }
             }
         }
     }

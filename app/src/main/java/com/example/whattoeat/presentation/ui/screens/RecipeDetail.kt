@@ -86,7 +86,7 @@ fun RecipeDetail(
         }
 
         RecipeDetailModelState.DefaultState -> {
-            recipe?.let {
+            recipe?.let { it ->
                 RecipeDetailContent(
                     recipe = it.recipe,
                     similarRecipes = uiState.similarRecipes,

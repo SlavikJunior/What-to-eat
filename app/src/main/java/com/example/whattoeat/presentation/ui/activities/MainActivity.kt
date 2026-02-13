@@ -9,9 +9,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.whattoeat.presentation.ui.nav.WhatToEatNavHost
@@ -38,8 +35,6 @@ class MainActivity : ComponentActivity() {
 //                    Log.d("BackStackLog", "BackStack: $routes")
 //                }
 
-                val snackbarHostState = remember { SnackbarHostState() }
-
                 Scaffold(
                     floatingActionButton = { WhatToEatFloatingActionButton(navController = navController) },
                     contentWindowInsets = WindowInsets.Companion.systemBars,
@@ -47,13 +42,11 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         WhatToEatBottomAppBarNew(navController = navController,)
                     },
-                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                     modifier = Modifier.fillMaxSize()
                 ) { paddingValues ->
                     WhatToEatNavHost(
                         navController = navController,
                         paddingValues = paddingValues,
-                        snackbarHostState = snackbarHostState
                     )
                 }
             }

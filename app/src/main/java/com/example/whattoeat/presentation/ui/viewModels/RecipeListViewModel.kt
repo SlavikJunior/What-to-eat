@@ -263,7 +263,10 @@ class RecipeListViewModel @Inject constructor(
             currentState.copy(
                 filter = currentState.filter.copy(
                     query = event.query
-                )
+                ),
+                isListShowing = false,
+                offset = 0,
+                totalResults = 0
             )
         }
     }
