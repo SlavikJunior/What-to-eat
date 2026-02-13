@@ -97,69 +97,90 @@ class FavoriteRecipesViewModel @Inject constructor(
     fun reduce(event: FavoriteRecipesPageEvent) {
         when (event) {
             is FavoriteRecipesPageEvent.LoadRecipes -> subscribeToFavorites()
-            is FavoriteRecipesPageEvent.SortTypeChange -> { /* Твоя логика сортировки */ }
-            is FavoriteRecipesPageEvent.FavoriteRecipeChange -> {
-                // Тут можно добавить удаление из избранного
-            }
+            is FavoriteRecipesPageEvent.SortTypeChange -> {}
+
+            is FavoriteRecipesPageEvent.FavoriteRecipeChange -> {}
         }
     }
 
     private fun subscribeToFavorites() {
         favoritesJob?.cancel()
-
         favoritesJob = viewModelScope.launch(defaultDispatcher) {
-            _uiState.update { it.getStateLoadingStarted() }
 
             getFavoriteRecipes().collectLatest { favoriteRecipes ->
+
+                _uiState.update {
+                    it.getStateLoadingStarted()
+                }
 
                 if (favoriteRecipes.isEmpty()) {
                     _uiState.update {
                         it.getStateLoadingFinished(FavoriteRecipesPageStatus.SUCCESS, emptyList())
                     }
                 } else {
-                    val idsString = favoriteRecipes.joinToString(",") { it.id.toString() }
-                    fetchBulkDetails(idsString)
+                    try {
+                        favoriteRecipes.forEach { favRecipe ->
+                            launch {
+                                fetchRecipeDetails(favRecipe.id)
+                            }
+                        }
+                    } catch (cause: Throwable) {
+                        Log.e(TAG, "Error loading fetching recipes from api with: $cause")
+
+                        _uiState.update { currentState ->
+                            currentState.getStateLoadingFinished(
+                                status = FavoriteRecipesPageStatus.ERROR
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 
-    private suspend fun fetchBulkDetails(ids: String) {
+    private suspend fun fetchRecipeDetails(id: Int) {
         getRecipes(
-            RecipeSearch.RecipeFullInformationBulkSearch(ids = ids)
+            recipeSearch = RecipeSearch.RecipeFullInformationSearch(
+                id = id,
+                includeNutrition = true
+            )
         ).collect { resource ->
             when (resource) {
-                is Resource.Loading -> _uiState.update { currentState -> currentState.getStateLoadingStarted() }
+                is Resource.Loading -> {
+                    // todo: обдумать можно ли как-то изменить состояние экрана при загрузке конкретного рецепта
+                }
 
                 is Resource.Success -> {
                     val result = resource.data
-                    if (result is RecipeResult.RecipeFullInformationBulkResult) {
-                        val complexRecipes = result.recipeFullInformationBulkResult.map { fullInfo ->
-                            Recipe.RecipeComplexExt(
-                                recipe = Recipe.RecipeComplex(
-                                    id = fullInfo.id,
-                                    title = fullInfo.title,
-                                    image = fullInfo.image,
-                                    imageType = fullInfo.imageType
-                                ),
-                                isFavorite = true
-                            )
-                        }
+                    if (result is RecipeResult.RecipeFullInformationResult) {
+                        val fullInfo = result.recipeFullInformationResult
 
-                        _uiState.update {
-                            it.getStateLoadingFinished(
+                        val newRecipe = Recipe.RecipeComplexExt(
+                            recipe = Recipe.RecipeComplex(
+                                id = fullInfo.id,
+                                title = fullInfo.title,
+                                image = fullInfo.image,
+                                imageType = fullInfo.imageType
+                            ),
+                            isFavorite = true
+                        )
+
+                        _uiState.update { currentState ->
+                            val updatedList = currentState.recipes + newRecipe
+
+                            currentState.copy(
                                 status = FavoriteRecipesPageStatus.SUCCESS,
-                                recipes = complexRecipes
+                                recipes = updatedList,
+                                isListShowing = true,
+                                totalResults = updatedList.size
                             )
                         }
                     }
                 }
 
                 is Resource.Error -> {
-                    Log.e(TAG, "Error loading bulk: ${resource.message}")
-                    _uiState.update {
-                        it.copy(status = FavoriteRecipesPageStatus.ERROR)
-                    }
+                    Log.e(TAG, "Error loading id: $id: ${resource.message}")
+                    // todo: обдумать можно ли как-то изменить состояние экрана при загрузке с ошибкой конкретного рецепта
                 }
             }
         }
