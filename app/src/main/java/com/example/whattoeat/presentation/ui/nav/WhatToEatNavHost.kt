@@ -30,8 +30,8 @@ fun WhatToEatNavHost(
             val dataObject: RecipeDetailDataObject = navBackStackEntry.toRoute<RecipeDetailDataObject>()
             RecipeDetail(
                 navController = navController,
-                dataObject = dataObject,
-                paddingValues = paddingValues
+                paddingValues = paddingValues,
+                dataObject = dataObject
             )
         }
         composable<FavoriteRecipesDataObject> {

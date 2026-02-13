@@ -287,35 +287,35 @@ fun OffsetRecipeListNavigationRow(
             )
         }
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(24.dp),
-                shape = RoundedCornerShape(4.dp),
-                shadowElevation = 4.dp
-            ) {
-                Text(
-                    text = uiState.value.numberOfCurrentPage().toString(),
-                    textAlign = TextAlign.Center,
-                    fontSize = 24.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Surface(
-                modifier = Modifier.size(24.dp),
-                shape = RoundedCornerShape(4.dp),
-                shadowElevation = 4.dp
-            ) {
-                Text(
-                    text = uiState.value.totalResults.toString(),
-                    textAlign = TextAlign.Center,
-                    fontSize = 24.sp
-                )
-            }
-        }
+//        Row(
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            Surface(
+//                modifier = Modifier.size(24.dp),
+//                shape = RoundedCornerShape(4.dp),
+//                shadowElevation = 4.dp
+//            ) {
+//                Text(
+//                    text = uiState.value.numberOfCurrentPage().toString(),
+//                    textAlign = TextAlign.Center,
+//                    fontSize = 24.sp
+//                )
+//            }
+//
+//            Spacer(modifier = Modifier.width(16.dp))
+//
+//            Surface(
+//                modifier = Modifier.size(24.dp),
+//                shape = RoundedCornerShape(4.dp),
+//                shadowElevation = 4.dp
+//            ) {
+//                Text(
+//                    text = uiState.value.totalResults.toString(),
+//                    textAlign = TextAlign.Center,
+//                    fontSize = 24.sp
+//                )
+//            }
+//        }
 
         IconButton(
             onClick = {

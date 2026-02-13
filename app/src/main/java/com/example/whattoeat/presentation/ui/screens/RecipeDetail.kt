@@ -23,10 +23,12 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,55 +65,76 @@ import com.valentinilk.shimmer.shimmer
 @Composable
 fun RecipeDetail(
     navController: NavHostController,
-    dataObject: RecipeDetailDataObject,
     paddingValues: PaddingValues,
+    dataObject: RecipeDetailDataObject,
     viewModel: RecipeDetailViewModel = hiltViewModel()
 ) {
-    val uiState = viewModel.uiState.collectAsState().value
+    val uiState by viewModel.uiState.collectAsState()
     val recipe = uiState.recipe
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(dataObject.recipeId) {
         viewModel.reduce(RecipeDetailPageEvent.LoadRecipe(dataObject.recipeId))
     }
 
-    when (uiState.modelState) {
-        RecipeDetailModelState.LoadingState -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+    Scaffold(
+        modifier = Modifier.padding(paddingValues),
+        floatingActionButton = {
+            if (uiState.modelState is RecipeDetailModelState.DefaultState && recipe != null) {
+                FloatingActionButton(
+                    onClick = { viewModel.reduce(RecipeDetailPageEvent.FavoriteCurrentRecipeChange) },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier
+                        .padding(all = 8.dp)
+                        .size(64.dp)
+                ) {
+                    Icon(
+                        imageVector = if (recipe.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = if (recipe.isFavorite) "Remove from favorites" else "Add to favorites",
+                        tint = if (recipe.isFavorite) Color.Red else LocalContentColor.current
+                    )
+
+                }
             }
         }
+    ) { scaffoldPadding ->
 
-        RecipeDetailModelState.DefaultState -> {
-            recipe?.let { it ->
-                RecipeDetailContent(
-                    recipe = it.recipe,
-                    similarRecipes = uiState.similarRecipes,
-                    padding = paddingValues,
-                    onSimilarClick = { id ->
-                        navController.navigate(RecipeDetailDataObject(id))
-                    },
-                    onSimilarFavorite = {
-                        viewModel.reduce(
-                            RecipeDetailPageEvent.FavoriteSimilarRecipeChange(it)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(scaffoldPadding)
+        ) {
+            when (uiState.modelState) {
+                RecipeDetailModelState.LoadingState -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                RecipeDetailModelState.DefaultState -> {
+                    recipe?.let { item ->
+                        RecipeDetailContent(
+                            recipe = item,
+                            similarRecipes = uiState.similarRecipes,
+                            onSimilarClick = { id ->
+                                navController.navigate(RecipeDetailDataObject(id))
+                            },
+                            onSimilarFavorite = { similar ->
+                                viewModel.reduce(
+                                    RecipeDetailPageEvent.FavoriteSimilarRecipeChange(
+                                        similar
+                                    )
+                                )
+                            }
                         )
                     }
-                )
-            }
-        }
+                }
 
-        is RecipeDetailModelState.ErrorState -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = stringResource(R.string.error_state_label))
+                is RecipeDetailModelState.ErrorState -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = stringResource(R.string.error_state_label))
+                    }
+                }
             }
         }
     }
@@ -118,17 +142,14 @@ fun RecipeDetail(
 
 @Composable
 private fun RecipeDetailContent(
-    recipe: Recipe.RecipeFullInformation,
+    recipe: Recipe.RecipeFullInformationExt,
     similarRecipes: List<Recipe.RecipeSimilarExt>,
-    padding: PaddingValues,
     onSimilarClick: (Int) -> Unit,
     onSimilarFavorite: (Recipe.RecipeSimilarExt) -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(padding),
-        contentPadding = PaddingValues(16.dp),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 80.dp, start = 16.dp, end = 16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
 
@@ -191,7 +212,11 @@ private fun RecipeDetailContent(
 
             item {
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(
+                        horizontal = 4.dp,
+                        vertical = 8.dp
+                    ) // Немного паддинга для теней карточек
                 ) {
                     items(similarRecipes) { similar ->
                         SimilarRecipeCard(
@@ -203,10 +228,10 @@ private fun RecipeDetailContent(
                 }
             }
         }
-
-        item { Spacer(Modifier.height(60.dp)) }
     }
 }
+
+// ... Остальные Composable функции (InstructionsSection, StepItem, Chip, SimilarRecipeCard) оставляем как есть ...
 
 @Composable
 private fun InstructionsSection(
