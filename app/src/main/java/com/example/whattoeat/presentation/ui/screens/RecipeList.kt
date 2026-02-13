@@ -1,5 +1,6 @@
 package com.example.whattoeat.presentation.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,7 +58,7 @@ import coil3.compose.AsyncImage
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
-import com.example.whattoeat.presentation.ui.screens.custom_composable.FilterBottomSheet
+import com.example.whattoeat.presentation.ui.screens.custom.FilterBottomSheet
 import com.example.whattoeat.presentation.ui.theme.Black
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListModelState
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
@@ -66,6 +68,7 @@ import com.example.whattoeat.presentation.ui.viewModels.isIncreaseOffsetButtonEn
 import com.example.whattoeat.presentation.ui.viewModels.numberOfCurrentPage
 import com.valentinilk.shimmer.shimmer
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeList(
@@ -136,9 +139,7 @@ fun RecipeList(
 
         Spacer(Modifier.height(16.dp))
 
-        if (uiState.value.isListShowing) {
-            OffsetRecipeListNavigationRow(viewModel = viewModel)
-        } else if (!uiState.value.isListShowing && uiState.value.modelState is RecipeListModelState.LoadingState) {
+        if (!uiState.value.isListShowing && uiState.value.modelState is RecipeListModelState.LoadingState) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -154,21 +155,23 @@ fun RecipeList(
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(64.dp))
             }
-        }
+        } else if (uiState.value.isListShowing && uiState.value.totalResults > 0) {
+            OffsetRecipeListNavigationRow(viewModel = viewModel)
 
-        Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(horizontal = 16.dp)
-        ) {
-            items(uiState.value.recipes) { recipe ->
-                RecipeCard(
-                    navController = navController,
-                    recipe = recipe,
-                    viewModel = viewModel
-                )
-                Spacer(Modifier.height(16.dp))
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+                items(uiState.value.recipes) { recipe ->
+                    RecipeComplexExtCard(
+                        navController = navController,
+                        recipe = recipe,
+                        viewModel = viewModel
+                    )
+                    Spacer(Modifier.height(16.dp))
+                }
             }
         }
     }
@@ -177,7 +180,7 @@ fun RecipeList(
 }
 
 @Composable
-fun RecipeCard(
+private fun RecipeComplexExtCard(
     navController: NavHostController,
     recipe: Recipe.RecipeComplexExt,
     viewModel: RecipeListViewModel,

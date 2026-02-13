@@ -3,12 +3,15 @@ package com.example.whattoeat.domain.domain_entities.support
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
+object CuisinesSerializer : EnumFallbackSerializer<Cuisines>(Cuisines.entries.toTypedArray(), Cuisines.UNKNOWN)
+
+@Serializable(with = CuisinesSerializer::class)
 enum class Cuisines {
     @SerialName("African") AFRICAN,
     @SerialName("Asian") ASIAN,
     @SerialName("American") AMERICAN,
     @SerialName("British") BRITISH,
+    @SerialName("Creole") CREOLE,
     @SerialName("Cajun") CAJUN,
     @SerialName("Caribbean") CARIBBEAN,
     @SerialName("Chinese") CHINESE,
@@ -31,5 +34,6 @@ enum class Cuisines {
     @SerialName("Southern") SOUTHERN,
     @SerialName("Spanish") SPANISH,
     @SerialName("Thai") THAI,
-    @SerialName("Vietnamese") VIETNAMESE
+    @SerialName("Vietnamese") VIETNAMESE,
+    UNKNOWN
 }

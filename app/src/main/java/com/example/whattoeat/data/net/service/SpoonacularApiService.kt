@@ -27,6 +27,12 @@ interface SpoonacularApiService {
         @Query(value = "apiKey", encoded = true) apiKey: String
     ): Result<RecipeResult.RecipeFullInformationResult>
 
+    @GET(value = "recipes/informationBulk")
+    suspend fun recipeFullInformationBulk(
+        @QueryMap(encoded = true) query: Map<String, String>,
+        @Query(value = "apiKey", encoded = true) apiKey: String
+    ): Result<RecipeResult.RecipeFullInformationBulkResult>
+
     @GET(value = "recipes/{id}/similar")
     suspend fun recipeSimilar(
         @Path(value = "id") id: Int,

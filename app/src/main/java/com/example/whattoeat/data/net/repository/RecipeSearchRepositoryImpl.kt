@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.whattoeat.data.database.dao.CachedRecipeComplexDao
 import com.example.whattoeat.data.database.entity.CachedRecipeComplex
 import com.example.whattoeat.data.net.service.SpoonacularApiService
+import com.example.whattoeat.di.IoDispatcher
 import com.example.whattoeat.di.SpoonacularJson
 import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.common.RecipeResult
@@ -11,6 +12,7 @@ import com.example.whattoeat.domain.domain_entities.common.Resource
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.search.RecipeSearch
 import com.example.whattoeat.domain.search.toQueryMap
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -25,10 +27,10 @@ class RecipeSearchRepositoryImpl @Inject constructor(
     @SpoonacularJson val json: Json,
     val apiKey: String,
     val service: SpoonacularApiService,
-    val cachedRecipeDao: CachedRecipeComplexDao
+    @IoDispatcher val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : RecipeSearchRepository {
 
-    override suspend fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<Resource<RecipeResult.RecipeComplexResult>> {
+    override fun getRecipeComplex(recipeSearch: RecipeSearch.RecipeComplexSearch): Flow<Resource<RecipeResult.RecipeComplexResult>> {
         var listFromCache: List<Recipe.RecipeComplex> = emptyList()
         val flow = flow {
             emit(Resource.Loading())
@@ -53,11 +55,11 @@ class RecipeSearchRepositoryImpl @Inject constructor(
                     emit(Resource.Error("Not found :/"))
                 }
             }
-        }.flowOn(Dispatchers.IO)
+        }.flowOn(ioDispatcher)
         return flow
     }
 
-    override suspend fun getRecipeSimilar(recipeSearch: RecipeSearch.RecipeSimilarSearch): Flow<Resource<RecipeResult.RecipeSimilarResult>> =
+    override fun getRecipeSimilar(recipeSearch: RecipeSearch.RecipeSimilarSearch): Flow<Resource<RecipeResult.RecipeSimilarResult>> =
         flow {
             Log.d(TAG, "RecipeSearch: $recipeSearch")
 
@@ -84,11 +86,11 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun getRecipeSummary(recipeSearch: RecipeSearch.RecipeSummarySearch): Flow<Resource<Recipe.RecipeSummary>> {
+    override fun getRecipeSummary(recipeSearch: RecipeSearch.RecipeSummarySearch): Flow<Resource<Recipe.RecipeSummary>> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Flow<Resource<RecipeResult.RecipeFullInformationResult>> =
+    override fun getRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Flow<Resource<RecipeResult.RecipeFullInformationResult>> =
         flow {
             Log.d(TAG, "RecipeSearch: $recipeSearch")
 
@@ -113,9 +115,35 @@ class RecipeSearchRepositoryImpl @Inject constructor(
 //                    emit(tryToGetFromCache(recipeSearch))
                 }
             }
-        }.flowOn(Dispatchers.IO)
+        }.flowOn(ioDispatcher)
 
-    override suspend fun getRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch) =
+    override fun getRecipeFullInformationBulk(recipeSearch: RecipeSearch.RecipeFullInformationBulkSearch): Flow<Resource<RecipeResult.RecipeFullInformationBulkResult>> {
+        return flow {
+            Log.d(TAG, "RecipeSearch: $recipeSearch")
+
+            emit(Resource.Loading())
+
+            service.recipeFullInformationBulk(
+                query = recipeSearch.toQueryMap(),
+                apiKey = apiKey
+            ).let { result ->
+
+                result.onSuccess {
+                    Log.d(TAG, "Success emiting: ${it.recipeFullInformationBulkResult}")
+
+                    emit(Resource.Success(it))
+                }
+
+                result.onFailure {
+                    Log.d(TAG, "Error emiting! Throwable: $it")
+
+                    emit(Resource.Error("Not found :/"))
+                }
+            }
+        }.flowOn(ioDispatcher)
+    }
+
+    override fun getRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch) =
         flow {
             emit(Resource.Loading())
 
@@ -134,29 +162,7 @@ class RecipeSearchRepositoryImpl @Inject constructor(
                     emit(Resource.Error("Not found :/"))
                 }
             }
-        }.flowOn(Dispatchers.IO)
-
-
-    private suspend fun tryToGetFromCache(recipeSearch: RecipeSearch.RecipeComplexSearch): List<Recipe.RecipeComplex> {
-        val hash = getRecipeComplexSearchHash(recipeSearch)
-        try {
-            val list = cachedRecipeDao.selectByHash(hash)
-            return list.map { cachedRecipeComplex ->
-                decodeCachedRecipe(cachedRecipeComplex)
-            }
-        } catch (_: Throwable) {
-            return emptyList()
-        }
-    }
-
-    private fun decodeCachedRecipe(cachedRecipeComplex: CachedRecipeComplex) =
-        json.decodeFromString<Recipe.RecipeComplex>(cachedRecipeComplex.recipeComplexBody)
-
-    private fun getRecipeComplexSearchHash(recipeSearch: RecipeSearch.RecipeComplexSearch) =
-        recipeSearch.copy(
-            offset = null,
-            number = null
-        ).hashCode().toString()
+        }.flowOn(ioDispatcher)
 
     companion object {
         private const val TAG = "TEST TAG"

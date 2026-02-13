@@ -1,7 +1,12 @@
 package com.example.whattoeat.domain.domain_entities.support
 
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+
+object DishTypesSerializer : EnumFallbackSerializer<DishTypes>(DishTypes.entries.toTypedArray(), DishTypes.UNKNOWN)
+
+@Serializable(with = DishTypesSerializer::class)
 enum class DishTypes {
     @SerialName("main course")MAIN_COURSE, // второе блюдо
     @SerialName("side dish")SIDE_DISH, // гарнир
@@ -11,6 +16,7 @@ enum class DishTypes {
     @SerialName("starter")STARTER,
     @SerialName("antipasto")ANTIPASTO,
     @SerialName("lunch")LUNCH,
+    @SerialName("hor d'oeuvre")HOR_D_OEUVRE,
     @SerialName("antipasti")ANTIPASTI,
     @SerialName("morning meal")MORNING_MEAL,
     @SerialName("brunch")BRUNCH,
@@ -25,4 +31,5 @@ enum class DishTypes {
     @SerialName("fingerfood")FINGERFOOD, // закуски, которые можно есть руками
     @SerialName("snack")SNACK, // перекус
     @SerialName("drink")DRINK, // напиток
+    UNKNOWN
 }

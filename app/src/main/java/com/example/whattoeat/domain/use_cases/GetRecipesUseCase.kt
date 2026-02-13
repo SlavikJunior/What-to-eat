@@ -7,11 +7,12 @@ import javax.inject.Inject
 class GetRecipesUseCase @Inject constructor(
     private val repository: RecipeSearchRepository
 ) {
-    suspend operator fun invoke(recipeSearch: RecipeSearch) =
+    operator fun invoke(recipeSearch: RecipeSearch) =
         when(recipeSearch) {
             is RecipeSearch.RecipeByIngredientsSearch -> repository.getRecipeByIngredients(recipeSearch)
             is RecipeSearch.RecipeComplexSearch -> repository.getRecipeComplex(recipeSearch)
             is RecipeSearch.RecipeFullInformationSearch -> repository.getRecipeFullInformation(recipeSearch)
+            is RecipeSearch.RecipeFullInformationBulkSearch -> repository.getRecipeFullInformationBulk(recipeSearch)
             is RecipeSearch.RecipeSimilarSearch -> repository.getRecipeSimilar(recipeSearch)
             is RecipeSearch.RecipeSummarySearch -> repository.getRecipeSummary(recipeSearch)
         }

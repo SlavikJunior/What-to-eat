@@ -1,4 +1,4 @@
-package com.example.whattoeat.presentation.ui.screens.custom_composable
+package com.example.whattoeat.presentation.ui.screens.custom
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

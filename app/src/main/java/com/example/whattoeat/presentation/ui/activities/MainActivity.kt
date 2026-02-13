@@ -44,7 +44,10 @@ class MainActivity : ComponentActivity() {
                     },
                     modifier = Modifier.fillMaxSize()
                 ) { paddingValues ->
-                    WhatToEatNavHost(navController = navController, paddingValues = paddingValues)
+                    WhatToEatNavHost(
+                        navController = navController,
+                        paddingValues = paddingValues,
+                    )
                 }
             }
         }

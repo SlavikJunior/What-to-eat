@@ -14,14 +14,17 @@ import com.example.whattoeat.presentation.ui.screens.UsersRecipes
 @Composable
 fun WhatToEatNavHost(
     navController: NavHostController,
-    paddingValues: PaddingValues = PaddingValues()
+    paddingValues: PaddingValues = PaddingValues(),
 ) {
     NavHost(
         navController = navController,
         startDestination = RecipeListDataObject
     ) {
         composable<RecipeListDataObject> { navBackStackEntry ->
-            RecipeList(navController = navController, paddingValues = paddingValues)
+            RecipeList(
+                navController = navController,
+                paddingValues = paddingValues
+            )
         }
         composable<RecipeDetailDataObject> { navBackStackEntry ->
             val dataObject: RecipeDetailDataObject = navBackStackEntry.toRoute<RecipeDetailDataObject>()
