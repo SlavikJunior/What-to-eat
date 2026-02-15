@@ -12,7 +12,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withContext
 
 class UsersRecipeRepositoryImpl(
@@ -26,7 +29,7 @@ class UsersRecipeRepositoryImpl(
         }
 
     override suspend fun deleteRecipe(recipe: Recipe.RecipeByUser) =
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
                 usersRecipeDao.delete(recipe.title)
         }
 
@@ -137,5 +140,10 @@ class UsersRecipeRepositoryImpl(
                 }
             )
         }
+    }
+
+    override suspend fun getAllRecipes(): Flow<List<Recipe.RecipeByUser>> {
+        return usersRecipeDao.selectAll()?.map { userRecipesList -> userRecipesList.map { it.toRecipeByUser() } }
+            ?.flowOn(ioDispatcher) ?: flowOf(emptyList())
     }
 }

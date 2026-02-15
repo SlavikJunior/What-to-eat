@@ -13,11 +13,11 @@ import com.example.whattoeat.domain.domain_entities.support.DishTypes
 import com.example.whattoeat.domain.domain_entities.support.SortDirection
 import com.example.whattoeat.domain.domain_entities.support.SortTypes
 import com.example.whattoeat.domain.search.RecipeSearch
-import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
-import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
-import com.example.whattoeat.domain.use_cases.IsFavoriteRecipeUseCase
-import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
-import com.example.whattoeat.domain.use_cases.TranslateTextUseCase
+import com.example.whattoeat.domain.useCases.AddFavoriteRecipeUseCase
+import com.example.whattoeat.domain.useCases.GetRecipesUseCase
+import com.example.whattoeat.domain.useCases.IsFavoriteRecipeUseCase
+import com.example.whattoeat.domain.useCases.RemoveFavoriteRecipeUseCase
+import com.example.whattoeat.domain.useCases.TranslateTextUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job

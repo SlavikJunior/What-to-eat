@@ -1,7 +1,6 @@
-package com.example.whattoeat.domain.use_cases
+package com.example.whattoeat.domain.useCases
 
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
-import com.example.whattoeat.domain.search.RecipeSearch
 import javax.inject.Inject
 
 class GetFavoriteRecipesUseCase @Inject constructor(

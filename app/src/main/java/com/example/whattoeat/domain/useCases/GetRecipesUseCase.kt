@@ -1,4 +1,4 @@
-package com.example.whattoeat.domain.use_cases
+package com.example.whattoeat.domain.useCases
 
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.search.RecipeSearch

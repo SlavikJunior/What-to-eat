@@ -4,20 +4,19 @@ import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.repositories.TranslateApiRepository
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
-import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
-import com.example.whattoeat.domain.use_cases.DeleteUsersRecipeUseCase
-import com.example.whattoeat.domain.use_cases.GetFavoriteRecipesUseCase
-import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
-import com.example.whattoeat.domain.use_cases.GetUsersRecipesUseCase
-import com.example.whattoeat.domain.use_cases.IsFavoriteRecipeUseCase
-import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
-import com.example.whattoeat.domain.use_cases.TranslateTextUseCase
-import com.example.whattoeat.domain.use_cases.UploadUsersRecipeUseCase
+import com.example.whattoeat.domain.useCases.AddFavoriteRecipeUseCase
+import com.example.whattoeat.domain.useCases.DeleteUsersRecipeUseCase
+import com.example.whattoeat.domain.useCases.GetFavoriteRecipesUseCase
+import com.example.whattoeat.domain.useCases.GetRecipesUseCase
+import com.example.whattoeat.domain.useCases.GetAllUsersRecipesUseCase
+import com.example.whattoeat.domain.useCases.IsFavoriteRecipeUseCase
+import com.example.whattoeat.domain.useCases.RemoveFavoriteRecipeUseCase
+import com.example.whattoeat.domain.useCases.TranslateTextUseCase
+import com.example.whattoeat.domain.useCases.UploadUsersRecipeUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import kotlinx.coroutines.Dispatchers
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -71,7 +70,7 @@ object DomainModule {
 
     @Provides
     fun provideGetUsersRecipesUseCase(repository: UsersRecipeRepository) =
-        GetUsersRecipesUseCase(
+        GetAllUsersRecipesUseCase(
             repository = repository
         )
 }
