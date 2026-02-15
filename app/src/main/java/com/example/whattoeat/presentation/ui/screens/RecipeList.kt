@@ -31,8 +31,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -48,7 +46,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,7 +62,6 @@ import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListViewModel
 import com.example.whattoeat.presentation.ui.viewModels.isDecreaseOffsetButtonEnabled
 import com.example.whattoeat.presentation.ui.viewModels.isIncreaseOffsetButtonEnabled
-import com.example.whattoeat.presentation.ui.viewModels.numberOfCurrentPage
 import com.valentinilk.shimmer.shimmer
 
 @SuppressLint("CoroutineCreationDuringComposition")

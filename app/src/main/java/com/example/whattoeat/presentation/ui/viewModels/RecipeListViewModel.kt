@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.jvm.Throws
 
 enum class SearchType {
     COMPLEX_SEARCH,
@@ -48,7 +47,7 @@ sealed interface RecipeListModelState {
 
 data class RecipeListFilter(
     val query: String? = null,
-    val cuisines: List<Cuisines>? = null,
+    val cuisines: List<Cuisines> = emptyList(),
     val diet: List<Diets>? = null,
     val includedProducts: String? = null,
     val excludedProducts: String? = null,
@@ -69,6 +68,8 @@ internal data class RecipeListModel(
     val recipes: List<Recipe.RecipeComplexExt> = listOf(),
     val searchType: SearchType = SearchType.COMPLEX_SEARCH,
     val filter: RecipeListFilter = RecipeListFilter(),
+    val isCuisinesDropDownMenuExpanded: Boolean = false,
+    val isRecipeTypesDropDownMenuExpanded: Boolean = false,
     val isInfoSnackbarShowing: Boolean = false,
     val isSuccessSnackbarShowing: Boolean = false,
     val isWarningSnackbarShowing: Boolean = false,
@@ -123,9 +124,9 @@ sealed interface RecipeListPageEvent {
     data class IncludedProductsChange(val includedProducts: String) : RecipeListPageEvent
     data class ExcludedProductsChange(val excludedProducts: String) : RecipeListPageEvent
     data class SearchTypeChange(val searchType: SearchType) : RecipeListPageEvent
-    data class CuisineChange(val cuisine: Cuisines? = null) : RecipeListPageEvent
+    data class CuisineChange(val cuisine: Cuisines) : RecipeListPageEvent
     data class DietChange(val diet: Diets? = null) : RecipeListPageEvent
-    data class DishTypeChange(val type: DishTypes? = null) : RecipeListPageEvent
+    data class DishTypeChange(val type: DishTypes) : RecipeListPageEvent
     data class MaxReadyTimeChange(val max: Int? = null) : RecipeListPageEvent
     data class MinServingsChange(val min: Int? = null) : RecipeListPageEvent
     data class SortTypeChange(val sortType: SortTypes? = null) : RecipeListPageEvent
@@ -171,8 +172,78 @@ class RecipeListViewModel @Inject constructor(
             is RecipeListPageEvent.FavoriteRecipeChange -> onChangeFavoriteRecipe(event)
             is RecipeListPageEvent.IncreaseOffsetChange -> onChangeIncreaseOffset()
             is RecipeListPageEvent.DecreaseOffsetChange -> onChangeDecreaseOffset()
+            is RecipeListPageEvent.CuisineChange -> onChangeCuisine(event)
+            is RecipeListPageEvent.DishTypeChange -> onChangeDishType(event)
+            is RecipeListPageEvent.DietChange -> onChangeDiet(event)
             else -> {}
         }
+
+    private fun onChangeDiet(event: RecipeListPageEvent.DietChange) {
+        val checked = _uiState.value.filter.diet?.contains(event.diet) ?: false
+        if (checked) {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    filter = currentState.filter.copy(
+                        diet = currentState.filter.diet?.filter { it != event.diet }
+                    )
+                )
+            }
+        } else {
+            val diets = ArrayList(_uiState.value.filter.diet)
+            diets.add(event.diet)
+
+            _uiState.update { currentState ->
+                currentState.copy(
+                    filter = currentState.filter.copy(
+                        diet = diets
+                    )
+                )
+            }
+        }
+    }
+
+    private fun onChangeDishType(event: RecipeListPageEvent.DishTypeChange) {
+        val checked = _uiState.value.filter.type == event.type
+
+        if (checked) {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    filter = currentState.filter.copy(
+                        type = null
+                    )
+                )
+            }
+        } else {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    filter = currentState.filter.copy(
+                        type = event.type
+                    )
+                )
+            }
+        }
+    }
+
+    private fun onChangeCuisine(event: RecipeListPageEvent.CuisineChange) {
+        val checked = _uiState.value.filter.cuisines.contains(event.cuisine)
+        if (checked) {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    filter = currentState.filter.copy(
+                        cuisines = currentState.filter.cuisines.filter { it != event.cuisine }
+                    )
+                )
+            }
+        } else {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    filter = currentState.filter.copy(
+                        cuisines = listOf(*currentState.filter.cuisines.toTypedArray()) + event.cuisine
+                    )
+                )
+            }
+        }
+    }
 
     private fun onChangeDecreaseOffset() {
         val newOffset = _uiState.value.offset - _uiState.value.filter.number
