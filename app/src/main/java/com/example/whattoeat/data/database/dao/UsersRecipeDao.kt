@@ -31,7 +31,7 @@ interface UsersRecipeDao {
         select *
         from $TABLE_NAME
     """)
-    fun selectAll(): Flow<UsersRecipe>
+    fun selectAll(): Flow<List<UsersRecipe>>?
 
     @Query("""
         select *

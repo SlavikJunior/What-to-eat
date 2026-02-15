@@ -17,4 +17,5 @@ interface UsersRecipeRepository {
     suspend fun getRecipesAsRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Flow<Recipe.RecipeFullInformation>
 
     suspend fun getRecipesAsRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch): Flow<Recipe.RecipeByIngredients>
+    suspend fun getAllRecipes(): Flow<List<Recipe.RecipeByUser>>
 }

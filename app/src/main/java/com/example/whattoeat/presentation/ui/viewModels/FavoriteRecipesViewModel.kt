@@ -8,10 +8,10 @@ import com.example.whattoeat.domain.domain_entities.common.Recipe
 import com.example.whattoeat.domain.domain_entities.common.RecipeResult
 import com.example.whattoeat.domain.domain_entities.common.Resource
 import com.example.whattoeat.domain.search.RecipeSearch
-import com.example.whattoeat.domain.use_cases.AddFavoriteRecipeUseCase
-import com.example.whattoeat.domain.use_cases.GetFavoriteRecipesUseCase
-import com.example.whattoeat.domain.use_cases.GetRecipesUseCase
-import com.example.whattoeat.domain.use_cases.RemoveFavoriteRecipeUseCase
+import com.example.whattoeat.domain.useCases.AddFavoriteRecipeUseCase
+import com.example.whattoeat.domain.useCases.GetFavoriteRecipesUseCase
+import com.example.whattoeat.domain.useCases.GetRecipesUseCase
+import com.example.whattoeat.domain.useCases.RemoveFavoriteRecipeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job

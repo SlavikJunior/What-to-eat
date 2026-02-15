@@ -1,4 +1,4 @@
-package com.example.whattoeat.domain.use_cases
+package com.example.whattoeat.domain.useCases
 
 import com.example.whattoeat.data.yandex_translate.models.Languages
 import com.example.whattoeat.domain.repositories.TranslateApiRepository
