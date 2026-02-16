@@ -28,6 +28,6 @@ object SortDirectionSerializer : EnumFallbackSerializer<SortDirection>(SortDirec
 @Serializable(with = SortDirectionSerializer::class)
 enum class SortDirection(val text: String = "") {
 
-    @SerialName(value = "asc") ASC(text = "Прямое направление"),
-    @SerialName(value = "desc") DESC(text = "Обратное направление")
+    @SerialName(value = "asc") ASC(text = "Возрастание"),
+    @SerialName(value = "desc") DESC(text = "Убывание")
 }

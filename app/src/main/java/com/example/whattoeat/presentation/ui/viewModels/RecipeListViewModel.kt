@@ -48,7 +48,7 @@ sealed interface RecipeListModelState {
 data class RecipeListFilter(
     val query: String? = null,
     val cuisines: List<Cuisines> = emptyList(),
-    val diet: List<Diets>? = null,
+    val diet: List<Diets> = emptyList(),
 //    val includedProducts: String? = null,
 //    val excludedProducts: String? = null,
     val products: String? = null, // это уже для поиска по продуктам
@@ -229,7 +229,8 @@ class RecipeListViewModel @Inject constructor(
             _uiState.update { currentState ->
                 currentState.copy(
                     filter = currentState.filter.copy(
-                        sort = event.sortType
+                        sort = event.sortType,
+                        sortDirection = SortDirection.ASC
                     )
                 )
             }
@@ -237,13 +238,13 @@ class RecipeListViewModel @Inject constructor(
     }
 
     private fun onChangeDiet(event: RecipeListPageEvent.DietChange) {
-        val checked = _uiState.value.filter.diet?.contains(event.diet) ?: false
+        val checked = _uiState.value.filter.diet.contains(event.diet)
 
         if (checked) {
             _uiState.update { currentState ->
                 currentState.copy(
                     filter = currentState.filter.copy(
-                        diet = currentState.filter.diet?.filter { it != event.diet }
+                        diet = currentState.filter.diet - event.diet
                     )
                 )
             }
@@ -251,9 +252,7 @@ class RecipeListViewModel @Inject constructor(
             _uiState.update { currentState ->
                 currentState.copy(
                     filter = currentState.filter.copy(
-                        diet = currentState.filter.diet?.let { currentDiets ->
-                            currentDiets + event.diet
-                        } ?: listOf(event.diet)
+                        diet = currentState.filter.diet + event.diet
                     )
                 )
             }

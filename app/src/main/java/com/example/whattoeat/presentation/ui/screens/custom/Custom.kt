@@ -4,8 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -15,7 +17,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedIconToggleButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -24,11 +25,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.whattoeat.R
 import com.example.whattoeat.domain.domain_entities.support.Cuisines
 import com.example.whattoeat.domain.domain_entities.support.Diets
 import com.example.whattoeat.domain.domain_entities.support.DishTypes
@@ -48,20 +48,6 @@ fun FilterBottomSheet(
     FilterBottomSheetContent(
         uiState = uiState,
         onFilterBottomSheetVisibleChange = { viewModel.reduce(event = RecipeListPageEvent.IsFilterBottomSheetVisibleChange) },
-        onIncludedProductsChange = {
-            viewModel.reduce(
-                event = RecipeListPageEvent.IncludedProductsChange(
-                    it.includedProducts
-                )
-            )
-        },
-        onExcludedProductsChange = {
-            viewModel.reduce(
-                event = RecipeListPageEvent.ExcludedProductsChange(
-                    it.excludedProducts
-                )
-            )
-        },
         onCuisineChange = {
             viewModel.reduce(
                 event = RecipeListPageEvent.CuisineChange(
@@ -105,8 +91,6 @@ fun FilterBottomSheet(
 private fun FilterBottomSheetContent(
     uiState: State<RecipeListModel>,
     onFilterBottomSheetVisibleChange: (event: RecipeListPageEvent.IsFilterBottomSheetVisibleChange) -> Unit,
-    onIncludedProductsChange: (event: RecipeListPageEvent.IncludedProductsChange) -> Unit,
-    onExcludedProductsChange: (event: RecipeListPageEvent.ExcludedProductsChange) -> Unit,
     onCuisineChange: (event: RecipeListPageEvent.CuisineChange) -> Unit,
     onDishTypeChange: (event: RecipeListPageEvent.DishTypeChange) -> Unit,
     onDietChange: (event: RecipeListPageEvent.DietChange) -> Unit,
@@ -129,12 +113,6 @@ private fun FilterBottomSheetContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    ProductsBlock(
-                        uiState = uiState,
-                        onIncludedProductsChange = onIncludedProductsChange,
-                        onExcludedProductsChange = onExcludedProductsChange
-                    )
-
                     SortBlock(
                         uiState = uiState,
                         onSortTypeChange = onSortTypeChange,
@@ -179,48 +157,72 @@ private fun DietsBlock(
         item {
             ToggleButtonChip(
                 enum = Diets.GLUTEN_FREE,
-                checked = uiState.value.filter.diet?.contains(Diets.GLUTEN_FREE) ?: false,
-                onCheckedChange = { checked -> onDietChange }
+                checked = uiState.value.filter.diet.contains(Diets.GLUTEN_FREE),
+                onCheckedChange = { checked -> onDietChange(
+                    RecipeListPageEvent.DietChange(
+                        diet = Diets.GLUTEN_FREE
+                    ))
+                }
             )
         }
 
         item {
             ToggleButtonChip(
                 enum = Diets.VEGETARIAN,
-                checked = uiState.value.filter.diet?.contains(Diets.VEGETARIAN) ?: false,
-                onCheckedChange = { checked -> onDietChange }
+                checked = uiState.value.filter.diet.contains(Diets.VEGETARIAN),
+                onCheckedChange = { checked -> onDietChange(
+                    RecipeListPageEvent.DietChange(
+                        diet = Diets.VEGETARIAN
+                    ))
+                }
             )
         }
 
         item {
             ToggleButtonChip(
                 enum = Diets.VEGAN,
-                checked = uiState.value.filter.diet?.contains(Diets.VEGAN) ?: false,
-                onCheckedChange = { checked -> onDietChange }
+                checked = uiState.value.filter.diet.contains(Diets.VEGAN),
+                onCheckedChange = { checked -> onDietChange(
+                    RecipeListPageEvent.DietChange(
+                        diet = Diets.VEGAN
+                    ))
+                }
             )
         }
 
         item {
             ToggleButtonChip(
                 enum = Diets.KETOGENIC,
-                checked = uiState.value.filter.diet?.contains(Diets.KETOGENIC) ?: false,
-                onCheckedChange = { checked -> onDietChange }
+                checked = uiState.value.filter.diet.contains(Diets.KETOGENIC),
+                onCheckedChange = { checked -> onDietChange(
+                    RecipeListPageEvent.DietChange(
+                        diet = Diets.KETOGENIC
+                    ))
+                }
             )
         }
 
         item {
             ToggleButtonChip(
                 enum = Diets.PALEO,
-                checked = uiState.value.filter.diet?.contains(Diets.PALEO) ?: false,
-                onCheckedChange = { checked -> onDietChange }
+                checked = uiState.value.filter.diet.contains(Diets.PALEO),
+                onCheckedChange = { checked -> onDietChange(
+                    RecipeListPageEvent.DietChange(
+                        diet = Diets.PALEO
+                    ))
+                }
             )
         }
 
         item {
             ToggleButtonChip(
                 enum = Diets.PRIMAL,
-                checked = uiState.value.filter.diet?.contains(Diets.PRIMAL) ?: false,
-                onCheckedChange = { checked -> onDietChange }
+                checked = uiState.value.filter.diet.contains(Diets.PRIMAL),
+                onCheckedChange = { checked -> onDietChange(
+                    RecipeListPageEvent.DietChange(
+                        diet = Diets.PRIMAL
+                    ))
+                }
             )
         }
     }
@@ -455,6 +457,15 @@ private fun CuisinesBlock(
     }
 }
 
+//@Preview
+//@Composable
+//private fun ToggleButtonChipPreview() =
+//    ToggleButtonChip(
+//        enum = Cuisines.EASTERN_EUROPEAN,
+//        checked = false,
+//        onCheckedChange = {}
+//    )
+
 @Composable
 private fun ToggleButtonChip(
     enum: Enum<*>,
@@ -483,53 +494,15 @@ private fun ToggleButtonChip(
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
-                    text = name,
+                    text = name.lowercase(),
+                    modifier = Modifier.padding(horizontal = 6.dp),
                     style = MaterialTheme.typography.labelSmall,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontFamily = FontFamily.Monospace
                 )
             }
         }
     }
-}
-
-@Composable
-private fun ProductsBlock(
-    uiState: State<RecipeListModel>,
-    onIncludedProductsChange: (event: RecipeListPageEvent.IncludedProductsChange) -> Unit,
-    onExcludedProductsChange: (event: RecipeListPageEvent.ExcludedProductsChange) -> Unit,
-) {
-    HorizontalDivider()
-
-    Text(text = "Продукты")
-
-    OutlinedTextField(
-        label = {
-            Text(stringResource(R.string.inclusive_products_text_field_label))
-        },
-        value = uiState.value.filter.includedProducts.orEmpty(),
-        onValueChange = { newValue ->
-            onIncludedProductsChange(
-                RecipeListPageEvent.IncludedProductsChange(
-                    includedProducts = newValue
-                )
-            )
-        }
-    )
-
-    OutlinedTextField(
-        label = {
-            Text(stringResource(R.string.exclusive_products_text_field_label))
-        },
-        value = uiState.value.filter.excludedProducts.orEmpty(),
-        onValueChange = { newValue ->
-            onExcludedProductsChange(
-                RecipeListPageEvent.ExcludedProductsChange(
-                    excludedProducts = newValue
-                )
-            )
-        }
-    )
-
 }
 
 @Composable
@@ -571,25 +544,25 @@ private fun SortBlock(
             horizontalArrangement = Arrangement.spacedBy(32.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            item {
-                ToggleButtonChip(
-                    enum = SortTypes.MAX_USED_INGREDIENTS,
-                    checked = uiState.value.filter.sort == SortTypes.MAX_USED_INGREDIENTS,
-                    onCheckedChange = { checked ->
-                        onSortTypeChange(RecipeListPageEvent.SortTypeChange(sortType = SortTypes.MAX_USED_INGREDIENTS))
-                    }
-                )
-            }
-
-            item {
-                ToggleButtonChip(
-                    enum = SortTypes.MIN_MISSING_INGREDIENTS,
-                    checked = uiState.value.filter.sort == SortTypes.MIN_MISSING_INGREDIENTS,
-                    onCheckedChange = { checked ->
-                        onSortTypeChange(RecipeListPageEvent.SortTypeChange(sortType = SortTypes.MIN_MISSING_INGREDIENTS))
-                    }
-                )
-            }
+//            item {
+//                ToggleButtonChip(
+//                    enum = SortTypes.MAX_USED_INGREDIENTS,
+//                    checked = uiState.value.filter.sort == SortTypes.MAX_USED_INGREDIENTS,
+//                    onCheckedChange = { checked ->
+//                        onSortTypeChange(RecipeListPageEvent.SortTypeChange(sortType = SortTypes.MAX_USED_INGREDIENTS))
+//                    }
+//                )
+//            }
+//
+//            item {
+//                ToggleButtonChip(
+//                    enum = SortTypes.MIN_MISSING_INGREDIENTS,
+//                    checked = uiState.value.filter.sort == SortTypes.MIN_MISSING_INGREDIENTS,
+//                    onCheckedChange = { checked ->
+//                        onSortTypeChange(RecipeListPageEvent.SortTypeChange(sortType = SortTypes.MIN_MISSING_INGREDIENTS))
+//                    }
+//                )
+//            }
 
             item {
                 ToggleButtonChip(
