@@ -49,8 +49,9 @@ data class RecipeListFilter(
     val query: String? = null,
     val cuisines: List<Cuisines> = emptyList(),
     val diet: List<Diets>? = null,
-    val includedProducts: String? = null,
-    val excludedProducts: String? = null,
+//    val includedProducts: String? = null,
+//    val excludedProducts: String? = null,
+    val products: String? = null, // это уже для поиска по продуктам
     val type: DishTypes? = null,
     val instructionsRequired: Boolean = false,
     val maxReadyTime: Int? = null,
@@ -166,8 +167,8 @@ class RecipeListViewModel @Inject constructor(
             is RecipeListPageEvent.SearchButtonClicked -> onClickSearchButton()
             is RecipeListPageEvent.IsFilterBottomSheetVisibleChange -> onChangeFilterShitVisible()
             is RecipeListPageEvent.QueryChange -> onChangeQuery(event)
-            is RecipeListPageEvent.IncludedProductsChange -> onChangeIncludedProducts(event)
-            is RecipeListPageEvent.ExcludedProductsChange -> onChangeExcludedProducts(event)
+//            is RecipeListPageEvent.IncludedProductsChange -> onChangeIncludedProducts(event)
+//            is RecipeListPageEvent.ExcludedProductsChange -> onChangeExcludedProducts(event)
             is RecipeListPageEvent.SearchTypeChange -> onChangeSearchType(event)
             is RecipeListPageEvent.FavoriteRecipeChange -> onChangeFavoriteRecipe(event)
             is RecipeListPageEvent.IncreaseOffsetChange -> onChangeIncreaseOffset()
@@ -366,25 +367,25 @@ class RecipeListViewModel @Inject constructor(
         }
     }
 
-    private fun onChangeExcludedProducts(event: RecipeListPageEvent.ExcludedProductsChange) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                filter = currentState.filter.copy(
-                    excludedProducts = event.excludedProducts
-                )
-            )
-        }
-    }
+//    private fun onChangeExcludedProducts(event: RecipeListPageEvent.ExcludedProductsChange) {
+//        _uiState.update { currentState ->
+//            currentState.copy(
+//                filter = currentState.filter.copy(
+//                    excludedProducts = event.excludedProducts
+//                )
+//            )
+//        }
+//    }
 
-    private fun onChangeIncludedProducts(event: RecipeListPageEvent.IncludedProductsChange) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                filter = currentState.filter.copy(
-                    includedProducts = event.includedProducts
-                )
-            )
-        }
-    }
+//    private fun onChangeIncludedProducts(event: RecipeListPageEvent.IncludedProductsChange) {
+//        _uiState.update { currentState ->
+//            currentState.copy(
+//                filter = currentState.filter.copy(
+//                    includedProducts = event.includedProducts
+//                )
+//            )
+//        }
+//    }
 
     private fun onChangeQuery(event: RecipeListPageEvent.QueryChange) {
         _uiState.update { currentState ->
@@ -417,20 +418,24 @@ class RecipeListViewModel @Inject constructor(
                 }
 
                 val originalQuery = _uiState.value.filter.query ?: ""
-                val originalIncluded = _uiState.value.filter.includedProducts ?: ""
-                val originalExcluded = _uiState.value.filter.excludedProducts ?: ""
+//                val originalIncluded = _uiState.value.filter.includedProducts ?: ""
+//                val originalExcluded = _uiState.value.filter.excludedProducts ?: ""
 
                 val translated = translateText(
-                    input = listOf(originalQuery, originalIncluded, originalExcluded)
+                    input = listOf(
+                        originalQuery,
+//                        originalIncluded,
+//                        originalExcluded
+                    )
                 )
 
-                if (translated.size >= 3) {
+                if (translated.size >= 1) {
                     _uiState.update { currentState ->
                         currentState.copy(
                             filter = currentState.filter.copy(
                                 query = translated[0],
-                                includedProducts = translated[1],
-                                excludedProducts = translated[2]
+//                                includedProducts = translated[1],
+//                                excludedProducts = translated[2]
                             )
                         )
                     }
@@ -515,9 +520,9 @@ class RecipeListViewModel @Inject constructor(
     private fun combineRecipeSearchByDataFromUi(): RecipeSearch {
         val recipeSearch = with(_uiState.value) {
             if (searchType == SearchType.SEARCH_BY_INGREDIENTS) {
-                if (filter.includedProducts != null)
+                if (filter.products != null)
                     RecipeSearch.RecipeByIngredientsSearch(
-                        ingredients = filter.includedProducts,
+                        ingredients = filter.products,
                         number = filter.number,
                         ranking = filter.ranking,
                         ignorePantry = filter.ignorePantry,
