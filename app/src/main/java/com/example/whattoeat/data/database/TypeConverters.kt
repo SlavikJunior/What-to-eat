@@ -21,13 +21,13 @@ object TypeConverters {
 
     @TypeConverter
     fun fromCuisinesList(cuisines: List<Cuisines>): String =
-        json.encodeToString(cuisines.map { it.name })
+        json.encodeToString(cuisines.map { it.text })
 
     @TypeConverter
     fun toCuisinesList(jsonString: String): List<Cuisines> = json.decodeFromString<List<String>>(jsonString).map { Cuisines.valueOf(it) }
 
     @TypeConverter
-    fun fromDietsList(diets: List<Diets>): String = json.encodeToString(diets.map { it.name })
+    fun fromDietsList(diets: List<Diets>): String = json.encodeToString(diets.map { it.text })
 
     @TypeConverter
     fun toDietsList(jsonString: String): List<Diets> = json.decodeFromString<List<String>>(jsonString).map { Diets.valueOf(it) }
