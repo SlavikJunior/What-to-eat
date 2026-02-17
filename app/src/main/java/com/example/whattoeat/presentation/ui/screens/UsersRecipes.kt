@@ -177,16 +177,6 @@ fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
-            value = uiState.value.recipe.instructions.orEmpty(),
-            onValueChange = { newInstructions -> viewModel.reduce(event = UsersRecipesPageEvent.OnInstructionsChange(instructions = newInstructions)) },
-            label = { Text("Instructions") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            maxLines = 5
-        )
-
         Button(
             onClick = { viewModel.reduce(event = UsersRecipesPageEvent.SaveRecipe) },
             modifier = Modifier.fillMaxWidth(),

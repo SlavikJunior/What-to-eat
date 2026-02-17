@@ -27,32 +27,14 @@ data class UsersRecipesModel(
     val modelState: UsersRecipesModelState = UsersRecipesModelState.DefaultState,
     val recipes: List<Recipe.RecipeByUser> = emptyList(),
     val isAddSheetVisible: Boolean = false,
-    val recipe: Recipe.RecipeByUser = Recipe.RecipeByUser
-        (
-        image = null,
-        imageType = null,
-        title = "",
-        readyInMinutes = -1,
-        servings = -1,
-        sourceUrl = null,
-        vegetarian = null,
-        vegan = null,
-        glutenFree = null,
-        dairyFree = null,
-        veryHealthy = null,
-        cheap = null,
-        cookingMinutes = null,
-        healthScore = null,
-        ingredients = null,
-        summary = null,
-        cuisines = null,
-        dishTypes = null,
-        diets = null,
-        occasions = null,
-        instructions = null,
-        steps = null,
-        notes = null,
-    )
+    val recipe: Recipe.RecipeByUser =
+        Recipe.RecipeByUser(
+            title = "",
+            readyInMinutes = -1,
+            servings = -1,
+            notes = null,
+            ingredients = null
+        )
 )
 
 sealed interface UsersRecipesPageEvent {
@@ -139,26 +121,8 @@ class UsersRecipesViewModel @Inject constructor(
             val newRecipe = Recipe.RecipeByUser(
                 title = currentState.recipe.title,
                 readyInMinutes = currentState.recipe.readyInMinutes,
-                instructions = currentState.recipe.instructions,
-                image = null,
-                imageType = null,
                 servings = 1,
-                sourceUrl = null,
-                vegetarian = false,
-                vegan = false,
-                glutenFree = false,
-                dairyFree = false,
-                veryHealthy = false,
-                cheap = false,
-                cookingMinutes = null,
-                healthScore = null,
-                ingredients = emptyList(),
-                summary = currentState.recipe.summary,
-                cuisines = emptyList(),
-                dishTypes = emptyList(),
-                diets = emptyList(),
-                occasions = emptyList(),
-                steps = emptyList(),
+                ingredients = null,
                 notes = null
             )
 
