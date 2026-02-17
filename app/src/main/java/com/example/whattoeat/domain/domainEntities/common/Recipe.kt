@@ -9,6 +9,7 @@ sealed interface Recipe {
 
     @Serializable
     data class RecipeByUser(
+        val id: Int,
         val title: String,
         val readyInMinutes: Int?, // общее время готовки
         val servings: Int?, // порции

@@ -1,13 +1,14 @@
 package com.example.whattoeat.presentation.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,12 +21,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.toRoute
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domainEntities.common.Recipe
-import com.example.whattoeat.presentation.ui.nav.UsersRecipesDataObject
+import com.example.whattoeat.presentation.ui.viewModels.ButtonActionType
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesModelState
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesViewModel
@@ -79,6 +78,7 @@ fun UsersRecipes(
                 uiState.value.modelState is UsersRecipesModelState.LoadingState && uiState.value.recipes.isEmpty() -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 uiState.value.modelState is UsersRecipesModelState.ErrorState -> {
                     Text(
                         text = "Error: ${(uiState.value.modelState as UsersRecipesModelState.ErrorState).cause?.message}",
@@ -86,6 +86,7 @@ fun UsersRecipes(
                         color = MaterialTheme.colorScheme.error
                     )
                 }
+
                 uiState.value.recipes.isEmpty() -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center),
@@ -104,6 +105,7 @@ fun UsersRecipes(
                         )
                     }
                 }
+
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -122,6 +124,9 @@ fun UsersRecipes(
                                 },
                                 onDeleteClick = {
                                     viewModel.reduce(UsersRecipesPageEvent.DeleteRecipe(recipe))
+                                },
+                                onUpdateCLick = {
+                                    viewModel.reduce(UsersRecipesPageEvent.UpdateRecipeStart(recipe))
                                 }
                             )
                         }
@@ -131,7 +136,7 @@ fun UsersRecipes(
             }
         }
 
-        if (uiState.value.isAddSheetVisible) {
+        if (uiState.value.isSheetVisible) {
             val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
             ModalBottomSheet(
                 onDismissRequest = { viewModel.reduce(UsersRecipesPageEvent.IsAddSheetVisibleChange) },
@@ -143,10 +148,27 @@ fun UsersRecipes(
     }
 }
 
+//@Preview
+//@Composable
+//fun UserRecipeCardPreview() =
+//    UserRecipeCard(
+//        recipe = Recipe.RecipeByUser(
+//            title = "Рецепт блинов",
+//            readyInMinutes = 23,
+//            servings = 12,
+//            ingredients = "Яйца, мука, сахар, соль, масло",
+//            notes = "Лучший рецепт блинов чтобы удивить семью"
+//        ),
+//        onCardClick = { TODO() },
+//        onUpdateCLick = { TODO() },
+//        onDeleteClick = { TODO() }
+//    )
+
 @Composable
 fun UserRecipeCard(
     recipe: Recipe.RecipeByUser,
     onCardClick: () -> Unit,
+    onUpdateCLick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     Card(
@@ -228,15 +250,30 @@ fun UserRecipeCard(
                 }
             }
 
-            IconButton(
-                onClick = onDeleteClick,
-                modifier = Modifier.align(Alignment.CenterVertically)
+            Column(
+                modifier = Modifier.align(Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceAround
             ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
-                )
+                IconButton(
+                    onClick = onUpdateCLick,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Update",
+                        tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f)
+                    )
+                }
+
+                IconButton(
+                    onClick = onDeleteClick,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                    )
+                }
             }
         }
     }
@@ -327,11 +364,16 @@ fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
         )
 
         Button(
-            onClick = { viewModel.reduce(event = UsersRecipesPageEvent.SaveRecipe) },
+            onClick = {
+                if (uiState.value.buttonActionType == ButtonActionType.SAVE_RECIPE)
+                    viewModel.reduce(event = UsersRecipesPageEvent.SaveRecipe)
+                else
+                    viewModel.reduce(event = UsersRecipesPageEvent.UpdateRecipeEnd)
+            },
             modifier = Modifier.fillMaxWidth(),
             enabled = uiState.value.recipeByUserOnUi.title.isNotBlank()
         ) {
-            Text("Save Recipe")
+            Text(uiState.value.buttonActionType.text)
         }
         Spacer(modifier = Modifier.height(16.dp))
     }
