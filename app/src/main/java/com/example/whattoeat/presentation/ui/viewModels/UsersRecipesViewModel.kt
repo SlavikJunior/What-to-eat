@@ -7,6 +7,7 @@ import com.example.whattoeat.di.IoDispatcher
 import com.example.whattoeat.domain.domainEntities.common.Recipe
 import com.example.whattoeat.domain.useCases.DeleteUsersRecipeUseCase
 import com.example.whattoeat.domain.useCases.GetAllUsersRecipesUseCase
+import com.example.whattoeat.domain.useCases.UpdateUsersRecipeUseCase
 import com.example.whattoeat.domain.useCases.UploadUsersRecipeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,10 +37,16 @@ data class RecipeByUserOnUi(
     val notes: String = ""
 )
 
+enum class ButtonActionType(val text: String) {
+    SAVE_RECIPE("Save Recipe"),
+    UPDATE_RECIPE("Update Recipe")
+}
+
 data class UsersRecipesModel(
     val modelState: UsersRecipesModelState = UsersRecipesModelState.DefaultState,
     val recipes: List<Recipe.RecipeByUser> = emptyList(),
-    val isAddSheetVisible: Boolean = false,
+    val isSheetVisible: Boolean = false,
+    val buttonActionType: ButtonActionType = ButtonActionType.SAVE_RECIPE,
     val recipeByUserOnUi: RecipeByUserOnUi = RecipeByUserOnUi() // модель рецепта из интерфейса
 )
 
@@ -48,6 +55,8 @@ sealed interface UsersRecipesPageEvent {
     data object IsAddSheetVisibleChange : UsersRecipesPageEvent
     data object SaveRecipe : UsersRecipesPageEvent
     data class DeleteRecipe(val recipe: Recipe.RecipeByUser) : UsersRecipesPageEvent
+    data class UpdateRecipeStart(val recipe: Recipe.RecipeByUser) : UsersRecipesPageEvent
+    data object UpdateRecipeEnd : UsersRecipesPageEvent
     data class TitleChange(val title: String) : UsersRecipesPageEvent
     data class ReadyInMinutesChange(val readyInMinutes: String) : UsersRecipesPageEvent
     data class ServingsChange(val servings: String) : UsersRecipesPageEvent
@@ -62,12 +71,14 @@ class UsersRecipesViewModel @Inject constructor(
     private val getAllUsersRecipes: GetAllUsersRecipesUseCase,
     private val uploadUsersRecipe: UploadUsersRecipeUseCase,
     private val deleteUsersRecipe: DeleteUsersRecipeUseCase,
+    private val updateUsersRecipe: UpdateUsersRecipeUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UsersRecipesModel())
     val uiState = _uiState.asStateFlow()
 
     private var recipe: Recipe.RecipeByUser? = null // внутренняя модель рецепта
+    private var currentRecipeId: Int = 0
 
     init {
         reduce(UsersRecipesPageEvent.LoadRecipes)
@@ -76,15 +87,25 @@ class UsersRecipesViewModel @Inject constructor(
     fun reduce(event: UsersRecipesPageEvent) =
         when (event) {
             is UsersRecipesPageEvent.LoadRecipes -> onLoadRecipes()
-            is UsersRecipesPageEvent.IsAddSheetVisibleChange -> _uiState.update {
-                it.copy(
-                    isAddSheetVisible = !it.isAddSheetVisible
-                )
+            is UsersRecipesPageEvent.IsAddSheetVisibleChange -> {
+                if (uiState.value.isSheetVisible) {
+                    _uiState.update {
+                        it.copy(
+                            isSheetVisible = false,
+                            buttonActionType = ButtonActionType.SAVE_RECIPE,
+                            recipeByUserOnUi = RecipeByUserOnUi()
+                        )
+                    }
+                    currentRecipeId = 0
+                } else _uiState.update { it.copy(isSheetVisible = true) }
             }
 
             is UsersRecipesPageEvent.SaveRecipe -> onSaveRecipe()
 
-            is UsersRecipesPageEvent.DeleteRecipe -> onDeleteRecipe(event.recipe)
+            is UsersRecipesPageEvent.DeleteRecipe -> onDeleteRecipe(event)
+
+            is UsersRecipesPageEvent.UpdateRecipeStart -> onUpdateRecipeStart(event)
+            is UsersRecipesPageEvent.UpdateRecipeEnd -> onUpdateRecipeEnd()
 
             is UsersRecipesPageEvent.TitleChange -> _uiState.update {
                 it.copy(
@@ -162,7 +183,7 @@ class UsersRecipesViewModel @Inject constructor(
             _uiState.update { currentState ->
                 currentState.copy(
                     modelState = UsersRecipesModelState.ErrorState(cause = e),
-                    isAddSheetVisible = false,
+                    isSheetVisible = false,
                     recipeByUserOnUi = RecipeByUserOnUi()
                 )
             }
@@ -200,7 +221,10 @@ class UsersRecipesViewModel @Inject constructor(
         if (_uiState.value.recipeByUserOnUi.title.isNotBlank()) {
             recipe = with(_uiState.value.recipeByUserOnUi) {
                 try {
+                    val targetId = if (_uiState.value.buttonActionType == ButtonActionType.UPDATE_RECIPE) currentRecipeId else 0
+
                     val recipe = Recipe.RecipeByUser(
+                        id = targetId,
                         title = title,
                         readyInMinutes = if(readyInMinutes.isBlank()) 0 else readyInMinutes.trim().toInt(),
                         servings = if(servings.isBlank()) 0 else servings.trim().toInt(),
@@ -209,22 +233,87 @@ class UsersRecipesViewModel @Inject constructor(
                     )
 
                     Log.d(TAG, "Combined: $recipe")
-
                     recipe
                 } catch (e: NumberFormatException) {
                     Log.e(TAG, "NumberFormatException while combining")
-
                     throw UsersRecipesError.SaveError(cause = e)
                 }
             }
         }
     }
 
-    private fun onDeleteRecipe(recipe: Recipe.RecipeByUser) {
+    private fun onDeleteRecipe(event: UsersRecipesPageEvent.DeleteRecipe) {
         viewModelScope.launch {
-            val deleted = deleteUsersRecipe(recipe)
+            val deleted = deleteUsersRecipe(event.recipe)
             if (deleted > 0)
                 reduce(UsersRecipesPageEvent.LoadRecipes)
+        }
+    }
+
+    private fun onUpdateRecipeStart(event: UsersRecipesPageEvent.UpdateRecipeStart) {
+        currentRecipeId = event.recipe.id
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                buttonActionType = ButtonActionType.UPDATE_RECIPE,
+                isSheetVisible = true,
+                recipeByUserOnUi = currentState.recipeByUserOnUi.copy(
+                    title = event.recipe.title,
+                    readyInMinutes = event.recipe.readyInMinutes?.toString().orEmpty(),
+                    servings = event.recipe.servings?.toString().orEmpty(),
+                    ingredients = event.recipe.ingredients.orEmpty(),
+                    notes = event.recipe.notes.orEmpty()
+                )
+            )
+        }
+    }
+
+    private fun onUpdateRecipeEnd() {
+        try {
+            combineRecipeByUserFromRecipeBuUserOnUi()
+        } catch (e: UsersRecipesError.SaveError) {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    modelState = UsersRecipesModelState.ErrorState(cause = e),
+                    isSheetVisible = false,
+                    recipeByUserOnUi = RecipeByUserOnUi()
+                )
+            }
+            return
+        }
+
+        viewModelScope.launch {
+
+            recipe?.let { recipeByUser ->
+                var updated: Int
+                try {
+                     updated = updateUsersRecipe(recipeByUser)
+                } catch (cause: Throwable) {
+                    Log.e(TAG, "Error while updating!")
+
+                    _uiState.update {
+                        it.copy(
+                            modelState = UsersRecipesModelState.ErrorState(
+                                UsersRecipesError.CauseError(
+                                    cause
+                                )
+                            )
+                        )
+                    }
+                    return@let
+                }
+
+                if (updated > 0) {
+                    reduce(UsersRecipesPageEvent.IsAddSheetVisibleChange)
+                    reduce(UsersRecipesPageEvent.LoadRecipes)
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            modelState = UsersRecipesModelState.ErrorState(null)
+                        )
+                    }
+                }
+            }
         }
     }
 

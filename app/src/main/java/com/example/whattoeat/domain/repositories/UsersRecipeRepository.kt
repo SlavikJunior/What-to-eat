@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface UsersRecipeRepository {
 
+    suspend fun updateRecipe(recipe: Recipe.RecipeByUser): Int
+
     suspend fun uploadRecipe(recipe: Recipe.RecipeByUser): Long
 
     suspend fun deleteRecipe(recipe: Recipe.RecipeByUser): Int

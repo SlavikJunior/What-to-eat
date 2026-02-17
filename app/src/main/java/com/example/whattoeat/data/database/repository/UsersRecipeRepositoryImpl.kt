@@ -18,6 +18,18 @@ class UsersRecipeRepositoryImpl(
     val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     val usersRecipeDao: UsersRecipeDao
 ) : UsersRecipeRepository {
+    override suspend fun updateRecipe(recipe: Recipe.RecipeByUser) =
+        withContext(ioDispatcher) {
+            usersRecipeDao.update(
+                id = recipe.id,
+                title = recipe.title,
+                readyInMinutes = recipe.readyInMinutes,
+                servings = recipe.servings,
+                ingredients = recipe.ingredients,
+                notes = recipe.notes
+            )
+        }
+
     override suspend fun uploadRecipe(recipe: Recipe.RecipeByUser) =
         withContext(ioDispatcher) {
             usersRecipeDao.insert(UsersRecipe.fromRecipe(recipe))

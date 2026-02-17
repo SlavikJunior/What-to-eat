@@ -38,6 +38,7 @@ data class UsersRecipe(
 
     fun toRecipeByUser(): Recipe.RecipeByUser {
         return Recipe.RecipeByUser(
+            id = id,
             title = title,
             readyInMinutes = readyInMinutes,
             servings = servings ?: -1,
@@ -51,7 +52,7 @@ data class UsersRecipe(
 
         fun fromRecipe(recipe: Recipe.RecipeByUser): UsersRecipe {
             return UsersRecipe(
-                id = 0,
+                id = recipe.id,
                 title = recipe.title,
                 readyInMinutes = recipe.readyInMinutes,
                 servings = recipe.servings,
