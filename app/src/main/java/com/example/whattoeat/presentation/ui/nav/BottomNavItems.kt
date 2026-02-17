@@ -35,5 +35,5 @@ data object UsersRecipesBottomNavItem : BottomNavItem {
     override val imageVector = Icons.Default.Edit
     override val isStarted = false
     override val index = 3
-    override val route = UsersRecipesDataObject
+    override val route = UsersRecipesDataObject()
 }

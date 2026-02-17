@@ -40,10 +40,13 @@ fun WhatToEatNavHost(
                 paddingValues = paddingValues
             )
         }
-        composable<UsersRecipesDataObject> {
+        composable<UsersRecipesDataObject> { navBackStackEntry ->
+            val data: UsersRecipesDataObject = navBackStackEntry.toRoute()
+
             UsersRecipes(
                 navController = navController,
-                paddingValues = paddingValues
+                paddingValues = paddingValues,
+                openAddSheet = data.openAddSheet
             )
         }
     }
