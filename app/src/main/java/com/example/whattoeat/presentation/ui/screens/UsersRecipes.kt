@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.whattoeat.domain.domainEntities.common.Recipe
-import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesModelState
+import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -163,15 +163,15 @@ fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
         Text("New Recipe", style = MaterialTheme.typography.headlineSmall)
 
         OutlinedTextField(
-            value = uiState.value.recipe.title,
-            onValueChange = { newTitle -> viewModel.reduce(event = UsersRecipesPageEvent.OnTitleChange(title = newTitle)) },
+            value = uiState.value.recipeByUserOnUi.title,
+            onValueChange = { newTitle -> viewModel.reduce(event = UsersRecipesPageEvent.TitleChange(title = newTitle)) },
             label = { Text("Title") },
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
-            value = uiState.value.recipe.readyInMinutes.toString(),
-            onValueChange = { newTime -> viewModel.reduce(event = UsersRecipesPageEvent.OnTimeChange(readyInMinutes = newTime.toInt())) },
+            value = uiState.value.recipeByUserOnUi.readyInMinutes,
+            onValueChange = { newTime -> viewModel.reduce(event = UsersRecipesPageEvent.ReadyInMinutesChange(readyInMinutes = newTime)) },
             label = { Text(text = "Cooking Time (minutes)") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
@@ -180,7 +180,7 @@ fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
         Button(
             onClick = { viewModel.reduce(event = UsersRecipesPageEvent.SaveRecipe) },
             modifier = Modifier.fillMaxWidth(),
-            enabled = uiState.value.recipe.title.isNotBlank()
+            enabled = uiState.value.recipeByUserOnUi.title.isNotBlank()
         ) {
             Text("Save Recipe")
         }
