@@ -1,25 +1,20 @@
 package com.example.whattoeat.data.net.repository
 
 import android.util.Log
-import com.example.whattoeat.data.database.dao.CachedRecipeComplexDao
-import com.example.whattoeat.data.database.entity.CachedRecipeComplex
 import com.example.whattoeat.data.net.service.SpoonacularApiService
 import com.example.whattoeat.di.IoDispatcher
 import com.example.whattoeat.di.SpoonacularJson
-import com.example.whattoeat.domain.domain_entities.common.Recipe
-import com.example.whattoeat.domain.domain_entities.common.RecipeResult
-import com.example.whattoeat.domain.domain_entities.common.Resource
+import com.example.whattoeat.domain.domainEntities.common.Recipe
+import com.example.whattoeat.domain.domainEntities.common.RecipeResult
+import com.example.whattoeat.domain.domainEntities.common.Resource
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.example.whattoeat.domain.search.RecipeSearch
 import com.example.whattoeat.domain.search.toQueryMap
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 

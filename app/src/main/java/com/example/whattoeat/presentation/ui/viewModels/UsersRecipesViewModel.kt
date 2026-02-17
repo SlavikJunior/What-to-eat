@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.di.IoDispatcher
-import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domainEntities.common.Recipe
 import com.example.whattoeat.domain.useCases.DeleteUsersRecipeUseCase
 import com.example.whattoeat.domain.useCases.GetAllUsersRecipesUseCase
 import com.example.whattoeat.domain.useCases.UploadUsersRecipeUseCase
@@ -43,7 +43,7 @@ data class UsersRecipesModel(
         cheap = null,
         cookingMinutes = null,
         healthScore = null,
-        extendedIngredients = null,
+        ingredients = null,
         summary = null,
         cuisines = null,
         dishTypes = null,
@@ -152,7 +152,7 @@ class UsersRecipesViewModel @Inject constructor(
                 cheap = false,
                 cookingMinutes = null,
                 healthScore = null,
-                extendedIngredients = emptyList(),
+                ingredients = emptyList(),
                 summary = currentState.recipe.summary,
                 cuisines = emptyList(),
                 dishTypes = emptyList(),

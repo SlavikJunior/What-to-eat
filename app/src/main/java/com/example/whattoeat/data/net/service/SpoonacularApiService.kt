@@ -1,6 +1,6 @@
 package com.example.whattoeat.data.net.service
 
-import com.example.whattoeat.domain.domain_entities.common.RecipeResult
+import com.example.whattoeat.domain.domainEntities.common.RecipeResult
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query

@@ -3,8 +3,8 @@ package com.example.whattoeat.data.database.repository
 import com.example.whattoeat.data.database.dao.UsersRecipeDao
 import com.example.whattoeat.data.database.entity.UsersRecipe
 import com.example.whattoeat.di.IoDispatcher
-import com.example.whattoeat.domain.domain_entities.common.Recipe
-import com.example.whattoeat.domain.domain_entities.support.Ingredient
+import com.example.whattoeat.domain.domainEntities.common.Recipe
+import com.example.whattoeat.domain.domainEntities.support.Ingredient
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import com.example.whattoeat.domain.search.RecipeSearch
 import kotlinx.coroutines.CoroutineDispatcher
@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withContext
 
 class UsersRecipeRepositoryImpl(

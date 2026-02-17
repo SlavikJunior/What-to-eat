@@ -6,11 +6,11 @@ import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.whattoeat.data.database.entity.UsersRecipe.Companion.TABLE_NAME
-import com.example.whattoeat.domain.domain_entities.common.Recipe
-import com.example.whattoeat.domain.domain_entities.support.Cuisines
-import com.example.whattoeat.domain.domain_entities.support.Diets
-import com.example.whattoeat.domain.domain_entities.support.DishTypes
-import com.example.whattoeat.domain.domain_entities.support.Ingredient
+import com.example.whattoeat.domain.domainEntities.common.Recipe
+import com.example.whattoeat.domain.domainEntities.support.Cuisines
+import com.example.whattoeat.domain.domainEntities.support.Diets
+import com.example.whattoeat.domain.domainEntities.support.DishTypes
+import com.example.whattoeat.domain.domainEntities.support.Ingredient
 
 @Entity(
     tableName = TABLE_NAME,
@@ -92,7 +92,7 @@ data class UsersRecipe(
             servings = servings ?: -1,
             sourceUrl = sourceUrl.orEmpty(),
             cookingMinutes = cookingMinutes.orEmpty(),
-            extendedIngredients = extendedIngredients,
+            ingredients = extendedIngredients,
             steps = emptyList(),
             notes = "",
         )
@@ -130,7 +130,7 @@ data class UsersRecipe(
                 veryHealthy = recipe.veryHealthy,
                 cheap = recipe.cheap,
                 cookingMinutes = recipe.cookingMinutes,
-                extendedIngredients = recipe.extendedIngredients,
+                extendedIngredients = recipe.ingredients,
                 summary = recipe.summary,
                 cuisines = recipe.cuisines,
                 dishTypes = recipe.dishTypes,

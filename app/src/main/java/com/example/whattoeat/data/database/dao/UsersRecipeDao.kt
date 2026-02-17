@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.example.whattoeat.data.database.entity.UsersRecipe.Companion.TABLE_NAME
 import com.example.whattoeat.data.database.entity.UsersRecipe
-import com.example.whattoeat.domain.domain_entities.common.Recipe
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -1,6 +1,6 @@
 package com.example.whattoeat.domain.repositories
 
-import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domainEntities.common.Recipe
 import com.example.whattoeat.domain.search.RecipeSearch
 import kotlinx.coroutines.flow.Flow
 

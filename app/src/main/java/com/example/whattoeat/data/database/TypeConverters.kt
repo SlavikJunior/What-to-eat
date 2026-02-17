@@ -1,11 +1,11 @@
 package com.example.whattoeat.data.database
 
 import androidx.room.TypeConverter
-import com.example.whattoeat.domain.domain_entities.support.AnalyzedInstruction
-import com.example.whattoeat.domain.domain_entities.support.Cuisines
-import com.example.whattoeat.domain.domain_entities.support.Diets
-import com.example.whattoeat.domain.domain_entities.support.DishTypes
-import com.example.whattoeat.domain.domain_entities.support.Ingredient
+import com.example.whattoeat.domain.domainEntities.support.AnalyzedInstruction
+import com.example.whattoeat.domain.domainEntities.support.Cuisines
+import com.example.whattoeat.domain.domainEntities.support.Diets
+import com.example.whattoeat.domain.domainEntities.support.DishTypes
+import com.example.whattoeat.domain.domainEntities.support.Ingredient
 import kotlinx.serialization.json.Json
 
 object TypeConverters {

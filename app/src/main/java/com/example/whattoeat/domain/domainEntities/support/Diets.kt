@@ -1,4 +1,4 @@
-package com.example.whattoeat.domain.domain_entities.support
+package com.example.whattoeat.domain.domainEntities.support
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
