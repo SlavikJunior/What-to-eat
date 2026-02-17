@@ -1,13 +1,8 @@
 package com.example.whattoeat.domain.search
 
-import com.example.whattoeat.domain.domain_entities.support.*
+import com.example.whattoeat.domain.domainEntities.support.*
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import java.lang.reflect.Field
 import kotlin.collections.forEach
-import kotlin.reflect.KProperty
-import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 

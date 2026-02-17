@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.whattoeat.data.database.entity.FavoriteRecipe.Companion.TABLE_NAME
-import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domainEntities.common.Recipe
 
 @Entity(tableName = TABLE_NAME,)
 data class FavoriteRecipe(

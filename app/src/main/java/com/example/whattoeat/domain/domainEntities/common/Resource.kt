@@ -1,4 +1,4 @@
-package com.example.whattoeat.domain.domain_entities.common
+package com.example.whattoeat.domain.domainEntities.common
 
 sealed class Resource<T>(
     open val data: T? = null,

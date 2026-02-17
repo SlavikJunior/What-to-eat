@@ -31,12 +31,13 @@ fun WhatToEatFloatingActionButton(
     if (isRecipeList) {
         FloatingActionButton(
             onClick = {
-                navController.navigate(route = UsersRecipesDataObject) {
+                navController.navigate(
+                    UsersRecipesDataObject(openAddSheet = true)
+                ) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
                     }
                     launchSingleTop = true
-                    restoreState = true
                 }
             },
             content = {

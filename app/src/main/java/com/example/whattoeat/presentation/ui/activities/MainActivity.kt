@@ -2,6 +2,7 @@ package com.example.whattoeat.presentation.ui.activities
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -28,12 +29,12 @@ class MainActivity : ComponentActivity() {
             WhatToEatTheme {
                 val navController = rememberNavController()
 
-//                navController.addOnDestinationChangedListener { controller, _, _ ->
-//                    val routes = controller
-//                        .currentBackStack.value.joinToString(", ") { it.destination.route.toString() }
-//
-//                    Log.d("BackStackLog", "BackStack: $routes")
-//                }
+                navController.addOnDestinationChangedListener { controller, _, _ ->
+                    val routes = controller
+                        .currentBackStack.value.joinToString(", ") { it.destination.route.toString() }
+
+                    Log.d("BackStackLog", "BackStack: $routes")
+                }
 
                 Scaffold(
                     floatingActionButton = { WhatToEatFloatingActionButton(navController = navController) },

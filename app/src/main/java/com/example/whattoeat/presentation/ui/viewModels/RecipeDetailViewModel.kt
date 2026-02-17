@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.di.IoDispatcher
-import com.example.whattoeat.domain.domain_entities.common.Recipe.*
-import com.example.whattoeat.domain.domain_entities.common.RecipeResult
-import com.example.whattoeat.domain.domain_entities.common.Resource
+import com.example.whattoeat.domain.domainEntities.common.Recipe.*
+import com.example.whattoeat.domain.domainEntities.common.RecipeResult
+import com.example.whattoeat.domain.domainEntities.common.Resource
 import com.example.whattoeat.domain.search.RecipeSearch
 import com.example.whattoeat.domain.useCases.AddFavoriteRecipeUseCase
 import com.example.whattoeat.domain.useCases.GetRecipesUseCase

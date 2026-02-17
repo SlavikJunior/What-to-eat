@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.di.IoDispatcher
-import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domainEntities.common.Recipe
 import com.example.whattoeat.domain.useCases.DeleteUsersRecipeUseCase
 import com.example.whattoeat.domain.useCases.GetAllUsersRecipesUseCase
 import com.example.whattoeat.domain.useCases.UploadUsersRecipeUseCase
@@ -17,42 +17,30 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+sealed class UsersRecipesError(override val cause: Throwable?) : Throwable(cause) {
+    data class SaveError(override val cause: Throwable?) : UsersRecipesError(cause)
+    data class CauseError(override val cause: Throwable?) : UsersRecipesError(cause)
+}
+
 sealed interface UsersRecipesModelState {
     data object DefaultState : UsersRecipesModelState
     data object LoadingState : UsersRecipesModelState
-    data class ErrorState(val cause: Throwable?) : UsersRecipesModelState
+    data class ErrorState(val cause: UsersRecipesError?) : UsersRecipesModelState
 }
+
+data class RecipeByUserOnUi(
+    val title: String = "",
+    val readyInMinutes: String = "",
+    val servings: String = "",
+    val ingredients: String = "",
+    val notes: String = ""
+)
 
 data class UsersRecipesModel(
     val modelState: UsersRecipesModelState = UsersRecipesModelState.DefaultState,
     val recipes: List<Recipe.RecipeByUser> = emptyList(),
     val isAddSheetVisible: Boolean = false,
-    val recipe: Recipe.RecipeByUser = Recipe.RecipeByUser
-        (
-        image = null,
-        imageType = null,
-        title = "",
-        readyInMinutes = -1,
-        servings = -1,
-        sourceUrl = null,
-        vegetarian = null,
-        vegan = null,
-        glutenFree = null,
-        dairyFree = null,
-        veryHealthy = null,
-        cheap = null,
-        cookingMinutes = null,
-        healthScore = null,
-        extendedIngredients = null,
-        summary = null,
-        cuisines = null,
-        dishTypes = null,
-        diets = null,
-        occasions = null,
-        instructions = null,
-        steps = null,
-        notes = null,
-    )
+    val recipeByUserOnUi: RecipeByUserOnUi = RecipeByUserOnUi() // модель рецепта из интерфейса
 )
 
 sealed interface UsersRecipesPageEvent {
@@ -60,9 +48,11 @@ sealed interface UsersRecipesPageEvent {
     data object IsAddSheetVisibleChange : UsersRecipesPageEvent
     data object SaveRecipe : UsersRecipesPageEvent
     data class DeleteRecipe(val recipe: Recipe.RecipeByUser) : UsersRecipesPageEvent
-    data class OnTitleChange(val title: String) : UsersRecipesPageEvent
-    data class OnTimeChange(val readyInMinutes: Int) : UsersRecipesPageEvent
-    data class OnInstructionsChange(val instructions: String) : UsersRecipesPageEvent
+    data class TitleChange(val title: String) : UsersRecipesPageEvent
+    data class ReadyInMinutesChange(val readyInMinutes: String) : UsersRecipesPageEvent
+    data class ServingsChange(val servings: String) : UsersRecipesPageEvent
+    data class IngredientsChange(val ingredients: String) : UsersRecipesPageEvent
+    data class NotesChange(val notes: String) : UsersRecipesPageEvent
 }
 
 @HiltViewModel
@@ -77,42 +67,68 @@ class UsersRecipesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UsersRecipesModel())
     val uiState = _uiState.asStateFlow()
 
+    private var recipe: Recipe.RecipeByUser? = null // внутренняя модель рецепта
+
     init {
         reduce(UsersRecipesPageEvent.LoadRecipes)
     }
 
     fun reduce(event: UsersRecipesPageEvent) =
         when (event) {
-            is UsersRecipesPageEvent.LoadRecipes -> loadRecipes()
+            is UsersRecipesPageEvent.LoadRecipes -> onLoadRecipes()
             is UsersRecipesPageEvent.IsAddSheetVisibleChange -> _uiState.update {
                 it.copy(
                     isAddSheetVisible = !it.isAddSheetVisible
                 )
             }
 
-            is UsersRecipesPageEvent.OnTitleChange -> _uiState.update {
+            is UsersRecipesPageEvent.SaveRecipe -> onSaveRecipe()
+
+            is UsersRecipesPageEvent.DeleteRecipe -> onDeleteRecipe(event.recipe)
+
+            is UsersRecipesPageEvent.TitleChange -> _uiState.update {
                 it.copy(
-                    recipe = it.recipe.copy(
+                    recipeByUserOnUi = it.recipeByUserOnUi.copy(
                         title = event.title
                     )
                 )
             }
 
-            is UsersRecipesPageEvent.OnTimeChange -> _uiState.update {
+            is UsersRecipesPageEvent.ReadyInMinutesChange -> _uiState.update {
                 it.copy(
-                    recipe = it.recipe.copy(
+                    recipeByUserOnUi = it.recipeByUserOnUi.copy(
                         readyInMinutes = event.readyInMinutes
                     )
                 )
             }
 
-            is UsersRecipesPageEvent.SaveRecipe -> saveNewRecipe()
-            is UsersRecipesPageEvent.DeleteRecipe -> deleteRecipe(event.recipe)
-            else -> {}
+            is UsersRecipesPageEvent.ServingsChange -> _uiState.update {
+                it.copy(
+                    recipeByUserOnUi = it.recipeByUserOnUi.copy(
+                        servings = event.servings
+                    )
+                )
+            }
+
+            is UsersRecipesPageEvent.IngredientsChange -> _uiState.update {
+                it.copy(
+                    recipeByUserOnUi = it.recipeByUserOnUi.copy(
+                        ingredients = event.ingredients
+                    )
+                )
+            }
+
+            is UsersRecipesPageEvent.NotesChange -> _uiState.update {
+                it.copy(
+                    recipeByUserOnUi = it.recipeByUserOnUi.copy(
+                        notes = event.notes
+                    )
+                )
+            }
         }
 
-    private fun loadRecipes() {
-        viewModelScope.launch(ioDispatcher) {
+    private fun onLoadRecipes() {
+        viewModelScope.launch {
             _uiState.update { it.copy(modelState = UsersRecipesModelState.LoadingState) }
 
             try {
@@ -123,53 +139,88 @@ class UsersRecipesViewModel @Inject constructor(
                             modelState = UsersRecipesModelState.DefaultState
                         )
                     }
+
+                    Log.d(TAG, "Collected: $recipes")
                 }
             } catch (cause: Throwable) {
                 Log.e(TAG, "Error: $cause")
-                _uiState.update { it.copy(modelState = UsersRecipesModelState.ErrorState(cause = cause)) }
+                _uiState.update {
+                    it.copy(
+                        modelState = UsersRecipesModelState.ErrorState(
+                            UsersRecipesError.CauseError(cause)
+                        )
+                    )
+                }
             }
         }
     }
 
-    private fun saveNewRecipe() {
-        val currentState = _uiState.value
-        if (currentState.recipe.title.isBlank()) return
+    private fun onSaveRecipe() {
+        try {
+            combineRecipeByUserFromRecipeBuUserOnUi()
+        } catch (e: UsersRecipesError.SaveError) {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    modelState = UsersRecipesModelState.ErrorState(cause = e),
+                    isAddSheetVisible = false,
+                    recipeByUserOnUi = RecipeByUserOnUi()
+                )
+            }
+            return
+        }
 
-        viewModelScope.launch(ioDispatcher) {
-            val newRecipe = Recipe.RecipeByUser(
-                title = currentState.recipe.title,
-                readyInMinutes = currentState.recipe.readyInMinutes,
-                instructions = currentState.recipe.instructions,
-                image = null,
-                imageType = null,
-                servings = 1,
-                sourceUrl = null,
-                vegetarian = false,
-                vegan = false,
-                glutenFree = false,
-                dairyFree = false,
-                veryHealthy = false,
-                cheap = false,
-                cookingMinutes = null,
-                healthScore = null,
-                extendedIngredients = emptyList(),
-                summary = currentState.recipe.summary,
-                cuisines = emptyList(),
-                dishTypes = emptyList(),
-                diets = emptyList(),
-                occasions = emptyList(),
-                steps = emptyList(),
-                notes = null
-            )
+        viewModelScope.launch {
 
-            uploadUsersRecipe(newRecipe)
+            recipe?.let { recipeByUser ->
+                try {
+                    uploadUsersRecipe(recipeByUser)
+                } catch (cause: Throwable) {
+                    Log.e(TAG, "Error while uploading!")
 
-            reduce(UsersRecipesPageEvent.IsAddSheetVisibleChange)
-            reduce(UsersRecipesPageEvent.LoadRecipes)
+                    _uiState.update {
+                        it.copy(
+                            modelState = UsersRecipesModelState.ErrorState(
+                                UsersRecipesError.CauseError(
+                                    cause
+                                )
+                            )
+                        )
+                    }
+                    return@let
+                }
+
+                reduce(UsersRecipesPageEvent.IsAddSheetVisibleChange)
+                reduce(UsersRecipesPageEvent.LoadRecipes)
+            }
         }
     }
 
-    private fun deleteRecipe(recipe: Recipe.RecipeByUser) {
+    @Throws(UsersRecipesError.SaveError::class)
+    private fun combineRecipeByUserFromRecipeBuUserOnUi() {
+        if (_uiState.value.recipeByUserOnUi.title.isNotBlank()) {
+            recipe = with(_uiState.value.recipeByUserOnUi) {
+                try {
+                    val recipe = Recipe.RecipeByUser(
+                        title = title,
+                        readyInMinutes = if(readyInMinutes.isBlank()) 0 else readyInMinutes.trim().toInt(),
+                        servings = if(servings.isBlank()) 0 else servings.trim().toInt(),
+                        ingredients = ingredients,
+                        notes = notes
+                    )
+
+                    Log.d(TAG, "Combined: $recipe")
+
+                    recipe
+                } catch (e: NumberFormatException) {
+                    Log.e(TAG, "NumberFormatException while combining")
+
+                    throw UsersRecipesError.SaveError(cause = e)
+                }
+            }
+        }
+    }
+
+    private fun onDeleteRecipe(recipe: Recipe.RecipeByUser) {
         viewModelScope.launch {
             val deleted = deleteUsersRecipe(recipe)
             if (deleted > 0)

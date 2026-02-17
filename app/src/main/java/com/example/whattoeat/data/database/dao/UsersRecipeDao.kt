@@ -3,9 +3,8 @@ package com.example.whattoeat.data.database.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.example.whattoeat.data.database.entity.UsersRecipe.Companion.TABLE_NAME
 import com.example.whattoeat.data.database.entity.UsersRecipe
-import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.data.database.entity.UsersRecipe.Companion.TABLE_NAME
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -23,33 +22,6 @@ interface UsersRecipeDao {
     @Query("""
         select *
         from $TABLE_NAME
-        where id = :id
-    """)
-    suspend fun selectById(id: Int): UsersRecipe?
-
-    @Query("""
-        select *
-        from $TABLE_NAME
     """)
     fun selectAll(): Flow<List<UsersRecipe>>?
-
-    @Query("""
-        select *
-        from $TABLE_NAME
-        where title like '%' || :query || '%'
-    """)
-    fun selectByTitle(query: String): Flow<UsersRecipe>
-
-    @Query("""
-        select *
-        from $TABLE_NAME 
-        where extended_ingredients like '%' || :ingredient1 || '%'
-           or extended_ingredients like '%' || :ingredient2 || '%'
-           or extended_ingredients like '%' || :ingredient3 || '%'
-    """)
-    fun selectByMultipleIngredients(
-        ingredient1: String,
-        ingredient2: String? = null,
-        ingredient3: String? = null
-    ): Flow<UsersRecipe>
 }

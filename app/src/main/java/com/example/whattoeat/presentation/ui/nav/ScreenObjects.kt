@@ -13,4 +13,6 @@ value class RecipeDetailDataObject(val recipeId: Int)
 data object FavoriteRecipesDataObject
 
 @Serializable
-data object UsersRecipesDataObject
+data class UsersRecipesDataObject(
+    val openAddSheet: Boolean = false
+)

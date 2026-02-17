@@ -1,6 +1,6 @@
 package com.example.whattoeat.domain.useCases
 
-import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domainEntities.common.Recipe
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
 import javax.inject.Inject
 

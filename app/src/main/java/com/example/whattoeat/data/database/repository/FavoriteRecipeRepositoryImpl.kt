@@ -2,13 +2,11 @@ package com.example.whattoeat.data.database.repository
 
 import com.example.whattoeat.data.database.dao.FavoriteRecipeDao
 import com.example.whattoeat.data.database.entity.FavoriteRecipe
-import com.example.whattoeat.domain.domain_entities.common.Recipe
+import com.example.whattoeat.domain.domainEntities.common.Recipe
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
-import com.example.whattoeat.domain.search.RecipeSearch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton

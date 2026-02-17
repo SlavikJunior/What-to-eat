@@ -1,4 +1,4 @@
-package com.example.whattoeat.domain.domain_entities.common
+package com.example.whattoeat.domain.domainEntities.common
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
