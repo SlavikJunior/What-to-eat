@@ -180,11 +180,24 @@ private fun RecipeDetailContent(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Chip(stringResource(R.string.ready_in_minutes_title, recipe.readyInMinutes))
-                Chip(stringResource(R.string.servings_title, recipe.servings))
-                Chip(stringResource(R.string.agregate_likes_title, recipe.aggregateLikes))
+                Chip(stringResource(R.string.ready_in_minutes_title, recipe.readyInMinutes).lowercase())
+                Chip(stringResource(R.string.servings_title, recipe.servings).lowercase())
+                Chip(stringResource(R.string.agregate_likes_title, recipe.aggregateLikes).lowercase())
                 Chip(stringResource(R.string.health_title, recipe.healthScore.toInt()))
                 Chip(stringResource(R.string.score_title, recipe.spoonacularScore.toInt()))
+            }
+        }
+
+        item {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Chip(stringResource(if (recipe.vegetarian) R.string.vegetarian_title_true else R.string.vegetarian_title_false).lowercase())
+                Chip(stringResource(if (recipe.vegan) R.string.vegan_title_true else R.string.vegan_title_false).lowercase())
+                Chip(stringResource(if (recipe.glutenFree) R.string.gluten_free_title_true else R.string.gluten_free_title_false).lowercase())
+                Chip(stringResource(if (recipe.dairyFree) R.string.dairy_free_title_true else R.string.dairy_free_title_false).lowercase())
+                Chip(stringResource(if (recipe.veryHealthy) R.string.very_healthy_title_true else R.string.very_healthy_title_false).lowercase())
             }
         }
 
@@ -323,7 +336,7 @@ private fun Chip(text: String) {
 }
 
 @Composable
-fun SimilarRecipeCard(
+private fun SimilarRecipeCard(
     recipe: Recipe.RecipeSimilarExt,
     onClick: () -> Unit,
     onFavoriteClick: () -> Unit,
