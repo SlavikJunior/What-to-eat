@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,7 +61,6 @@ import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailModelState
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailViewModel
-import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
 import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,7 +127,9 @@ fun RecipeDetail(
                                         similar
                                     )
                                 )
-                            }
+                            },
+                            onTranslateClick = { viewModel.reduce(event = RecipeDetailPageEvent.TranslateRecipe) },
+                            isTranslated = uiState.isTranslated
                         )
                     }
                 }
@@ -147,7 +149,9 @@ private fun RecipeDetailContent(
     recipe: Recipe.RecipeFullInformationExt,
     similarRecipes: List<Recipe.RecipeSimilarExt>,
     onSimilarClick: (Int) -> Unit,
-    onSimilarFavorite: (Recipe.RecipeSimilarExt) -> Unit
+    onSimilarFavorite: (Recipe.RecipeSimilarExt) -> Unit,
+    onTranslateClick: () -> Unit,
+    isTranslated: Boolean,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -210,6 +214,21 @@ private fun RecipeDetailContent(
         }
 
         item {
+            Button(
+                onClick = onTranslateClick,
+                enabled = !isTranslated
+            ) {
+                Text(
+                    text = "Translate Instruction",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+
+        item {
             InstructionsSection(
                 analyzedInstructions = recipe.analyzedInstructions,
                 fallbackText = recipe.instructions
@@ -260,7 +279,7 @@ private fun InstructionsSection(
     Spacer(Modifier.height(12.dp))
 
     if (analyzedInstructions.isNotEmpty()) {
-        analyzedInstructions.forEach { block ->
+        analyzedInstructions.first().let { block ->
             if (block.name.isNotBlank()) {
                 Text(
                     block.name,
