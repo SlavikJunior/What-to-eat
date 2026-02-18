@@ -291,12 +291,6 @@ private fun RecipeComplexExtCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = "ID: ${recipe.id}",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-
                     IconButton(
                         onClick = {
                             viewModel.reduce(

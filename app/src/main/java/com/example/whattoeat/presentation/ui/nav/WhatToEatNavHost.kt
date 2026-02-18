@@ -9,6 +9,7 @@ import androidx.navigation.toRoute
 import com.example.whattoeat.presentation.ui.screens.FavoriteRecipes
 import com.example.whattoeat.presentation.ui.screens.RecipeDetail
 import com.example.whattoeat.presentation.ui.screens.RecipeList
+import com.example.whattoeat.presentation.ui.screens.UsersRecipeDetail
 import com.example.whattoeat.presentation.ui.screens.UsersRecipes
 
 @Composable
@@ -47,6 +48,14 @@ fun WhatToEatNavHost(
                 navController = navController,
                 paddingValues = paddingValues,
                 openAddSheet = data.openAddSheet
+            )
+        }
+        composable<UsersRecipeDetailDataObject> { navBackStackEntry ->
+            val dataObject = navBackStackEntry.toRoute<UsersRecipeDetailDataObject>()
+            UsersRecipeDetail(
+                navController = navController,
+                paddingValues = paddingValues,
+                dataObject = dataObject
             )
         }
     }

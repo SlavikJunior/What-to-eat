@@ -58,6 +58,7 @@ import com.example.whattoeat.domain.domainEntities.common.Recipe
 import com.example.whattoeat.domain.domainEntities.support.AnalyzedInstruction
 import com.example.whattoeat.domain.domainEntities.support.Step
 import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
+import com.example.whattoeat.presentation.ui.screens.custom.Chip
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailModelState
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailViewModel
@@ -337,20 +338,6 @@ private fun StepItem(step: Step) {
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun Chip(text: String) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
-    ) {
-        Text(
-            text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.labelMedium
-        )
     }
 }
 

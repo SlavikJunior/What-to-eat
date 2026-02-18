@@ -148,24 +148,8 @@ fun UsersRecipes(
     }
 }
 
-//@Preview
-//@Composable
-//fun UserRecipeCardPreview() =
-//    UserRecipeCard(
-//        recipe = Recipe.RecipeByUser(
-//            title = "Рецепт блинов",
-//            readyInMinutes = 23,
-//            servings = 12,
-//            ingredients = "Яйца, мука, сахар, соль, масло",
-//            notes = "Лучший рецепт блинов чтобы удивить семью"
-//        ),
-//        onCardClick = { TODO() },
-//        onUpdateCLick = { TODO() },
-//        onDeleteClick = { TODO() }
-//    )
-
 @Composable
-fun UserRecipeCard(
+private fun UserRecipeCard(
     recipe: Recipe.RecipeByUser,
     onCardClick: () -> Unit,
     onUpdateCLick: () -> Unit,
@@ -280,7 +264,7 @@ fun UserRecipeCard(
 }
 
 @Composable
-fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
+private fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
     val uiState = viewModel.uiState.collectAsState()
 
     Column(

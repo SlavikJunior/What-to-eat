@@ -12,4 +12,5 @@ interface UsersRecipeRepository {
 
     suspend fun deleteRecipe(recipe: Recipe.RecipeByUser): Int
     suspend fun getAllRecipes(): Flow<List<Recipe.RecipeByUser>>
+    suspend fun getRecipeById(id: Int): Recipe.RecipeByUser?
 }

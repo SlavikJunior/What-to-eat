@@ -49,4 +49,11 @@ interface UsersRecipeDao {
     """
     )
     fun selectAll(): Flow<List<UsersRecipe>>?
+
+    @Query("""
+        select *
+        from $TABLE_NAME
+        where id == :id
+    """)
+    fun selectById(id: Int): UsersRecipe?
 }

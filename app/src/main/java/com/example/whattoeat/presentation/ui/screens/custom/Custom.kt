@@ -37,6 +37,20 @@ import com.example.whattoeat.presentation.ui.viewModels.RecipeListViewModel
 import com.example.whattoeat.presentation.ui.viewModels.SearchType
 
 @Composable
+fun Chip(text: String) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Text(
+            text,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.labelMedium
+        )
+    }
+}
+
+@Composable
 fun FilterBottomSheet(
     viewModel: RecipeListViewModel
 ) {
