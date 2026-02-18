@@ -18,5 +18,11 @@ data class FavoriteRecipe(
 
         fun fromRecipeComplex(recipe: Recipe.RecipeComplex) =
             FavoriteRecipe(id = recipe.id)
+
+        fun fromRecipeSimilar(recipe: Recipe.RecipeSimilar) =
+            FavoriteRecipe(id = recipe.id)
+
+        fun fromRecipeFullInformation(recipe: Recipe.RecipeFullInformation) =
+            FavoriteRecipe(id = recipe.id)
     }
 }

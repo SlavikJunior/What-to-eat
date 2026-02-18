@@ -38,7 +38,7 @@ data class RecipeDetailModel(
     val recipe: RecipeFullInformationExt? = null,
     val similarRecipes: List<RecipeSimilarExt> = listOf(),
     val totalResults: Int = 0,
-    val countOfSimilar: Int = 5
+    val countOfSimilar: Int = 3
 )
 
 sealed interface RecipeDetailPageEvent {
@@ -88,8 +88,7 @@ class RecipeDetailViewModel @Inject constructor(
                                 )
                                 _uiState.update {
                                     it.copy(
-                                        recipe = ext,
-                                        modelState = DefaultState
+                                        recipe = ext
                                     )
                                 }
 
@@ -111,7 +110,7 @@ class RecipeDetailViewModel @Inject constructor(
                         is Resource.Loading<*> -> {
                             _uiState.update {
                                 it.copy(
-                                    modelState = RecipeDetailModelState.LoadingState
+                                    modelState = LoadingState
                                 )
                             }
                         }
@@ -121,27 +120,78 @@ class RecipeDetailViewModel @Inject constructor(
     }
 
     private fun loadSimilarRecipes(recipeId: Int) {
-        Log.d(TAG, "Loading similar for recipe with id: $recipeId")
+        viewModelScope.launch(ioDispatcher) {
 
-        viewModelScope.launch {
-            getRecipes(RecipeSearch.RecipeSimilarSearch(id = recipeId, number = _uiState.value.countOfSimilar))
-                .collectLatest { resource ->
-                    Log.d(TAG, "Collected: $resource")
+            getRecipes(
+                RecipeSearch.RecipeSimilarSearch(
+                    id = recipeId,
+                    number = _uiState.value.countOfSimilar
+                )
+            ).collectLatest { resource ->
 
-                    if (resource is Resource.Success) {
-                        val similarResult = resource.data as? RecipeResult.RecipeSimilarResult
-                        val similarList = similarResult?.recipeSimilarResult?.map {
-                            RecipeSimilarExt(
-                                recipe = it,
-                                isFavorite = isFavoriteRecipe(it)
-                            )
-                        } ?: emptyList()
+                if (resource !is Resource.Success) return@collectLatest
 
-                        _uiState.update { it.copy(similarRecipes = similarList) }
+                val similarResult =
+                    resource.data as? RecipeResult.RecipeSimilarResult
+                        ?: return@collectLatest
+
+                val initialList = similarResult.recipeSimilarResult.map {
+                    RecipeSimilarExt(
+                        recipe = it,
+                        isFavorite = isFavoriteRecipe(it)
+                    )
+                }
+
+                _uiState.update {
+                    it.copy(similarRecipes = initialList)
+                }
+
+                initialList.forEach { similar ->
+                    launch {
+                        getRecipes(
+                            RecipeSearch.RecipeFullInformationSearch(similar.id)
+                        ).collectLatest { fullResource ->
+
+                            if (fullResource !is Resource.Success) return@collectLatest
+
+                            val fullInfo =
+                                fullResource.data as? RecipeResult.RecipeFullInformationResult
+                                    ?: return@collectLatest
+
+                            val imageUrl =
+                                fullInfo.recipeFullInformationResult.image
+
+                            _uiState.update { state ->
+                                state.copy(
+                                    similarRecipes = state.similarRecipes.map { similarRecipeTemp ->
+                                        if (similarRecipeTemp.id == similar.id) {
+                                            similarRecipeTemp.copy(
+                                                recipe = RecipeSimilar(
+                                                    id = similarRecipeTemp.id,
+                                                    image = imageUrl,
+                                                    imageType = similarRecipeTemp.imageType,
+                                                    title = similarRecipeTemp.title,
+                                                    readyInMinutes = similarRecipeTemp.readyInMinutes,
+                                                    servings = similarRecipeTemp.servings,
+                                                    sourceUrl = similarRecipeTemp.sourceUrl
+                                                )
+                                            )
+                                        } else similarRecipeTemp
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
+                _uiState.update {
+                    it.copy(
+                        modelState = DefaultState
+                    )
+                }
+            }
         }
     }
+
 
     private fun onToggleCurrentFavorite() {
         val current = _uiState.value.recipe ?: return

@@ -2,10 +2,11 @@ package com.example.whattoeat.data.database.repository
 
 import com.example.whattoeat.data.database.dao.FavoriteRecipeDao
 import com.example.whattoeat.data.database.entity.FavoriteRecipe
+import com.example.whattoeat.di.IoDispatcher
 import com.example.whattoeat.domain.domainEntities.common.Recipe
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -13,18 +14,36 @@ import javax.inject.Singleton
 
 @Singleton
 class FavoriteRecipeRepositoryImpl @Inject constructor(
+    @IoDispatcher
+    val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     val favoriteRecipeDao: FavoriteRecipeDao
 ) : FavoriteRecipeRepository {
     override suspend fun addRecipe(recipe: Recipe): Long {
         val id: Long
 
-        if (recipe is Recipe.RecipeComplex) {
-            withContext(Dispatchers.IO) {
-                id = async {
-                    favoriteRecipeDao.insert(FavoriteRecipe.fromRecipeComplex(recipe))
-                }.await()
+        when (recipe) {
+            is Recipe.RecipeComplex -> {
+                withContext(ioDispatcher) {
+                    id = favoriteRecipeDao.insert(FavoriteRecipe.fromRecipeComplex(recipe))
+                    return@withContext id
+                }
             }
-            return id
+
+            is Recipe.RecipeSimilar -> {
+                withContext(ioDispatcher) {
+                    id = favoriteRecipeDao.insert(FavoriteRecipe.fromRecipeSimilar(recipe))
+                    return@withContext id
+                }
+            }
+
+            is Recipe.RecipeFullInformation -> {
+                withContext(ioDispatcher) {
+                    id = favoriteRecipeDao.insert(FavoriteRecipe.fromRecipeFullInformation(recipe))
+                    return@withContext id
+                }
+            }
+
+            else -> return -1
         }
 
         return -1
@@ -33,15 +52,29 @@ class FavoriteRecipeRepositoryImpl @Inject constructor(
     override suspend fun removeRecipe(recipe: Recipe): Int {
         val cnt: Int
 
-        if (recipe is Recipe.RecipeComplex) {
-            withContext(Dispatchers.IO) {
-                cnt = async {
-                    favoriteRecipeDao.selectById(recipe.id)?.let {
-                        favoriteRecipeDao.delete(it)
-                    } ?: -1
-                }.await()
+        when (recipe) {
+            is Recipe.RecipeComplex -> {
+                withContext(ioDispatcher) {
+                    cnt = favoriteRecipeDao.delete(FavoriteRecipe.fromRecipeComplex(recipe))
+                    return@withContext cnt
+                }
             }
-            return cnt
+
+            is Recipe.RecipeSimilar -> {
+                withContext(ioDispatcher) {
+                    cnt = favoriteRecipeDao.delete(FavoriteRecipe.fromRecipeSimilar(recipe))
+                    return@withContext cnt
+                }
+            }
+
+            is Recipe.RecipeFullInformation -> {
+                withContext(ioDispatcher) {
+                    cnt = favoriteRecipeDao.delete(FavoriteRecipe.fromRecipeFullInformation(recipe))
+                    return@withContext cnt
+                }
+            }
+
+            else -> return -1
         }
 
         return -1

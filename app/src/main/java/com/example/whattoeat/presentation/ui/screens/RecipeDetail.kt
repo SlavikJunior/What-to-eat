@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,6 +60,7 @@ import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailModelState
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailViewModel
+import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
 import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -230,8 +232,6 @@ private fun RecipeDetailContent(
         }
     }
 }
-
-// ... Остальные Composable функции (InstructionsSection, StepItem, Chip, SimilarRecipeCard) оставляем как есть ...
 
 @Composable
 private fun InstructionsSection(
