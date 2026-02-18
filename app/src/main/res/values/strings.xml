@@ -33,11 +33,28 @@
     <!--  RecipeDetail  -->
     <string name="instructions_section_title">Инструкция</string>
     <string name="similar_recipes_title">Похожие рецепты</string>
-    <string name="ready_in_minutes_title">%1$d мин</string>
-    <string name="servings_title">%1$d порций</string>
-    <string name="agregate_likes_title">❤ %1$d</string>
-    <string name="health_title">Health %1$d</string>
-    <string name="score_title">Score %1$d</string>
+
+    <string name="ready_in_minutes_title">⏱️ %1$d Мин</string>
+    <string name="servings_title">🍽️ %1$d Порций</string>
+    <string name="agregate_likes_title">❤ %1$d Оценок</string>
+    <string name="health_title">✚ %1$d полезность</string>
+    <string name="score_title">🚀 %1$d счёт</string>
+
+    <string name="vegetarian_title_true">🥦 Вегетарианская</string>
+    <string name="vegetarian_title_false">🥩 Не вегетарианская</string>
+
+    <string name="vegan_title_true">🌿 Веганская</string>
+    <string name="vegan_title_false">🍖🥛 не веганская</string>
+
+    <string name="gluten_free_title_true">🆓 без глютена</string>
+    <string name="gluten_free_title_false">🌽 с глютеном</string>
+
+    <string name="dairy_free_title_true">🆓 без молочная</string>
+    <string name="dairy_free_title_false">🥛 Молочная</string>
+
+    <string name="very_healthy_title_true">✅ Полезная</string>
+    <string name="very_healthy_title_false">❌ Не полезная</string>
+
     <string name="error_state_label">Ошибка загрузки рецепта</string>
     <!--  RecipeDetail END  -->
 </resources>

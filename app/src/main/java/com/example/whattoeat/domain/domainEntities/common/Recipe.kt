@@ -51,33 +51,33 @@ sealed interface Recipe {
 
     @Serializable
     open class RecipeFullInformation(
-        val id: Int,
-        val image: String,
-        val imageType: String,
-        val title: String,
-        val readyInMinutes: Int, // общее время готовки
-        val servings: Int, // порции
+        /* it's used */ val id: Int,
+        /* it's used */ val image: String,
+        /* it's used */ val imageType: String,
+        /* it's used */ val title: String,
+        /* it's used */ val readyInMinutes: Int, // общее время готовки
+        /* it's used */ val servings: Int, // порции
         val sourceUrl: String,
-        val vegetarian: Boolean,
-        val vegan: Boolean,
-        val glutenFree: Boolean,
-        val dairyFree: Boolean,
-        val veryHealthy: Boolean,
+        /* it's used */ val vegetarian: Boolean,
+        /* it's used */ val vegan: Boolean,
+        /* it's used */ val glutenFree: Boolean,
+        /* it's used */ val dairyFree: Boolean,
+        /* it's used */ val veryHealthy: Boolean,
         val cheap: Boolean,
         val veryPopular: Boolean,
-        val cookingMinutes: String? = null, // время готовки
-        val aggregateLikes: Int,
-        val healthScore: Double,
-        val extendedIngredients: List<Ingredient>,
-        val summary: String,
+        /* it's used */ val cookingMinutes: String? = null, // время готовки
+        /* it's used */ val aggregateLikes: Int,
+        /* it's used */ val healthScore: Double,
+        /* it's used */ val extendedIngredients: List<Ingredient>,
+        /* it's used */ val summary: String,
         val cuisines: List<Cuisines> = listOf(),
         val dishTypes: List<DishTypes> = listOf(),
         val diets: List<Diets> = listOf(),
         val occasions: List<String> = emptyList(),
-        val instructions: String,
-        val analyzedInstructions: List<AnalyzedInstruction>,
-        val spoonacularScore: Double,
-        val spoonacularSourceUrl: String
+        /* it's used */ val instructions: String,
+        /* it's used */ val analyzedInstructions: List<AnalyzedInstruction>,
+        /* it's used */ val spoonacularScore: Double,
+        /* it's used */ val spoonacularSourceUrl: String
     ) : Recipe
 
     @Serializable
