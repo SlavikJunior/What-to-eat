@@ -56,7 +56,8 @@ data class UsersRecipe(
                 title = recipe.title,
                 readyInMinutes = recipe.readyInMinutes,
                 servings = recipe.servings,
-                ingredients = recipe.ingredients
+                ingredients = recipe.ingredients,
+                notes = recipe.notes
             )
         }
     }
