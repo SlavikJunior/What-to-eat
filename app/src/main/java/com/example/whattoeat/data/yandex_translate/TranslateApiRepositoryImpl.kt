@@ -20,7 +20,6 @@ class TranslateApiRepositoryImpl @Inject constructor(
     ): List<String> = withContext(Dispatchers.IO) {
         Log.d(TAG, "Input text: $input")
 
-        // 1. Фильтруем только непустые строки для перевода
         val nonEmptyTexts = input.filter { it.isNotBlank() }
         if (nonEmptyTexts.isEmpty()) {
             Log.d(TAG, "No text to translate, returning original")
@@ -28,7 +27,6 @@ class TranslateApiRepositoryImpl @Inject constructor(
         }
 
         try {
-            // 2. Определяем язык по первому непустому тексту
             val detectRequest = DetectRequest(
                 text = nonEmptyTexts.first(),
                 folderId = folderId
@@ -38,16 +36,14 @@ class TranslateApiRepositoryImpl @Inject constructor(
             val detectResponse = service.detect(detectRequest)
             Log.d(TAG, "Detected language: ${detectResponse.languageCode}")
 
-            // 3. Если язык уже английский - не переводим
-            if (detectResponse.languageCode.equals("en", ignoreCase = true)) {
+            if (detectResponse.languageCode.equals(targetLanguage.bcp47Code, ignoreCase = true)) {
                 Log.d(TAG, "Text is already English, skipping translation")
                 return@withContext input
             }
 
-            // 4. Подготавливаем запрос на перевод ТОЛЬКО непустых текстов
             val translateRequest = TranslateRequest(
                 folderId = folderId,
-                texts = nonEmptyTexts,  // Важно: только непустые!
+                texts = nonEmptyTexts,
                 targetLanguageCode = targetLanguage.bcp47Code
             )
 
@@ -57,13 +53,12 @@ class TranslateApiRepositoryImpl @Inject constructor(
             val translatedTexts = translateResponse.translations.map { it.text }
             Log.d(TAG, "Translated texts: $translatedTexts")
 
-            // 5. Восстанавливаем полный список, сохраняя пустые строки
             val result = mutableListOf<String>()
             var translatedIndex = 0
 
             for (text in input) {
                 if (text.isBlank()) {
-                    result.add("")  // Сохраняем пустую строку
+                    result.add("")
                 } else {
                     result.add(translatedTexts.getOrElse(translatedIndex) { text })
                     translatedIndex++
@@ -75,7 +70,6 @@ class TranslateApiRepositoryImpl @Inject constructor(
 
         } catch (e: Exception) {
             Log.e(TAG, "Translation error: ${e.message}", e)
-            // При любой ошибке возвращаем исходные тексты
             return@withContext input
         }
     }

@@ -24,7 +24,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domainEntities.common.Recipe
+import com.example.whattoeat.presentation.ui.nav.UsersRecipeDetailDataObject
 import com.example.whattoeat.presentation.ui.viewModels.ButtonActionType
+import com.example.whattoeat.presentation.ui.viewModels.SearchType
+import com.example.whattoeat.presentation.ui.viewModels.UsersRecipeDetailModel
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesModelState
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesViewModel
@@ -116,11 +119,7 @@ fun UsersRecipes(
                             UserRecipeCard(
                                 recipe = recipe,
                                 onCardClick = {
-                                    // Предполагаем, что у UserRecipe есть ID.
-                                    // Если нет, нужно решить, как передавать данные в детали.
-                                    // Пока использую заглушку recipe.id (если он есть в entity)
-                                    // или придется передавать весь объект.
-                                    // navController.navigate(RecipeDetailDataObject(recipeId = recipe.id))
+                                     navController.navigate(UsersRecipeDetailDataObject(recipeId = recipe.id))
                                 },
                                 onDeleteClick = {
                                     viewModel.reduce(UsersRecipesPageEvent.DeleteRecipe(recipe))
@@ -148,24 +147,8 @@ fun UsersRecipes(
     }
 }
 
-//@Preview
-//@Composable
-//fun UserRecipeCardPreview() =
-//    UserRecipeCard(
-//        recipe = Recipe.RecipeByUser(
-//            title = "Рецепт блинов",
-//            readyInMinutes = 23,
-//            servings = 12,
-//            ingredients = "Яйца, мука, сахар, соль, масло",
-//            notes = "Лучший рецепт блинов чтобы удивить семью"
-//        ),
-//        onCardClick = { TODO() },
-//        onUpdateCLick = { TODO() },
-//        onDeleteClick = { TODO() }
-//    )
-
 @Composable
-fun UserRecipeCard(
+private fun UserRecipeCard(
     recipe: Recipe.RecipeByUser,
     onCardClick: () -> Unit,
     onUpdateCLick: () -> Unit,
@@ -280,7 +263,7 @@ fun UserRecipeCard(
 }
 
 @Composable
-fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
+private fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
     val uiState = viewModel.uiState.collectAsState()
 
     Column(
@@ -290,7 +273,10 @@ fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
             .navigationBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("New Recipe", style = MaterialTheme.typography.headlineSmall)
+        val labelText = if (uiState.value.buttonActionType == ButtonActionType.SAVE_RECIPE) "New Recipe"
+                else "Update recipe"
+
+        Text(labelText, style = MaterialTheme.typography.headlineSmall)
 
         OutlinedTextField(
             value = uiState.value.recipeByUserOnUi.title,
@@ -346,8 +332,7 @@ fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
                 )
             },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Ingredients") },
-            singleLine = true
+            label = { Text("Ingredients") }
         )
 
         OutlinedTextField(

@@ -1,5 +1,6 @@
 package com.example.whattoeat.di
 
+import android.content.Context
 import android.util.Log
 import com.example.whattoeat.BuildConfig
 import com.example.whattoeat.data.net.adapter.ResultCallAdapterFactory
@@ -10,13 +11,18 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import okhttp3.Cache
+import okhttp3.CacheControl
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import okio.Buffer
 import retrofit2.Retrofit
+import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -55,11 +61,34 @@ object ApiModule {
     @YandexTranslateOkHttpClient
     @Provides
     @Singleton
-    fun provideYandexTranslateOkHttpClient(): OkHttpClient {
+    fun provideYandexTranslateOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
+        val cacheFile = File(context.cacheDir, "yandex-cache")
+        val cache = Cache(
+            directory = cacheFile,
+            maxSize = (50 * 1024 * 1024).toLong() // 50 MB
+        )
+
+        val cacheInterceptor = Interceptor { chain ->
+            val response = chain.proceed(chain.request())
+
+            val cacheControl = CacheControl.Builder()
+                .maxAge(7, TimeUnit.DAYS)
+                .maxStale(7, TimeUnit.DAYS)
+                .build()
+
+
+            response.newBuilder()
+                .removeHeader("Pragma")
+                .removeHeader("Cache-Control")
+                .header("Cache-Control", cacheControl.toString())
+                .build()
+        }
+
         return OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
+            .addNetworkInterceptor(cacheInterceptor)
             .addInterceptor { chain ->
                 val originalRequest = chain.request()
 
@@ -84,6 +113,7 @@ object ApiModule {
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             })
+            .cache(cache)
             .build()
     }
 

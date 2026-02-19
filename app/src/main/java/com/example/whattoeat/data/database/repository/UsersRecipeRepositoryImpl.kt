@@ -44,4 +44,10 @@ class UsersRecipeRepositoryImpl(
         return usersRecipeDao.selectAll()?.map { userRecipesList -> userRecipesList.map { it.toRecipeByUser() } }
             ?.flowOn(ioDispatcher) ?: flowOf(emptyList())
     }
+
+    override suspend fun getRecipeById(id: Int): Recipe.RecipeByUser? {
+        return withContext(ioDispatcher){
+            usersRecipeDao.selectById(id)?.toRecipeByUser()
+        }
+    }
 }

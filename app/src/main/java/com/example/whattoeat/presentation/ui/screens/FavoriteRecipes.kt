@@ -174,17 +174,6 @@ private fun FavoriteRecipeCard(
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 20.sp
                 )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "ID: ${recipe.id}",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
-                }
             }
         }
     }
