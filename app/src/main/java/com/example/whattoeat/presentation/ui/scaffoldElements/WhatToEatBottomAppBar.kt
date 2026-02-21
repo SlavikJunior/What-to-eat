@@ -19,15 +19,17 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation3.runtime.NavBackStack
 import com.example.whattoeat.presentation.ui.nav.BottomNavItem
 import com.example.whattoeat.presentation.ui.nav.FavoriteRecipesBottomNavItem
 import com.example.whattoeat.presentation.ui.nav.RecipeListBottomNavItem
+import com.example.whattoeat.presentation.ui.nav.Screen
 import com.example.whattoeat.presentation.ui.nav.UsersRecipesBottomNavItem
 
 @SuppressLint("RestrictedApi")
 @Composable
-fun WhatToEatBottomAppBarNew(
-    navController: NavHostController,
+fun WhatToEatBottomAppBar(
+    backStack: NavBackStack<Screen>,
     bottomNavItems: List<BottomNavItem> = listOf(
         RecipeListBottomNavItem,
         FavoriteRecipesBottomNavItem,
@@ -36,29 +38,18 @@ fun WhatToEatBottomAppBarNew(
 ) {
     val items = bottomNavItems.sortedBy { it.index }
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
-
     NavigationBar(
         modifier = Modifier
             .windowInsetsPadding(insets = WindowInsets.navigationBars)
             .fillMaxWidth()
     ) {
         items.forEach { bottomNavItem ->
-            val isSelected = currentDestination?.hierarchy?.any { destination ->
-                destination.hasRoute(bottomNavItem.route::class)
-            } == true
+            val isSelected = backStack.last() == bottomNavItem.route
 
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
-                    navController.navigate(bottomNavItem.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    backStack.add(bottomNavItem.route)
                 },
                 icon = {
                     Icon(
