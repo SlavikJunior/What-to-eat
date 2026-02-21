@@ -41,6 +41,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,13 +64,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.navigation3.runtime.NavBackStack
 import coil3.compose.AsyncImage
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domainEntities.common.Recipe
-import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
+import com.example.whattoeat.presentation.ui.nav.Screen
 import com.example.whattoeat.presentation.ui.screens.custom.FilterBottomSheet
 import com.example.whattoeat.presentation.ui.theme.Black
+import com.example.whattoeat.presentation.ui.viewModels.RecipeListModel
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListModelState
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListViewModel
@@ -81,7 +83,7 @@ import com.valentinilk.shimmer.shimmer
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeList(
-    navController: NavHostController,
+    backStack: NavBackStack<Screen>,
     viewModel: RecipeListViewModel = hiltViewModel(),
     paddingValues: PaddingValues = PaddingValues()
 ) {
@@ -211,7 +213,11 @@ fun RecipeList(
                 CircularProgressIndicator(modifier = Modifier.size(64.dp))
             }
         } else if (uiState.value.isListShowing && uiState.value.totalResults > 0) {
-            OffsetRecipeListNavigationRow(viewModel = viewModel)
+            OffsetRecipeListNavigationRow(
+                uiState = uiState,
+                onIncreaseOffset = { viewModel.reduce(RecipeListPageEvent.IncreaseOffsetChange) },
+                onDecreaseOffset = { viewModel.reduce(RecipeListPageEvent.DecreaseOffsetChange) },
+            )
 
             Spacer(Modifier.height(16.dp))
 
@@ -221,9 +227,15 @@ fun RecipeList(
             ) {
                 items(uiState.value.recipes) { recipe ->
                     RecipeComplexExtCard(
-                        navController = navController,
                         recipe = recipe,
-                        viewModel = viewModel
+                        onCardClick = { backStack.add(Screen.RecipeDetailDataObject(recipe.id)) },
+                        onFavoriteRecipeChange = {
+                            viewModel.reduce(
+                                event = RecipeListPageEvent.FavoriteRecipeChange(
+                                    recipe = recipe
+                                )
+                            )
+                        },
                     )
                     Spacer(Modifier.height(16.dp))
                 }
@@ -236,15 +248,15 @@ fun RecipeList(
 
 @Composable
 private fun RecipeComplexExtCard(
-    navController: NavHostController,
     recipe: Recipe.RecipeComplexExt,
-    viewModel: RecipeListViewModel,
+    onCardClick: () -> Unit,
+    onFavoriteRecipeChange: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isImageLoaded by remember { mutableStateOf(false) }
 
     Card(
-        onClick = { navController.navigate(RecipeDetailDataObject(recipeId = recipe.id)) },
+        onClick = onCardClick,
         modifier = modifier
             .fillMaxWidth()
             .height(120.dp)
@@ -292,13 +304,7 @@ private fun RecipeComplexExtCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     IconButton(
-                        onClick = {
-                            viewModel.reduce(
-                                event = RecipeListPageEvent.FavoriteRecipeChange(
-                                    recipe = recipe
-                                )
-                            )
-                        }
+                        onClick = onFavoriteRecipeChange
                     ) {
                         Icon(
                             imageVector = if (recipe.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
@@ -312,11 +318,11 @@ private fun RecipeComplexExtCard(
 }
 
 @Composable
-fun OffsetRecipeListNavigationRow(
-    viewModel: RecipeListViewModel
+private fun OffsetRecipeListNavigationRow(
+    uiState: State<RecipeListModel>,
+    onIncreaseOffset: () -> Unit,
+    onDecreaseOffset: () -> Unit,
 ) {
-    val uiState = viewModel.uiState.collectAsState()
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -325,9 +331,7 @@ fun OffsetRecipeListNavigationRow(
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         IconButton(
-            onClick = {
-                viewModel.reduce(RecipeListPageEvent.DecreaseOffsetChange)
-            },
+            onClick = onDecreaseOffset,
             enabled = uiState.value.isDecreaseOffsetButtonEnabled()
         ) {
             Icon(
@@ -336,40 +340,8 @@ fun OffsetRecipeListNavigationRow(
             )
         }
 
-//        Row(
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Surface(
-//                modifier = Modifier.size(24.dp),
-//                shape = RoundedCornerShape(4.dp),
-//                shadowElevation = 4.dp
-//            ) {
-//                Text(
-//                    text = uiState.value.numberOfCurrentPage().toString(),
-//                    textAlign = TextAlign.Center,
-//                    fontSize = 24.sp
-//                )
-//            }
-//
-//            Spacer(modifier = Modifier.width(16.dp))
-//
-//            Surface(
-//                modifier = Modifier.size(24.dp),
-//                shape = RoundedCornerShape(4.dp),
-//                shadowElevation = 4.dp
-//            ) {
-//                Text(
-//                    text = uiState.value.totalResults.toString(),
-//                    textAlign = TextAlign.Center,
-//                    fontSize = 24.sp
-//                )
-//            }
-//        }
-
         IconButton(
-            onClick = {
-                viewModel.reduce(RecipeListPageEvent.IncreaseOffsetChange)
-            },
+            onClick = onIncreaseOffset,
             enabled = uiState.value.isIncreaseOffsetButtonEnabled()
         ) {
             Icon(

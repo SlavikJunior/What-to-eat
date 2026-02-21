@@ -6,39 +6,27 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation3.runtime.NavBackStack
 import com.example.whattoeat.R
-import com.example.whattoeat.presentation.ui.nav.RecipeListDataObject
-import com.example.whattoeat.presentation.ui.nav.UsersRecipesDataObject
+import com.example.whattoeat.presentation.ui.nav.Screen
+import kotlinx.coroutines.delay
 
 @SuppressLint("RestrictedApi")
 @Composable
 fun WhatToEatFloatingActionButton(
-    navController: NavHostController,
+    backStack: NavBackStack<Screen>
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
+    val currentDestination = backStack.last()
 
-    val isRecipeList = currentDestination?.hasRoute<RecipeListDataObject>() == true
+    val isRecipeList = currentDestination is Screen.RecipeListDataObject
 
     if (isRecipeList) {
         FloatingActionButton(
             onClick = {
-                navController.navigate(
-                    UsersRecipesDataObject(openAddSheet = true)
-                ) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                }
+                backStack.add(Screen.UsersRecipesDataObject(openAddSheet = true))
             },
             content = {
                 Icon(

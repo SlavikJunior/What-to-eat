@@ -2,7 +2,6 @@ package com.example.whattoeat.presentation.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,23 +23,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domainEntities.common.Recipe
-import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
-import com.example.whattoeat.presentation.ui.nav.UsersRecipeDetailDataObject
+import com.example.whattoeat.presentation.ui.nav.Screen
 import com.example.whattoeat.presentation.ui.screens.custom.Chip
-import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailModelState
-import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipeDetailModelState
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipeDetailPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipeDetailViewModel
 
 @Composable
 fun UsersRecipeDetail(
-    navController: NavHostController,
+    dataObject: Screen.UsersRecipeDetailDataObject,
     paddingValues: PaddingValues,
-    dataObject: UsersRecipeDetailDataObject,
     viewModel: UsersRecipeDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()

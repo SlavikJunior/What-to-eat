@@ -11,7 +11,7 @@ sealed interface BottomNavItem {
     val imageVector: ImageVector
     val isStarted: Boolean
     val index: Int
-    val route: Any
+    val route: Screen
 }
 
 data object RecipeListBottomNavItem : BottomNavItem {
@@ -19,7 +19,7 @@ data object RecipeListBottomNavItem : BottomNavItem {
     override val imageVector = Icons.AutoMirrored.Filled.List
     override val isStarted = true
     override val index = 1
-    override val route = RecipeListDataObject
+    override val route = Screen.RecipeListDataObject
 }
 
 data object FavoriteRecipesBottomNavItem : BottomNavItem {
@@ -27,7 +27,7 @@ data object FavoriteRecipesBottomNavItem : BottomNavItem {
     override val imageVector = Icons.Default.Favorite
     override val isStarted = false
     override val index = 2
-    override val route = FavoriteRecipesDataObject
+    override val route = Screen.FavoriteRecipesDataObject
 }
 
 data object UsersRecipesBottomNavItem : BottomNavItem {
@@ -35,5 +35,5 @@ data object UsersRecipesBottomNavItem : BottomNavItem {
     override val imageVector = Icons.Default.Edit
     override val isStarted = false
     override val index = 3
-    override val route = UsersRecipesDataObject()
+    override val route = Screen.UsersRecipesDataObject()
 }

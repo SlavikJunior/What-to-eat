@@ -9,29 +9,25 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation3.runtime.NavBackStack
 import com.example.whattoeat.R
-import com.example.whattoeat.presentation.ui.nav.FavoriteRecipesDataObject
-import com.example.whattoeat.presentation.ui.nav.RecipeListDataObject
-import com.example.whattoeat.presentation.ui.nav.UsersRecipesDataObject
+import com.example.whattoeat.presentation.ui.nav.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WhatToEatTopAppBar(
-    navController: NavHostController
+    backStack: NavBackStack<Screen>
 ) {
-    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = backStack.last()
 
-    val currentRoute = backStackEntry?.destination?.route.orEmpty()
+    val isBottomNavRoot = when (currentDestination) {
+            is Screen.RecipeListDataObject -> true
+            is Screen.FavoriteRecipesDataObject -> true
+            is Screen.UsersRecipesDataObject -> true
+            else -> false
+        }
 
-    val isBottomNavRoot = listOf(
-        RecipeListDataObject::class.java.simpleName,
-        FavoriteRecipesDataObject::class.java.simpleName,
-        UsersRecipesDataObject::class.java.simpleName
-    ).any { currentRoute.contains(it, ignoreCase = true) }
 
     CenterAlignedTopAppBar(
         title = {
@@ -42,7 +38,7 @@ fun WhatToEatTopAppBar(
         },
         navigationIcon = {
             if (!isBottomNavRoot) {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = { backStack.removeLastOrNull() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                         contentDescription = stringResource(R.string.back_button_content_description)

@@ -51,13 +51,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.navigation3.runtime.NavBackStack
 import coil3.compose.AsyncImage
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domainEntities.common.Recipe
 import com.example.whattoeat.domain.domainEntities.support.AnalyzedInstruction
 import com.example.whattoeat.domain.domainEntities.support.Step
-import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
+import com.example.whattoeat.presentation.ui.nav.Screen
 import com.example.whattoeat.presentation.ui.screens.custom.Chip
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailModelState
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailPageEvent
@@ -67,9 +67,9 @@ import com.valentinilk.shimmer.shimmer
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetail(
-    navController: NavHostController,
+    backStack: NavBackStack<Screen>,
     paddingValues: PaddingValues,
-    dataObject: RecipeDetailDataObject,
+    dataObject: Screen.RecipeDetailDataObject,
     viewModel: RecipeDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -120,7 +120,7 @@ fun RecipeDetail(
                             recipe = item,
                             similarRecipes = uiState.similarRecipes,
                             onSimilarClick = { id ->
-                                navController.navigate(RecipeDetailDataObject(id))
+                                backStack.add(Screen.RecipeDetailDataObject(id))
                             },
                             onSimilarFavorite = { similar ->
                                 viewModel.reduce(

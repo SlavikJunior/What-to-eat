@@ -42,11 +42,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavHostController
+import androidx.navigation3.runtime.NavBackStack
 import coil3.compose.AsyncImage
 import com.example.whattoeat.R
 import com.example.whattoeat.domain.domainEntities.common.Recipe
-import com.example.whattoeat.presentation.ui.nav.RecipeDetailDataObject
+import com.example.whattoeat.presentation.ui.nav.Screen
 import com.example.whattoeat.presentation.ui.viewModels.FavoriteRecipesPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.FavoriteRecipesPageStatus
 import com.example.whattoeat.presentation.ui.viewModels.FavoriteRecipesViewModel
@@ -54,7 +54,7 @@ import com.valentinilk.shimmer.shimmer
 
 @Composable
 fun FavoriteRecipes(
-    navController: NavHostController,
+    backStack: NavBackStack<Screen>,
     paddingValues: PaddingValues,
     viewModel: FavoriteRecipesViewModel = hiltViewModel()
 ) {
@@ -110,7 +110,7 @@ fun FavoriteRecipes(
                     ) {
                         items(uiState.recipes, key = { it.recipe.id }) { recipe ->
                             FavoriteRecipeCard(
-                                navController = navController,
+                                backStack = backStack,
                                 recipe = recipe
                             )
                         }
@@ -125,14 +125,14 @@ fun FavoriteRecipes(
 
 @Composable
 private fun FavoriteRecipeCard(
-    navController: NavHostController,
+    backStack: NavBackStack<Screen>,
     recipe: Recipe.RecipeComplexExt,
     modifier: Modifier = Modifier
 ) {
     var isImageLoaded by remember { mutableStateOf(false) }
 
     Card(
-        onClick = { navController.navigate(RecipeDetailDataObject(recipeId = recipe.id)) },
+        onClick = { backStack.add(Screen.RecipeDetailDataObject(recipe.id)) },
         modifier = modifier
             .fillMaxWidth()
             .height(120.dp)
