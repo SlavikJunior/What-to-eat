@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -75,6 +76,7 @@ import com.example.whattoeat.presentation.ui.viewModels.RecipeListModel
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListModelState
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListViewModel
+import com.example.whattoeat.presentation.ui.viewModels.SearchType
 import com.example.whattoeat.presentation.ui.viewModels.isDecreaseOffsetButtonEnabled
 import com.example.whattoeat.presentation.ui.viewModels.isIncreaseOffsetButtonEnabled
 import com.valentinilk.shimmer.shimmer
@@ -101,25 +103,34 @@ fun RecipeList(
                 .padding(16.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            IconButton(
-                onClick = {
-                    viewModel.reduce(
-                        RecipeListPageEvent.IsFilterBottomSheetVisibleChange
-                    )
+            if (uiState.value.searchType == SearchType.COMPLEX_SEARCH) {
+                IconButton(onClick = { viewModel.reduce(RecipeListPageEvent.IsFilterBottomSheetVisibleChange) }
+                ) {
+                    Icon(painter = painterResource(R.drawable.ic_filter), contentDescription = null)
                 }
+            }
+
+            IconButton(
+                onClick = { viewModel.reduce(RecipeListPageEvent.SearchTypeChange) }
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_filter),
-                    contentDescription = null
-                )
+                Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
             }
         }
 
-        var value by remember {
+        var queryValue by remember {
             mutableStateOf(
                 TextFieldValue(
                     text = uiState.value.filter.query.orEmpty(),
                     selection = TextRange(uiState.value.filter.query.orEmpty().length)
+                )
+            )
+        }
+
+        var productsValue by remember {
+            mutableStateOf(
+                TextFieldValue(
+                    text = uiState.value.filter.products.orEmpty(),
+                    selection = TextRange(uiState.value.filter.products.orEmpty().length)
                 )
             )
         }
@@ -130,51 +141,96 @@ fun RecipeList(
         val interactionSource = remember { MutableInteractionSource() }
         val isFocused by interactionSource.collectIsFocusedAsState()
 
-        OutlinedTextField(
-            value = value,
-            onValueChange = {
-                value = it
+        when (uiState.value.searchType) {
+            SearchType.COMPLEX_SEARCH -> {
+                OutlinedTextField(
+                    value = queryValue,
+                    onValueChange = {
+                        queryValue = it
 
-                viewModel.reduce(
-                    RecipeListPageEvent.QueryChange(it.text.trim())
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            label = {
-                Text(stringResource(R.string.query_text_field_label))
-            },
-            singleLine = true,
-            interactionSource = interactionSource,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = {
-                viewModel.reduce(RecipeListPageEvent.SearchButtonClicked)
-                keyboardController?.hide()
-                focusManager.clearFocus()
-            }),
-            colors = OutlinedTextFieldDefaults.colors(
-                cursorColor = if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent,
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-            ),
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search"
-                )
-            },
-            trailingIcon = {
-                IconButton(
-                    onClick = {
-                        value = value.copy(text = "")
-                        viewModel.reduce(event = RecipeListPageEvent.QueryChange(value.text))
+                        viewModel.reduce(
+                            RecipeListPageEvent.QueryChange(it.text.trim())
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    label = {
+                        Text(stringResource(R.string.query_text_field_label))
+                    },
+                    singleLine = true,
+                    interactionSource = interactionSource,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = {
+                        viewModel.reduce(RecipeListPageEvent.SearchButtonClicked)
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    }),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        cursorColor = if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                    ),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search"
+                        )
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                queryValue = queryValue.copy(text = "")
+                                viewModel.reduce(event = RecipeListPageEvent.QueryChange(queryValue.text))
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear")
+                        }
                     }
-                ) {
-                    Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear")
-                }
+                )
             }
-        )
+            SearchType.SEARCH_BY_INGREDIENTS -> {
+                OutlinedTextField(
+                    value = productsValue,
+                    onValueChange = {
+                        productsValue = it
+
+                        viewModel.reduce(
+                            RecipeListPageEvent.ProductsChange(it.text.trim())
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    label = { Text(stringResource(R.string.products_text_field_label)) },
+                    singleLine = true,
+                    interactionSource = interactionSource,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = {
+                        viewModel.reduce(RecipeListPageEvent.SearchButtonClicked)
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    }),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        cursorColor = if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                    ),
+                    leadingIcon = {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                productsValue = productsValue.copy(text = "")
+                                viewModel.reduce(event = RecipeListPageEvent.ProductsChange(productsValue.text))
+                            }
+                        ) { Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear") }
+                    }
+                )
+            }
+        }
+
         Spacer(Modifier.height(12.dp))
 
         OutlinedButton(
@@ -212,7 +268,7 @@ fun RecipeList(
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(64.dp))
             }
-        } else if (uiState.value.isListShowing && uiState.value.totalResults > 0) {
+        } else if (uiState.value.isListShowing && uiState.value.totalResults > 0 && uiState.value.searchType == SearchType.COMPLEX_SEARCH) {
             OffsetRecipeListNavigationRow(
                 uiState = uiState,
                 onIncreaseOffset = { viewModel.reduce(RecipeListPageEvent.IncreaseOffsetChange) },
@@ -225,8 +281,29 @@ fun RecipeList(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(horizontal = 16.dp)
             ) {
-                items(uiState.value.recipes) { recipe ->
+                items(uiState.value.recipesComplex) { recipe ->
                     RecipeComplexExtCard(
+                        recipe = recipe,
+                        onCardClick = { backStack.add(Screen.RecipeDetailDataObject(recipe.id)) },
+                        onFavoriteRecipeChange = {
+                            viewModel.reduce(
+                                event = RecipeListPageEvent.FavoriteRecipeChange(
+                                    recipe = recipe
+                                )
+                            )
+                        },
+                    )
+                    Spacer(Modifier.height(16.dp))
+                }
+            }
+        }
+        else if (uiState.value.isListShowing && uiState.value.totalResults > 0 && uiState.value.searchType == SearchType.SEARCH_BY_INGREDIENTS) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+                items(uiState.value.recipesByIngredients) { recipe ->
+                    RecipeByIngredientsExtCard(
                         recipe = recipe,
                         onCardClick = { backStack.add(Screen.RecipeDetailDataObject(recipe.id)) },
                         onFavoriteRecipeChange = {
@@ -249,6 +326,77 @@ fun RecipeList(
 @Composable
 private fun RecipeComplexExtCard(
     recipe: Recipe.RecipeComplexExt,
+    onCardClick: () -> Unit,
+    onFavoriteRecipeChange: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var isImageLoaded by remember { mutableStateOf(false) }
+
+    Card(
+        onClick = onCardClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .then(if (!isImageLoaded) Modifier.shimmer() else Modifier),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = recipe.image,
+                contentDescription = stringResource(
+                    R.string.recipe_card_image_content_description,
+                    recipe.title
+                ),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .height(120.dp)
+                    .width(120.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                onSuccess = {
+                    isImageLoaded = true
+                }
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = recipe.title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 20.sp
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IconButton(
+                        onClick = onFavoriteRecipeChange
+                    ) {
+                        Icon(
+                            imageVector = if (recipe.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecipeByIngredientsExtCard(
+    recipe: Recipe.RecipeByIngredientsExt,
     onCardClick: () -> Unit,
     onFavoriteRecipeChange: () -> Unit,
     modifier: Modifier = Modifier

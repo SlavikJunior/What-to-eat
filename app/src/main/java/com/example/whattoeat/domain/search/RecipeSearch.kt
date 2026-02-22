@@ -10,9 +10,10 @@ sealed interface RecipeSearch {
 
     data class RecipeByIngredientsSearch(
         val ingredients: String = "", // Список ингредиентов, разделенных запятыми, которые должны содержаться в рецепте.
-        val number: Int = 3, // Максимальное количество возвращаемых рецептов (от 1 до 100). По умолчанию — 10.
         val ranking: Int = 2, // Максимально использовать имеющиеся (1), минимизировать недостающие ингредиенты (2).
-        val ignorePantry: Boolean = true // Игнорировать обычные продукты, такие как вода, соль, мука и т. д.?
+        val ignorePantry: Boolean = true, // Игнорировать обычные продукты, такие как вода, соль, мука и т. д.?
+        val offset: Int? = null, // Количество результатов, которые пропускаются.
+        val number: Int = 3 // Максимальное количество возвращаемых рецептов (от 1 до 100). По умолчанию — 10.
     ): RecipeSearch
 
     data class RecipeComplexSearch(
