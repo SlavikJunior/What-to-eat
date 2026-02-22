@@ -11,5 +11,5 @@ interface RecipeSearchRepository {
     fun getRecipeSummary(recipeSearch: RecipeSearch.RecipeSummarySearch): Flow<Resource<Recipe.RecipeSummary>>
     fun getRecipeFullInformation(recipeSearch: RecipeSearch.RecipeFullInformationSearch): Flow<Resource<RecipeResult.RecipeFullInformationResult>>
     fun getRecipeFullInformationBulk(recipeSearch: RecipeSearch.RecipeFullInformationBulkSearch): Flow<Resource<RecipeResult.RecipeFullInformationBulkResult>>
-    fun getRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch): Flow<Resource<Recipe.RecipeByIngredients>>
+    fun getRecipeByIngredients(recipeSearch: RecipeSearch.RecipeByIngredientsSearch): Flow<Resource<RecipeResult.RecipeByIngredientsResult>>
 }

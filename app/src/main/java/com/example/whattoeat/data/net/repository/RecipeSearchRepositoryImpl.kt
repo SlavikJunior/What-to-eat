@@ -147,9 +147,7 @@ class RecipeSearchRepositoryImpl @Inject constructor(
             ).let { result ->
 
                 result.onSuccess {
-                    it.recipeByIngredientsResult.forEach { recipeByIngredients ->
-                        emit(Resource.Success(recipeByIngredients))
-                    }
+                    emit(Resource.Success(it))
                 }
 
                 result.onFailure {

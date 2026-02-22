@@ -17,6 +17,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedIconToggleButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -37,6 +39,7 @@ import com.example.whattoeat.presentation.ui.viewModels.RecipeListModel
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListViewModel
 import com.example.whattoeat.presentation.ui.viewModels.SearchType
+import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesPageEvent
 
 @Composable
 fun Chip(text: String) {
@@ -53,55 +56,62 @@ fun Chip(text: String) {
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun FilterBottomSheet(
     viewModel: RecipeListViewModel
 ) {
     val uiState = viewModel.uiState.collectAsState()
 
-    FilterBottomSheetContent(
-        uiState = uiState,
-        onFilterBottomSheetVisibleChange = { viewModel.reduce(event = RecipeListPageEvent.IsFilterBottomSheetVisibleChange) },
-        onCuisineChange = {
-            viewModel.reduce(
-                event = RecipeListPageEvent.CuisineChange(
-                    it.cuisine
+    val sheetState = rememberModalBottomSheetState()
+
+    if (uiState.value.searchType == SearchType.COMPLEX_SEARCH) {
+        ComplexSearchFilterBottomSheetContent(
+            sheetState = sheetState,
+            uiState = uiState,
+            onFilterBottomSheetVisibleChange = { viewModel.reduce(event = RecipeListPageEvent.IsFilterBottomSheetVisibleChange) },
+            onCuisineChange = {
+                viewModel.reduce(
+                    event = RecipeListPageEvent.CuisineChange(
+                        it.cuisine
+                    )
                 )
-            )
-        },
-        onDishTypeChange = {
-            viewModel.reduce(
-                event = RecipeListPageEvent.DishTypeChange(
-                    it.type
+            },
+            onDishTypeChange = {
+                viewModel.reduce(
+                    event = RecipeListPageEvent.DishTypeChange(
+                        it.type
+                    )
                 )
-            )
-        },
-        onDietChange = {
-            viewModel.reduce(
-                event = RecipeListPageEvent.DietChange(
-                    it.diet
+            },
+            onDietChange = {
+                viewModel.reduce(
+                    event = RecipeListPageEvent.DietChange(
+                        it.diet
+                    )
                 )
-            )
-        },
-        onSortTypeChange = {
-            viewModel.reduce(
-                event = RecipeListPageEvent.SortTypeChange(
-                    it.sortType
+            },
+            onSortTypeChange = {
+                viewModel.reduce(
+                    event = RecipeListPageEvent.SortTypeChange(
+                        it.sortType
+                    )
                 )
-            )
-        },
-        onSortDirectionChange = {
-            viewModel.reduce(
-                event = RecipeListPageEvent.SortDirectionChange(
-                    it.sortDirection
+            },
+            onSortDirectionChange = {
+                viewModel.reduce(
+                    event = RecipeListPageEvent.SortDirectionChange(
+                        it.sortDirection
+                    )
                 )
-            )
-        },
-    )
+            },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FilterBottomSheetContent(
+private fun ComplexSearchFilterBottomSheetContent(
+    sheetState: SheetState,
     uiState: State<RecipeListModel>,
     onFilterBottomSheetVisibleChange: (event: RecipeListPageEvent.IsFilterBottomSheetVisibleChange) -> Unit,
     onCuisineChange: (event: RecipeListPageEvent.CuisineChange) -> Unit,
@@ -110,47 +120,41 @@ private fun FilterBottomSheetContent(
     onSortTypeChange: (event: RecipeListPageEvent.SortTypeChange) -> Unit,
     onSortDirectionChange: (event: RecipeListPageEvent.SortDirectionChange) -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState()
-
     if (uiState.value.isFilterBottomSheetVisible) {
         ModalBottomSheet(
             sheetState = sheetState,
             onDismissRequest = { onFilterBottomSheetVisibleChange(RecipeListPageEvent.IsFilterBottomSheetVisibleChange) }
         ) {
 
-            if (uiState.value.searchType == SearchType.COMPLEX_SEARCH) {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 32.dp)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    SortBlock(
-                        uiState = uiState,
-                        onSortTypeChange = onSortTypeChange,
-                        onSortDirectionChange = onSortDirectionChange
-                    )
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 32.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                SortBlock(
+                    uiState = uiState,
+                    onSortTypeChange = onSortTypeChange,
+                    onSortDirectionChange = onSortDirectionChange
+                )
 
-                    CuisinesBlock(
-                        uiState = uiState,
-                        onCuisineChange = { onCuisineChange(RecipeListPageEvent.CuisineChange(it.cuisine)) }
-                    )
+                CuisinesBlock(
+                    uiState = uiState,
+                    onCuisineChange = { onCuisineChange(RecipeListPageEvent.CuisineChange(it.cuisine)) }
+                )
 
-                    DishTypesBlock(
-                        uiState = uiState,
-                        onDishTypeChange = onDishTypeChange
-                    )
+                DishTypesBlock(
+                    uiState = uiState,
+                    onDishTypeChange = onDishTypeChange
+                )
 
-                    DietsBlock(
-                        uiState = uiState,
-                        onDietChange = onDietChange
-                    )
+                DietsBlock(
+                    uiState = uiState,
+                    onDietChange = onDietChange
+                )
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            } else {
-
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -173,10 +177,12 @@ private fun DietsBlock(
             ToggleButtonChip(
                 enum = Diets.GLUTEN_FREE,
                 checked = uiState.value.filter.diet.contains(Diets.GLUTEN_FREE),
-                onCheckedChange = { checked -> onDietChange(
-                    RecipeListPageEvent.DietChange(
-                        diet = Diets.GLUTEN_FREE
-                    ))
+                onCheckedChange = { checked ->
+                    onDietChange(
+                        RecipeListPageEvent.DietChange(
+                            diet = Diets.GLUTEN_FREE
+                        )
+                    )
                 }
             )
         }
@@ -185,10 +191,12 @@ private fun DietsBlock(
             ToggleButtonChip(
                 enum = Diets.VEGETARIAN,
                 checked = uiState.value.filter.diet.contains(Diets.VEGETARIAN),
-                onCheckedChange = { checked -> onDietChange(
-                    RecipeListPageEvent.DietChange(
-                        diet = Diets.VEGETARIAN
-                    ))
+                onCheckedChange = { checked ->
+                    onDietChange(
+                        RecipeListPageEvent.DietChange(
+                            diet = Diets.VEGETARIAN
+                        )
+                    )
                 }
             )
         }
@@ -197,10 +205,12 @@ private fun DietsBlock(
             ToggleButtonChip(
                 enum = Diets.VEGAN,
                 checked = uiState.value.filter.diet.contains(Diets.VEGAN),
-                onCheckedChange = { checked -> onDietChange(
-                    RecipeListPageEvent.DietChange(
-                        diet = Diets.VEGAN
-                    ))
+                onCheckedChange = { checked ->
+                    onDietChange(
+                        RecipeListPageEvent.DietChange(
+                            diet = Diets.VEGAN
+                        )
+                    )
                 }
             )
         }
@@ -209,10 +219,12 @@ private fun DietsBlock(
             ToggleButtonChip(
                 enum = Diets.KETOGENIC,
                 checked = uiState.value.filter.diet.contains(Diets.KETOGENIC),
-                onCheckedChange = { checked -> onDietChange(
-                    RecipeListPageEvent.DietChange(
-                        diet = Diets.KETOGENIC
-                    ))
+                onCheckedChange = { checked ->
+                    onDietChange(
+                        RecipeListPageEvent.DietChange(
+                            diet = Diets.KETOGENIC
+                        )
+                    )
                 }
             )
         }
@@ -221,10 +233,12 @@ private fun DietsBlock(
             ToggleButtonChip(
                 enum = Diets.PALEO,
                 checked = uiState.value.filter.diet.contains(Diets.PALEO),
-                onCheckedChange = { checked -> onDietChange(
-                    RecipeListPageEvent.DietChange(
-                        diet = Diets.PALEO
-                    ))
+                onCheckedChange = { checked ->
+                    onDietChange(
+                        RecipeListPageEvent.DietChange(
+                            diet = Diets.PALEO
+                        )
+                    )
                 }
             )
         }
@@ -233,10 +247,12 @@ private fun DietsBlock(
             ToggleButtonChip(
                 enum = Diets.PRIMAL,
                 checked = uiState.value.filter.diet.contains(Diets.PRIMAL),
-                onCheckedChange = { checked -> onDietChange(
-                    RecipeListPageEvent.DietChange(
-                        diet = Diets.PRIMAL
-                    ))
+                onCheckedChange = { checked ->
+                    onDietChange(
+                        RecipeListPageEvent.DietChange(
+                            diet = Diets.PRIMAL
+                        )
+                    )
                 }
             )
         }

@@ -18,7 +18,7 @@ sealed interface Recipe {
     ) : Recipe
 
     @Serializable
-    data class RecipeByIngredients(
+    open class RecipeByIngredients(
         val id: Int,
         val title: String,
         val image: String,
@@ -29,6 +29,22 @@ sealed interface Recipe {
         val unusedIngredients: List<Ingredient>,
         val likes: Int
     ) : Recipe
+
+    @Serializable
+    data class RecipeByIngredientsExt(
+        val recipe: RecipeByIngredients,
+        val isFavorite: Boolean
+    ) : RecipeByIngredients(
+        id = recipe.id,
+        title = recipe.title,
+        image = recipe.image,
+        usedIngredientCount = recipe.usedIngredientCount,
+        missedIngredientCount = recipe.missedIngredientCount,
+        missedIngredients = recipe.missedIngredients,
+        usedIngredients = recipe.usedIngredients,
+        unusedIngredients = recipe.unusedIngredients,
+        likes = recipe.likes
+    )
 
     @Serializable
     open class RecipeComplex(
