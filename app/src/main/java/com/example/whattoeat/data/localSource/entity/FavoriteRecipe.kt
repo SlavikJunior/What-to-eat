@@ -1,0 +1,31 @@
+package com.example.whattoeat.data.localSource.entity
+
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.example.whattoeat.data.localSource.entity.FavoriteRecipe.Companion.TABLE_NAME
+import com.example.whattoeat.domain.models.common.Recipe
+
+@Entity(tableName = TABLE_NAME,)
+data class FavoriteRecipe(
+    @PrimaryKey
+    val id: Int,
+    @ColumnInfo(name = "created_at")
+    val createdAt: Long = System.currentTimeMillis()
+) {
+    companion object {
+        const val TABLE_NAME = "favorite_recipes"
+
+        fun fromRecipeComplex(recipe: Recipe.RecipeComplex) =
+            FavoriteRecipe(id = recipe.id)
+
+        fun fromRecipeSimilar(recipe: Recipe.RecipeSimilar) =
+            FavoriteRecipe(id = recipe.id)
+
+        fun fromRecipeFullInformation(recipe: Recipe.RecipeFullInformation) =
+            FavoriteRecipe(id = recipe.id)
+
+        fun fromRecipeByIngredients(recipe: Recipe.RecipeByIngredients) =
+            FavoriteRecipe(id = recipe.id)
+    }
+}

@@ -1,7 +1,7 @@
 package com.example.whattoeat.domain.repositories
 
-import com.example.whattoeat.data.database.entity.FavoriteRecipe
-import com.example.whattoeat.domain.domainEntities.common.Recipe
+import com.example.whattoeat.data.localSource.entity.FavoriteRecipe
+import com.example.whattoeat.domain.models.common.Recipe
 import kotlinx.coroutines.flow.Flow
 
 interface FavoriteRecipeRepository {

@@ -1,6 +1,6 @@
 package com.example.whattoeat.domain.repositories
 
-import com.example.whattoeat.data.yandex_translate.models.Languages
+import com.example.whattoeat.data.translateApi.models.Languages
 
 interface TranslateApiRepository {
 

@@ -31,11 +31,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.whattoeat.R
-import com.example.whattoeat.domain.domainEntities.support.Cuisines
-import com.example.whattoeat.domain.domainEntities.support.Diets
-import com.example.whattoeat.domain.domainEntities.support.DishTypes
-import com.example.whattoeat.domain.domainEntities.support.SortDirection
-import com.example.whattoeat.domain.domainEntities.support.SortTypes
+import com.example.whattoeat.domain.models.support.Cuisines
+import com.example.whattoeat.domain.models.support.Diets
+import com.example.whattoeat.domain.models.support.DishTypes
+import com.example.whattoeat.domain.models.support.SortDirection
+import com.example.whattoeat.domain.models.support.SortTypes
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListModel
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListViewModel

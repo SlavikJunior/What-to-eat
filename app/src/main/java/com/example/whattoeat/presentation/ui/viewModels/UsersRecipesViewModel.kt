@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.di.IoDispatcher
-import com.example.whattoeat.domain.domainEntities.common.Recipe
+import com.example.whattoeat.domain.models.common.Recipe
 import com.example.whattoeat.domain.useCases.DeleteUsersRecipeUseCase
 import com.example.whattoeat.domain.useCases.GetAllUsersRecipesUseCase
 import com.example.whattoeat.domain.useCases.UpdateUsersRecipeUseCase

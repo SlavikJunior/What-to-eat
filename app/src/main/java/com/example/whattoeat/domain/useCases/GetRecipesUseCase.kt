@@ -1,20 +1,20 @@
 package com.example.whattoeat.domain.useCases
 
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
-import com.example.whattoeat.domain.search.RecipeSearch
+import com.example.whattoeat.data.remoteSource.request.RecipeRequest
 import javax.inject.Inject
 
 class GetRecipesUseCase @Inject constructor(
     private val repository: RecipeSearchRepository
 ) {
-    operator fun invoke(recipeSearch: RecipeSearch) =
+    operator fun invoke(recipeSearch: RecipeRequest) =
         when(recipeSearch) {
-            is RecipeSearch.RecipeByIngredientsSearch -> repository.getRecipeByIngredients(recipeSearch)
-            is RecipeSearch.RecipeComplexSearch -> repository.getRecipeComplex(recipeSearch)
-            is RecipeSearch.RecipeFullInformationSearch -> repository.getRecipeFullInformation(recipeSearch)
-            is RecipeSearch.RecipeFullInformationBulkSearch -> repository.getRecipeFullInformationBulk(recipeSearch)
-            is RecipeSearch.RecipeSimilarSearch -> repository.getRecipeSimilar(recipeSearch)
-            is RecipeSearch.RecipeSummarySearch -> repository.getRecipeSummary(recipeSearch)
+            is RecipeRequest.RecipeByIngredientsRequest -> repository.getRecipeByIngredients(recipeSearch)
+            is RecipeRequest.RecipeComplexRequest -> repository.getRecipeComplex(recipeSearch)
+            is RecipeRequest.RecipeFullInformationRequest -> repository.getRecipeFullInformation(recipeSearch)
+            is RecipeRequest.RecipeFullInformationBulkRequest -> repository.getRecipeFullInformationBulk(recipeSearch)
+            is RecipeRequest.RecipeSimilarRequest -> repository.getRecipeSimilar(recipeSearch)
+            is RecipeRequest.RecipeSummaryRequest -> repository.getRecipeSummary(recipeSearch)
         }
 
     companion object {

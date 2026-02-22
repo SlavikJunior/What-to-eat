@@ -1,0 +1,48 @@
+package com.example.whattoeat.data.remoteSource.service
+
+import com.example.whattoeat.data.remoteSource.response.RecipeResponse
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
+import retrofit2.http.QueryMap
+
+interface SpoonacularApiService {
+
+    @GET(value = "recipes/complexSearch")
+    suspend fun recipeComplexSearch(
+        @QueryMap(encoded = true) query: Map<String, String>,
+        @Query(value = "apiKey", encoded = true) apiKey: String
+    ): Result<RecipeResponse.RecipeComplexResponse>
+
+    @GET(value = "recipes/findByIngredients")
+    suspend fun recipeByIngredients(
+        @QueryMap(encoded = true) query: Map<String, String>,
+        @Query(value = "apiKey", encoded = true) apiKey: String
+    ): Result<RecipeResponse.RecipeByIngredientsResponse>
+
+    @GET(value = "recipes/{id}/information")
+    suspend fun recipeFullInformation(
+        @Path(value = "id") id: Int,
+        @QueryMap(encoded = true) query: Map<String, String>,
+        @Query(value = "apiKey", encoded = true) apiKey: String
+    ): Result<RecipeResponse.RecipeFullInformationResponse>
+
+    @GET(value = "recipes/informationBulk")
+    suspend fun recipeFullInformationBulk(
+        @QueryMap(encoded = true) query: Map<String, String>,
+        @Query(value = "apiKey", encoded = true) apiKey: String
+    ): Result<RecipeResponse.RecipeFullInformationBulkResponse>
+
+    @GET(value = "recipes/{id}/similar")
+    suspend fun recipeSimilar(
+        @Path(value = "id") id: Int,
+        @QueryMap(encoded = true) query: Map<String, String>,
+        @Query(value = "apiKey", encoded = true) apiKey: String
+    ): Result<RecipeResponse.RecipeSimilarResponse>
+
+    @GET(value = "recipes/{id}/summary")
+    suspend fun recipeSummary(
+        @Path(value = "id") id: Int,
+        @Query(value = "apiKey", encoded = true) apiKey: String
+    ): Result<RecipeResponse.RecipeSummaryResponse>
+}

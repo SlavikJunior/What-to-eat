@@ -3,9 +3,9 @@ package com.example.whattoeat.di
 import android.content.Context
 import android.util.Log
 import com.example.whattoeat.BuildConfig
-import com.example.whattoeat.data.net.adapter.ResultCallAdapterFactory
-import com.example.whattoeat.data.yandex_translate.TranslateApiRepositoryImpl
-import com.example.whattoeat.data.yandex_translate.TranslateApiService
+import com.example.whattoeat.data.remoteSource.adapter.ResultCallAdapterFactory
+import com.example.whattoeat.data.translateApi.TranslateApiRepositoryImpl
+import com.example.whattoeat.data.translateApi.TranslateApiService
 import com.example.whattoeat.domain.repositories.TranslateApiRepository
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module

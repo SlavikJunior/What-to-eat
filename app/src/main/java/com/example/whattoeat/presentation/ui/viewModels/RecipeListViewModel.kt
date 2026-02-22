@@ -3,15 +3,15 @@ package com.example.whattoeat.presentation.ui.viewModels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.whattoeat.domain.domainEntities.common.Recipe
-import com.example.whattoeat.domain.domainEntities.common.RecipeResult
-import com.example.whattoeat.domain.domainEntities.common.Resource
-import com.example.whattoeat.domain.domainEntities.support.Cuisines
-import com.example.whattoeat.domain.domainEntities.support.Diets
-import com.example.whattoeat.domain.domainEntities.support.DishTypes
-import com.example.whattoeat.domain.domainEntities.support.SortDirection
-import com.example.whattoeat.domain.domainEntities.support.SortTypes
-import com.example.whattoeat.domain.search.RecipeSearch
+import com.example.whattoeat.domain.models.common.Recipe
+import com.example.whattoeat.data.remoteSource.response.RecipeResponse
+import com.example.whattoeat.domain.models.common.Resource
+import com.example.whattoeat.domain.models.support.Cuisines
+import com.example.whattoeat.domain.models.support.Diets
+import com.example.whattoeat.domain.models.support.DishTypes
+import com.example.whattoeat.domain.models.support.SortDirection
+import com.example.whattoeat.domain.models.support.SortTypes
+import com.example.whattoeat.data.remoteSource.request.RecipeRequest
 import com.example.whattoeat.domain.useCases.AddFavoriteRecipeUseCase
 import com.example.whattoeat.domain.useCases.GetRecipesUseCase
 import com.example.whattoeat.domain.useCases.IsFavoriteRecipeUseCase
@@ -428,7 +428,7 @@ class RecipeListViewModel @Inject constructor(
         }
     }
 
-    private suspend fun searchRecipes(recipeSearch: RecipeSearch) {
+    private suspend fun searchRecipes(recipeSearch: RecipeRequest) {
         try {
             getRecipes(recipeSearch)
                 .collectLatest { resourceRecipeResult ->
@@ -444,10 +444,10 @@ class RecipeListViewModel @Inject constructor(
                             if (resourceRecipeResult.data != null) {
                                 if (_uiState.value.searchType == SearchType.COMPLEX_SEARCH) {
                                     val recipeComplexResult =
-                                        resourceRecipeResult.data as RecipeResult.RecipeComplexResult
+                                        resourceRecipeResult.data as RecipeResponse.RecipeComplexResponse
                                     _uiState.update { currentState ->
                                         currentState.copy(
-                                            recipesComplex = currentState.recipesComplex + recipeComplexResult.recipeComplexList.map {
+                                            recipesComplex = currentState.recipesComplex + recipeComplexResult.recipes.map {
                                                 Recipe.RecipeComplexExt(
                                                     recipe = it,
                                                     isFavorite = isFavoriteRecipe(it)
@@ -460,17 +460,17 @@ class RecipeListViewModel @Inject constructor(
                                     }
                                 } else {
                                     val recipeByIngredientsResult =
-                                        resourceRecipeResult.data as RecipeResult.RecipeByIngredientsResult
+                                        resourceRecipeResult.data as RecipeResponse.RecipeByIngredientsResponse
                                     _uiState.update { currentState ->
                                         currentState.copy(
-                                            recipesByIngredients = currentState.recipesByIngredients + recipeByIngredientsResult.recipeByIngredientsResult.map {
+                                            recipesByIngredients = currentState.recipesByIngredients + recipeByIngredientsResult.recipes.map {
                                                 Recipe.RecipeByIngredientsExt(
                                                     recipe = it,
                                                     isFavorite = isFavoriteRecipe(it)
                                                 )
                                             },
                                             isListShowing = true,
-                                            totalResults = recipeByIngredientsResult.recipeByIngredientsResult.size,
+                                            totalResults = recipeByIngredientsResult.recipes.size,
                                             offset = 0
                                         )
                                     }
@@ -501,11 +501,11 @@ class RecipeListViewModel @Inject constructor(
     }
 
     @Throws(RecipeListError.NotEnoughArgumentsError::class)
-    private fun combineRecipeSearchByDataFromUi(): RecipeSearch {
+    private fun combineRecipeSearchByDataFromUi(): RecipeRequest {
         val recipeSearch = with(_uiState.value) {
             if (searchType == SearchType.SEARCH_BY_INGREDIENTS) {
                 if (filter.products != null)
-                    RecipeSearch.RecipeByIngredientsSearch(
+                    RecipeRequest.RecipeByIngredientsRequest(
                         ingredients = filter.products,
                         ranking = filter.ranking,
                         ignorePantry = filter.ignorePantry,
@@ -514,7 +514,7 @@ class RecipeListViewModel @Inject constructor(
                     )
                 else throw RecipeListError.NotEnoughArgumentsError(null)
             } else
-                RecipeSearch.RecipeComplexSearch(
+                RecipeRequest.RecipeComplexRequest(
                     query = filter.query,
                     cuisines = filter.cuisines,
                     diet = filter.diet,

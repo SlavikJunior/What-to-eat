@@ -4,10 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.whattoeat.di.DefaultDispatcher
-import com.example.whattoeat.domain.domainEntities.common.Recipe
-import com.example.whattoeat.domain.domainEntities.common.RecipeResult
-import com.example.whattoeat.domain.domainEntities.common.Resource
-import com.example.whattoeat.domain.search.RecipeSearch
+import com.example.whattoeat.domain.models.common.Recipe
+import com.example.whattoeat.data.remoteSource.response.RecipeResponse
+import com.example.whattoeat.domain.models.common.Resource
+import com.example.whattoeat.data.remoteSource.request.RecipeRequest
 import com.example.whattoeat.domain.useCases.GetFavoriteRecipesUseCase
 import com.example.whattoeat.domain.useCases.GetRecipesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -116,7 +116,7 @@ class FavoriteRecipesViewModel @Inject constructor(
 
     private suspend fun fetchRecipeDetails(id: Int) {
         getRecipes(
-            recipeSearch = RecipeSearch.RecipeFullInformationSearch(
+            recipeSearch = RecipeRequest.RecipeFullInformationRequest(
                 id = id,
                 includeNutrition = true
             )
@@ -128,8 +128,8 @@ class FavoriteRecipesViewModel @Inject constructor(
 
                 is Resource.Success -> {
                     val result = resource.data
-                    if (result is RecipeResult.RecipeFullInformationResult) {
-                        val fullInfo = result.recipeFullInformationResult
+                    if (result is RecipeResponse.RecipeFullInformationResponse) {
+                        val fullInfo = result.recipes
 
                         val newRecipe = Recipe.RecipeComplexExt(
                             recipe = Recipe.RecipeComplex(

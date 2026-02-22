@@ -1,6 +1,6 @@
 package com.example.whattoeat.domain.useCases
 
-import com.example.whattoeat.data.yandex_translate.models.Languages
+import com.example.whattoeat.data.translateApi.models.Languages
 import com.example.whattoeat.domain.repositories.TranslateApiRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
