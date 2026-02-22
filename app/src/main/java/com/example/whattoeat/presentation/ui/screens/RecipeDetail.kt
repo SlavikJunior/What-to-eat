@@ -53,9 +53,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavBackStack
 import coil3.compose.AsyncImage
 import com.example.whattoeat.R
-import com.example.whattoeat.domain.domainEntities.common.Recipe
-import com.example.whattoeat.domain.domainEntities.support.AnalyzedInstruction
-import com.example.whattoeat.domain.domainEntities.support.Step
+import com.example.whattoeat.domain.models.common.Recipe
+import com.example.whattoeat.domain.models.support.AnalyzedInstruction
+import com.example.whattoeat.domain.models.support.Step
 import com.example.whattoeat.presentation.ui.nav.Screen
 import com.example.whattoeat.presentation.ui.screens.custom.Chip
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailModelState

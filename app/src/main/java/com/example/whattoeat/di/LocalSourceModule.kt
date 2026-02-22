@@ -2,8 +2,8 @@ package com.example.whattoeat.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.whattoeat.data.database.Migration_1_2
-import com.example.whattoeat.data.database.WhatToEatDatabase
+import com.example.whattoeat.data.localSource.Migration_1_2
+import com.example.whattoeat.data.localSource.WhatToEatDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

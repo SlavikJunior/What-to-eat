@@ -2,7 +2,7 @@ package com.example.whattoeat.presentation.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.whattoeat.domain.domainEntities.common.Recipe
+import com.example.whattoeat.domain.models.common.Recipe
 import com.example.whattoeat.domain.useCases.GetUsersRecipeByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

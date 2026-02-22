@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.whattoeat.R
-import com.example.whattoeat.domain.domainEntities.common.Recipe
+import com.example.whattoeat.domain.models.common.Recipe
 import com.example.whattoeat.presentation.ui.nav.Screen
 import com.example.whattoeat.presentation.ui.screens.custom.Chip
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipeDetailModelState

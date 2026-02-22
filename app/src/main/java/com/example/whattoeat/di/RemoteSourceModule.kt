@@ -2,9 +2,9 @@ package com.example.whattoeat.di
 
 import android.content.Context
 import com.example.whattoeat.BuildConfig
-import com.example.whattoeat.data.net.adapter.ResultCallAdapterFactory
-import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
-import com.example.whattoeat.data.net.service.SpoonacularApiService
+import com.example.whattoeat.data.remoteSource.adapter.ResultCallAdapterFactory
+import com.example.whattoeat.data.remoteSource.repository.RecipeSearchRepositoryImpl
+import com.example.whattoeat.data.remoteSource.service.SpoonacularApiService
 import com.example.whattoeat.domain.repositories.RecipeSearchRepository
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module

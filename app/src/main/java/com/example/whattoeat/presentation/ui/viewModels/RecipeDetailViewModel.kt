@@ -3,12 +3,12 @@ package com.example.whattoeat.presentation.ui.viewModels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.whattoeat.data.yandex_translate.models.Languages
+import com.example.whattoeat.data.translateApi.models.Languages
 import com.example.whattoeat.di.IoDispatcher
-import com.example.whattoeat.domain.domainEntities.common.Recipe.*
-import com.example.whattoeat.domain.domainEntities.common.RecipeResult
-import com.example.whattoeat.domain.domainEntities.common.Resource
-import com.example.whattoeat.domain.search.RecipeSearch
+import com.example.whattoeat.domain.models.common.Recipe.*
+import com.example.whattoeat.data.remoteSource.response.RecipeResponse
+import com.example.whattoeat.domain.models.common.Resource
+import com.example.whattoeat.data.remoteSource.request.RecipeRequest
 import com.example.whattoeat.domain.useCases.AddFavoriteRecipeUseCase
 import com.example.whattoeat.domain.useCases.GetRecipesUseCase
 import com.example.whattoeat.domain.useCases.IsFavoriteRecipeUseCase
@@ -175,14 +175,14 @@ class RecipeDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(modelState = LoadingState) }
 
-            getRecipes(RecipeSearch.RecipeFullInformationSearch(id = event.recipeId))
+            getRecipes(RecipeRequest.RecipeFullInformationRequest(id = event.recipeId))
                 .collectLatest { resource ->
                     Log.d(TAG, "Collected resource: $resource")
 
                     when (resource) {
                         is Resource.Success -> {
-                            val result = resource.data as? RecipeResult.RecipeFullInformationResult
-                            val recipe = result?.recipeFullInformationResult
+                            val result = resource.data as? RecipeResponse.RecipeFullInformationResponse
+                            val recipe = result?.recipes
                             if (recipe != null) {
                                 val ext = RecipeFullInformationExt(
                                     recipe = recipe,
@@ -225,7 +225,7 @@ class RecipeDetailViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
 
             getRecipes(
-                RecipeSearch.RecipeSimilarSearch(
+                RecipeRequest.RecipeSimilarRequest(
                     id = recipeId,
                     number = _uiState.value.countOfSimilar
                 )
@@ -234,10 +234,10 @@ class RecipeDetailViewModel @Inject constructor(
                 if (resource !is Resource.Success) return@collectLatest
 
                 val similarResult =
-                    resource.data as? RecipeResult.RecipeSimilarResult
+                    resource.data as? RecipeResponse.RecipeSimilarResponse
                         ?: return@collectLatest
 
-                val initialList = similarResult.recipeSimilarResult.map {
+                val initialList = similarResult.recipes.map {
                     RecipeSimilarExt(
                         recipe = it,
                         isFavorite = isFavoriteRecipe(it)
@@ -251,17 +251,17 @@ class RecipeDetailViewModel @Inject constructor(
                 initialList.forEach { similar ->
                     launch {
                         getRecipes(
-                            RecipeSearch.RecipeFullInformationSearch(similar.id)
+                            RecipeRequest.RecipeFullInformationRequest(similar.id)
                         ).collectLatest { fullResource ->
 
                             if (fullResource !is Resource.Success) return@collectLatest
 
                             val fullInfo =
-                                fullResource.data as? RecipeResult.RecipeFullInformationResult
+                                fullResource.data as? RecipeResponse.RecipeFullInformationResponse
                                     ?: return@collectLatest
 
                             val imageUrl =
-                                fullInfo.recipeFullInformationResult.image
+                                fullInfo.recipes.image
 
                             _uiState.update { state ->
                                 state.copy(

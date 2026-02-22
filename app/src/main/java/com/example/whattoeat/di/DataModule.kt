@@ -1,9 +1,9 @@
 package com.example.whattoeat.di
 
-import com.example.whattoeat.data.database.dao.FavoriteRecipeDao
-import com.example.whattoeat.data.database.dao.UsersRecipeDao
-import com.example.whattoeat.data.database.repository.FavoriteRecipeRepositoryImpl
-import com.example.whattoeat.data.database.repository.UsersRecipeRepositoryImpl
+import com.example.whattoeat.data.localSource.dao.FavoriteRecipeDao
+import com.example.whattoeat.data.localSource.dao.UsersRecipeDao
+import com.example.whattoeat.data.localSource.repository.FavoriteRecipeRepositoryImpl
+import com.example.whattoeat.data.localSource.repository.UsersRecipeRepositoryImpl
 import com.example.whattoeat.domain.repositories.FavoriteRecipeRepository
 import com.example.whattoeat.domain.repositories.UsersRecipeRepository
 import dagger.Module
