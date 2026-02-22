@@ -8,10 +8,8 @@ import com.example.whattoeat.domain.domainEntities.common.Recipe
 import com.example.whattoeat.domain.domainEntities.common.RecipeResult
 import com.example.whattoeat.domain.domainEntities.common.Resource
 import com.example.whattoeat.domain.search.RecipeSearch
-import com.example.whattoeat.domain.useCases.AddFavoriteRecipeUseCase
 import com.example.whattoeat.domain.useCases.GetFavoriteRecipesUseCase
 import com.example.whattoeat.domain.useCases.GetRecipesUseCase
-import com.example.whattoeat.domain.useCases.RemoveFavoriteRecipeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
@@ -23,30 +21,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class FavoriteRecipesPageStatus {
-    DEFAULT,
     LOADING,
     SUCCESS,
-    WARNING,
     ERROR
 }
 
-enum class FavoriteRecipesSortType {
-    ORDER_BY_TITLE_ASC,
-    ORDER_BY_TITLE_DESC,
-//    ORDER_BY_READY_TIME_ASC,
-//    ORDER_BY_READY_TIME_DESC
-}
-
-data class FavoriteRecipesFilter(
-    val favoriteRecipesSortType: FavoriteRecipesSortType? = null
-)
-
 data class FavoriteRecipesModel(
-    val status: FavoriteRecipesPageStatus = FavoriteRecipesPageStatus.DEFAULT,
+    val status: FavoriteRecipesPageStatus = FavoriteRecipesPageStatus.SUCCESS,
     val isFilterBottomSheetVisible: Boolean = false,
     val recipes: List<Recipe.RecipeComplexExt> = listOf(),
     val isListShowing: Boolean = false,
-    val filter: FavoriteRecipesFilter = FavoriteRecipesFilter(),
     val totalResults: Int = recipes.size
 )
 
@@ -56,7 +40,6 @@ fun FavoriteRecipesModel.getStateLoadingStarted() =
         isFilterBottomSheetVisible = false,
         recipes = emptyList(),
         isListShowing = false,
-        filter = FavoriteRecipesFilter(),
         totalResults = 0
     )
 
@@ -73,9 +56,6 @@ fun FavoriteRecipesModel.getStateLoadingFinished(
     )
 
 sealed interface FavoriteRecipesPageEvent {
-    data class SortTypeChange(val sortType: FavoriteRecipesSortType? = null) :
-        FavoriteRecipesPageEvent
-
     data class FavoriteRecipeChange(val recipe: Recipe) : FavoriteRecipesPageEvent
     data object LoadRecipes : FavoriteRecipesPageEvent
 }
@@ -85,8 +65,6 @@ class FavoriteRecipesViewModel @Inject constructor(
     @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     private val getRecipes: GetRecipesUseCase,
     private val getFavoriteRecipes: GetFavoriteRecipesUseCase,
-    private val addFavoriteRecipe: AddFavoriteRecipeUseCase,
-    private val removeFavoriteRecipe: RemoveFavoriteRecipeUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FavoriteRecipesModel())
@@ -97,8 +75,6 @@ class FavoriteRecipesViewModel @Inject constructor(
     fun reduce(event: FavoriteRecipesPageEvent) {
         when (event) {
             is FavoriteRecipesPageEvent.LoadRecipes -> subscribeToFavorites()
-            is FavoriteRecipesPageEvent.SortTypeChange -> {}
-
             is FavoriteRecipesPageEvent.FavoriteRecipeChange -> {}
         }
     }

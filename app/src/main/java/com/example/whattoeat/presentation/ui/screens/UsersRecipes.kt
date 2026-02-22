@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,7 +56,6 @@ import com.example.whattoeat.presentation.ui.viewModels.ButtonActionType
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesModelState
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesViewModel
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,7 +70,7 @@ fun UsersRecipes(
     LaunchedEffect(Unit) {
         if (openAddSheet) {
             viewModel.reduce(UsersRecipesPageEvent.IsAddSheetVisibleChange)
-            backStack[backStack.size - 1] = Screen.UsersRecipesDataObject(openAddSheet = false)
+            backStack[backStack.size - 1] = Screen.UsersRecipesScreen(openAddSheet = false)
         }
     }
 
@@ -82,7 +82,7 @@ fun UsersRecipes(
                 content = {
                     Icon(
                         painter = painterResource(R.drawable.ic_plus),
-                        contentDescription = "Upload recipe",
+                        contentDescription = stringResource(R.string.upload_users_recipe_content_description),
                         modifier = Modifier.padding(16.dp)
                     )
                 },
@@ -104,7 +104,10 @@ fun UsersRecipes(
 
                 uiState.value.modelState is UsersRecipesModelState.ErrorState -> {
                     Text(
-                        text = "Error: ${(uiState.value.modelState as UsersRecipesModelState.ErrorState).cause?.message}",
+                        text = stringResource(
+                            id = R.string.error_state_label_format,
+                            ((uiState.value.modelState as UsersRecipesModelState.ErrorState).cause?.message).orEmpty()
+                        ),
                         modifier = Modifier.align(Alignment.Center),
                         color = MaterialTheme.colorScheme.error
                     )
@@ -116,13 +119,13 @@ fun UsersRecipes(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "У вас пока нет рецептов.",
+                            text = stringResource(R.string.empty_loading_users_label),
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.Gray
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Нажмите +, чтобы создать.",
+                            text = stringResource(R.string.empty_loading_users_hint),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
@@ -139,7 +142,7 @@ fun UsersRecipes(
                             UserRecipeCard(
                                 recipe = recipe,
                                 onCardClick = {
-                                    backStack.add(Screen.UsersRecipeDetailDataObject(recipe.id))
+                                    backStack.add(Screen.UsersRecipeDetailScreen(recipe.id))
                                 },
                                 onDeleteClick = {
                                     viewModel.reduce(UsersRecipesPageEvent.DeleteRecipe(recipe))
@@ -203,53 +206,51 @@ private fun UserRecipeCard(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    recipe.readyInMinutes?.let {
-                        if (it > 0) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_timer),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "${recipe.readyInMinutes} мин",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                        }
+
+                    if (recipe.readyInMinutes != null && recipe.readyInMinutes > 0) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_timer),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(
+                                R.string.cooking_time_label_format,
+                                recipe.readyInMinutes
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
                     }
 
-                    recipe.servings?.let {
-                        if (it > 0) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_restaurant),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "${recipe.servings} порц.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        }
+                    if (recipe.servings != null && recipe.servings > 0) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_restaurant),
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.servings_label_format, recipe.servings),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
                     }
                 }
 
-                recipe.notes?.let {
-                    if (it.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = recipe.notes,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                if (recipe.notes != null && recipe.notes.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = recipe.notes,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
 
@@ -263,7 +264,7 @@ private fun UserRecipeCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Update",
+                        contentDescription = stringResource(R.string.update_users_recipe_content_description),
                         tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f)
                     )
                 }
@@ -273,7 +274,7 @@ private fun UserRecipeCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.delete_users_recipe_content_description),
                         tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
                     )
                 }
@@ -293,8 +294,11 @@ private fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
             .navigationBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        val labelText = if (uiState.value.buttonActionType == ButtonActionType.SAVE_RECIPE) "New Recipe"
-                else "Update recipe"
+        val labelText =
+            if (uiState.value.buttonActionType == ButtonActionType.SAVE_RECIPE)
+                stringResource(R.string.upload_users_recipe_label)
+            else
+                stringResource(R.string.update_users_recipe_label)
 
         Text(labelText, style = MaterialTheme.typography.headlineSmall)
 
@@ -308,7 +312,7 @@ private fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
                 )
             },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Title") },
+            label = { Text(text = stringResource(R.string.title_field)) },
             singleLine = true
         )
 
@@ -322,7 +326,7 @@ private fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
                 )
             },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(text = "Cooking Time (minutes)") },
+            label = { Text(text = stringResource(R.string.cooking_time_field)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -337,7 +341,7 @@ private fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
                 )
             },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(text = "Servings (count)") },
+            label = { Text(text = stringResource(R.string.servings_field)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -352,7 +356,7 @@ private fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
                 )
             },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Ingredients") }
+            label = { Text(text = stringResource(R.string.ingredients_field)) }
         )
 
         OutlinedTextField(
@@ -365,7 +369,7 @@ private fun AddRecipeForm(viewModel: UsersRecipesViewModel) {
                 )
             },
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Notes") },
+            label = { Text(text = stringResource(R.string.notes_field)) },
         )
 
         Button(

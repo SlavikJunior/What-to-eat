@@ -17,7 +17,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedIconToggleButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,9 +26,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.whattoeat.R
 import com.example.whattoeat.domain.domainEntities.support.Cuisines
 import com.example.whattoeat.domain.domainEntities.support.Diets
 import com.example.whattoeat.domain.domainEntities.support.DishTypes
@@ -39,7 +40,46 @@ import com.example.whattoeat.presentation.ui.viewModels.RecipeListModel
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.RecipeListViewModel
 import com.example.whattoeat.presentation.ui.viewModels.SearchType
-import com.example.whattoeat.presentation.ui.viewModels.UsersRecipesPageEvent
+
+@Composable
+private fun ToggleButtonChip(
+    enum: Enum<*>,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    val name = when (enum) {
+        is DishTypes -> enum.text
+        is Cuisines -> enum.text
+        is Diets -> enum.text
+        is SortTypes -> enum.text
+        is SortDirection -> enum.text
+        else -> ""
+    }
+
+    OutlinedIconToggleButton(
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        modifier = Modifier.size(64.dp),
+        shape = RoundedCornerShape(16.dp),
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = if (checked) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceVariant,
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = name.lowercase(),
+                    modifier = Modifier.padding(horizontal = 6.dp),
+                    style = MaterialTheme.typography.labelSmall,
+                    textAlign = TextAlign.Center,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun Chip(text: String) {
@@ -167,7 +207,7 @@ private fun DietsBlock(
 ) {
     HorizontalDivider()
 
-    Text(text = "Диеты")
+    Text(text = stringResource(R.string.diets_block_label))
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(32.dp),
@@ -266,7 +306,7 @@ private fun DishTypesBlock(
 ) {
     HorizontalDivider()
 
-    Text(text = "Типы блюд")
+    Text(text = stringResource(R.string.dish_types_block_label))
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(32.dp),
@@ -407,7 +447,7 @@ private fun CuisinesBlock(
 ) {
     HorizontalDivider()
 
-    Text(text = "Кухни")
+    Text(text = stringResource(R.string.cuisines_block_label))
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(32.dp),
@@ -416,7 +456,7 @@ private fun CuisinesBlock(
         item {
             ToggleButtonChip(
                 enum = Cuisines.AMERICAN,
-                checked = uiState.value.filter.cuisines?.contains(Cuisines.AMERICAN) ?: false,
+                checked = uiState.value.filter.cuisines.contains(Cuisines.AMERICAN),
                 onCheckedChange = { checked ->
                     onCuisineChange(
                         RecipeListPageEvent.CuisineChange(
@@ -430,8 +470,7 @@ private fun CuisinesBlock(
         item {
             ToggleButtonChip(
                 enum = Cuisines.EASTERN_EUROPEAN,
-                checked = uiState.value.filter.cuisines?.contains(Cuisines.EASTERN_EUROPEAN)
-                    ?: false,
+                checked = uiState.value.filter.cuisines.contains(Cuisines.EASTERN_EUROPEAN),
                 onCheckedChange = { checked ->
                     onCuisineChange(RecipeListPageEvent.CuisineChange(Cuisines.EASTERN_EUROPEAN))
                 }
@@ -441,7 +480,7 @@ private fun CuisinesBlock(
         item {
             ToggleButtonChip(
                 enum = Cuisines.EUROPEAN,
-                checked = uiState.value.filter.cuisines?.contains(Cuisines.EUROPEAN) ?: false,
+                checked = uiState.value.filter.cuisines.contains(Cuisines.EUROPEAN),
                 onCheckedChange = { checked ->
                     onCuisineChange(RecipeListPageEvent.CuisineChange(Cuisines.EUROPEAN))
                 }
@@ -451,7 +490,7 @@ private fun CuisinesBlock(
         item {
             ToggleButtonChip(
                 enum = Cuisines.FRENCH,
-                checked = uiState.value.filter.cuisines?.contains(Cuisines.FRENCH) ?: false,
+                checked = uiState.value.filter.cuisines.contains(Cuisines.FRENCH),
                 onCheckedChange = { checked ->
                     onCuisineChange(RecipeListPageEvent.CuisineChange(Cuisines.FRENCH))
                 }
@@ -461,7 +500,7 @@ private fun CuisinesBlock(
         item {
             ToggleButtonChip(
                 enum = Cuisines.GERMAN,
-                checked = uiState.value.filter.cuisines?.contains(Cuisines.GERMAN) ?: false,
+                checked = uiState.value.filter.cuisines.contains(Cuisines.GERMAN),
                 onCheckedChange = { checked ->
                     onCuisineChange(
                         RecipeListPageEvent.CuisineChange(
@@ -475,7 +514,7 @@ private fun CuisinesBlock(
         item {
             ToggleButtonChip(
                 enum = Cuisines.ITALIAN,
-                checked = uiState.value.filter.cuisines?.contains(Cuisines.ITALIAN) ?: false,
+                checked = uiState.value.filter.cuisines.contains(Cuisines.ITALIAN),
                 onCheckedChange = { checked ->
                     onCuisineChange(
                         RecipeListPageEvent.CuisineChange(
@@ -488,53 +527,6 @@ private fun CuisinesBlock(
     }
 }
 
-//@Preview
-//@Composable
-//private fun ToggleButtonChipPreview() =
-//    ToggleButtonChip(
-//        enum = Cuisines.EASTERN_EUROPEAN,
-//        checked = false,
-//        onCheckedChange = {}
-//    )
-
-@Composable
-private fun ToggleButtonChip(
-    enum: Enum<*>,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    val name = when (enum) {
-        is DishTypes -> enum.text
-        is Cuisines -> enum.text
-        is Diets -> enum.text
-        is SortTypes -> enum.text
-        is SortDirection -> enum.text
-        else -> ""
-    }
-
-    OutlinedIconToggleButton(
-        checked = checked,
-        onCheckedChange = onCheckedChange,
-        modifier = Modifier.size(64.dp),
-        shape = RoundedCornerShape(16.dp),
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = if (checked) MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.surfaceVariant,
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(
-                    text = name.lowercase(),
-                    modifier = Modifier.padding(horizontal = 6.dp),
-                    style = MaterialTheme.typography.labelSmall,
-                    textAlign = TextAlign.Center,
-                    fontFamily = FontFamily.Monospace
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun SortBlock(
@@ -544,7 +536,7 @@ private fun SortBlock(
 ) {
     HorizontalDivider()
 
-    Text(text = "Сортировка")
+    Text(text = stringResource(R.string.sort_block_label))
 
     Column(
         verticalArrangement = Arrangement.spacedBy(32.dp),
@@ -575,26 +567,6 @@ private fun SortBlock(
             horizontalArrangement = Arrangement.spacedBy(32.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-//            item {
-//                ToggleButtonChip(
-//                    enum = SortTypes.MAX_USED_INGREDIENTS,
-//                    checked = uiState.value.filter.sort == SortTypes.MAX_USED_INGREDIENTS,
-//                    onCheckedChange = { checked ->
-//                        onSortTypeChange(RecipeListPageEvent.SortTypeChange(sortType = SortTypes.MAX_USED_INGREDIENTS))
-//                    }
-//                )
-//            }
-//
-//            item {
-//                ToggleButtonChip(
-//                    enum = SortTypes.MIN_MISSING_INGREDIENTS,
-//                    checked = uiState.value.filter.sort == SortTypes.MIN_MISSING_INGREDIENTS,
-//                    onCheckedChange = { checked ->
-//                        onSortTypeChange(RecipeListPageEvent.SortTypeChange(sortType = SortTypes.MIN_MISSING_INGREDIENTS))
-//                    }
-//                )
-//            }
-
             item {
                 ToggleButtonChip(
                     enum = SortTypes.TIME,

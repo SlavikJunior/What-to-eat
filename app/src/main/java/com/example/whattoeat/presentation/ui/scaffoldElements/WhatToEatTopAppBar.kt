@@ -19,16 +19,6 @@ import com.example.whattoeat.presentation.ui.nav.Screen
 fun WhatToEatTopAppBar(
     backStack: NavBackStack<Screen>
 ) {
-    val currentDestination = backStack.last()
-
-    val isBottomNavRoot = when (currentDestination) {
-            is Screen.RecipeListDataObject -> true
-            is Screen.FavoriteRecipesDataObject -> true
-            is Screen.UsersRecipesDataObject -> true
-            else -> false
-        }
-
-
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -37,7 +27,7 @@ fun WhatToEatTopAppBar(
             )
         },
         navigationIcon = {
-            if (!isBottomNavRoot) {
+            if (backStack.size > 1) {
                 IconButton(onClick = { backStack.removeLastOrNull() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
