@@ -12,6 +12,7 @@ class IsFavoriteRecipeUseCase @Inject constructor(
         is Recipe.RecipeComplex -> repository.isFavorite(recipe.id)
         is Recipe.RecipeFullInformation -> repository.isFavorite(recipe.id)
         is Recipe.RecipeSimilar -> repository.isFavorite(recipe.id)
+        is Recipe.RecipeByIngredients -> repository.isFavorite(recipe.id)
         else -> false
     }
 }

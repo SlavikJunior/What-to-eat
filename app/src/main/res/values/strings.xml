@@ -1,35 +1,39 @@
 <resources>
     <!--  Common  -->
     <string name="app_name">What to eat</string>
+    <string name="remove_favorite_recipe_title">Удалить из избранного</string>
+    <string name="add_favorite_recipe_title">Добавить в избранное</string>
     <!--  Common END  -->
 
     <!--  WhatToEatTopAppBar  -->
-    <string name="back_button_content_description">Back button</string>
+    <string name="back_button_content_description">Навигация назад</string>
     <!--  WhatToEatTopAppBar END  -->
 
-    <!--  WhatToEatBottomAppBar  -->
-    <string name="recipe_list_content_description">Recipe list</string>
-    <string name="favorite_recipes_content_description">Favorite Recipes</string>
-    <!--  WhatToEatTopBottomBar END  -->
-
     <!--  RecipeList  -->
-    <string name="query_text_field_label">Search query (NLP)</string>
-    <string name="products_text_field_label">Products</string>
-    <string name="inclusive_products_text_field_label">Inclusive products</string>
-    <string name="exclusive_products_text_field_label">Exclusive products</string>
-    <string name="search_button_text">Search</string>
-    <string name="filter_button_content_description">Фильтры</string>
+    <string name="query_text_field_label">Блюдо</string>
+    <string name="products_text_field_label">Имеющиеся продукты</string>
+    <string name="search_button_text">Поиск</string>
+    <string name="filter_button_content_description">Кнопка фильтров для поиска</string>
+    <string name="refresh_button_content_description">Кнопка смены типа поиска</string>
     <string name="search_by_name_mode">По названию</string>
     <string name="search_by_ingredients_mode">По ингредиентам</string>
     <string name="no_recipes_found">Рецепты не найдены</string>
     <string name="previous_page">Предыдущая страница</string>
     <string name="next_page">Следующая страница</string>
     <string name="page_number">Страница %d</string>
-    <!--  RecipeList END  -->
 
-    <!--  RecipeCard  -->
-    <string name="recipe_card_image_content_description">Image for recipe: %1$s</string>
-    <!--  RecipeCard END -->
+        <!--  FilterBottomSheet  -->
+        <string name="diets_block_label">Диеты</string>
+        <string name="dish_types_block_label">Типы блюд</string>
+        <string name="cuisines_block_label">Кухни</string>
+        <string name="sort_block_label">Сортировка</string>
+        <!--  FilterBottomSheet END -->
+
+        <!--  RecipeCard  -->
+        <string name="recipe_card_image_content_description">Image for recipe: %1$s</string>
+        <!--  RecipeCard END -->
+
+    <!--  RecipeList END  -->
 
     <!--  RecipeDetail  -->
     <string name="instructions_section_title">Инструкция</string>
@@ -58,4 +62,28 @@
 
     <string name="error_state_label">Ошибка загрузки рецепта</string>
     <!--  RecipeDetail END  -->
+
+    <!--  FavoriteRecipes  -->
+    <string name="error_loading_favorites_label">Ошибка загрузки избранных рецептов</string>
+    <string name="retry_loading_favorites_label">Попробовать снова</string>
+    <string name="empty_loading_favorites_label">Ещё нет избранных рецептов</string>
+    <!--  FavoriteRecipes END -->
+
+    <!--  UsersRecipes  -->
+    <string name="upload_users_recipe_content_description">Добавить рецепт</string>
+    <string name="error_state_label_format">Ошибка: %1$s</string>
+    <string name="empty_loading_users_label">У вас пока нет рецептов</string>
+    <string name="empty_loading_users_hint">Нажмите +, чтобы создать</string>
+    <string name="cooking_time_label_format">%1%d минут</string>
+    <string name="servings_label_format">%1%d порций</string>
+    <string name="update_users_recipe_content_description">Обновить информацию в рецепте</string>
+    <string name="delete_users_recipe_content_description">Удалить рецепт</string>
+    <string name="upload_users_recipe_label">Добавить рецепт</string>
+    <string name="update_users_recipe_label">Обновить рецепт</string>
+    <string name="title_field">Название рецепта</string>
+    <string name="cooking_time_field">Время приготовления</string>
+    <string name="servings_field">Порции</string>
+    <string name="ingredients_field">Ингредиенты</string>
+    <string name="notes_field">Примечания</string>
+    <!--  UsersRecipes END -->
 </resources>

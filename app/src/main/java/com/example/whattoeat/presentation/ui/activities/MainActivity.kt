@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WhatToEatTheme {
-                val backStack = rememberNavBackStack<Screen>(Screen.RecipeListDataObject)
+                val backStack = rememberNavBackStack<Screen>(Screen.RecipeListScreen)
 
                 Scaffold(
                     floatingActionButton = { WhatToEatFloatingActionButton(backStack = backStack) },
@@ -60,19 +60,19 @@ fun App(backStack: NavBackStack<Screen>, paddingValues: PaddingValues) {
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
         entryProvider = entryProvider {
-            entry<Screen.RecipeListDataObject> {
+            entry<Screen.RecipeListScreen> {
                 RecipeList(backStack = backStack, paddingValues = paddingValues)
             }
-            entry<Screen.RecipeDetailDataObject> {
+            entry<Screen.RecipeDetailScreen> {
                 RecipeDetail(backStack = backStack, dataObject = it, paddingValues = paddingValues)
             }
-            entry<Screen.FavoriteRecipesDataObject> {
+            entry<Screen.FavoriteRecipesScreen> {
                 FavoriteRecipes(backStack = backStack, paddingValues = paddingValues)
             }
-            entry<Screen.UsersRecipesDataObject> { dataObject ->
+            entry<Screen.UsersRecipesScreen> { dataObject ->
                 UsersRecipes(backStack = backStack, openAddSheet = dataObject.openAddSheet, paddingValues = paddingValues)
             }
-            entry<Screen.UsersRecipeDetailDataObject> { dataObject ->
+            entry<Screen.UsersRecipeDetailScreen> { dataObject ->
                 UsersRecipeDetail(dataObject = dataObject, paddingValues = paddingValues)
             }
         }
@@ -80,7 +80,7 @@ fun App(backStack: NavBackStack<Screen>, paddingValues: PaddingValues) {
 }
 
 @Composable
-fun <T : NavKey> rememberNavBackStack(vararg elements: T): NavBackStack<T> {
+private fun <T : NavKey> rememberNavBackStack(vararg elements: T): NavBackStack<T> {
     return rememberSerializable(
         serializer = NavBackStackSerializer(elementSerializer = NavKeySerializer())
     ) {

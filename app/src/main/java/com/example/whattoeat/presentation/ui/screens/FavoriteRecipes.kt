@@ -79,9 +79,9 @@ fun FavoriteRecipes(
 
             FavoriteRecipesPageStatus.ERROR -> {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Error loading favorites")
+                    Text(text = stringResource(R.string.error_loading_favorites_label))
                     Button(onClick = { viewModel.reduce(FavoriteRecipesPageEvent.LoadRecipes) }) {
-                        Text("Retry")
+                        Text(text = stringResource(R.string.retry_loading_favorites_label))
                     }
                 }
             }
@@ -97,7 +97,7 @@ fun FavoriteRecipes(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "No favorite recipes yet",
+                            text = stringResource(R.string.empty_loading_favorites_label),
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.Gray
                         )
@@ -117,8 +117,6 @@ fun FavoriteRecipes(
                     }
                 }
             }
-
-            else -> {} // DEFAULT state
         }
     }
 }
@@ -132,7 +130,7 @@ private fun FavoriteRecipeCard(
     var isImageLoaded by remember { mutableStateOf(false) }
 
     Card(
-        onClick = { backStack.add(Screen.RecipeDetailDataObject(recipe.id)) },
+        onClick = { backStack.add(Screen.RecipeDetailScreen(recipe.id)) },
         modifier = modifier
             .fillMaxWidth()
             .height(120.dp)

@@ -24,5 +24,8 @@ data class FavoriteRecipe(
 
         fun fromRecipeFullInformation(recipe: Recipe.RecipeFullInformation) =
             FavoriteRecipe(id = recipe.id)
+
+        fun fromRecipeByIngredients(recipe: Recipe.RecipeByIngredients) =
+            FavoriteRecipe(id = recipe.id)
     }
 }

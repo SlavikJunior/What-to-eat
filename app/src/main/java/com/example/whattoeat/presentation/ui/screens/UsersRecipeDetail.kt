@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -33,7 +32,7 @@ import com.example.whattoeat.presentation.ui.viewModels.UsersRecipeDetailViewMod
 
 @Composable
 fun UsersRecipeDetail(
-    dataObject: Screen.UsersRecipeDetailDataObject,
+    dataObject: Screen.UsersRecipeDetailScreen,
     paddingValues: PaddingValues,
     viewModel: UsersRecipeDetailViewModel = hiltViewModel()
 ) {
@@ -72,20 +71,6 @@ fun UsersRecipeDetail(
         }
     }
 }
-
-@Preview
-@Composable
-private fun UsersRecipeDetailContentPreview() =
-    UsersRecipeDetailContent(
-        recipe = Recipe.RecipeByUser(
-            id = 12,
-            title = "Рецепт блинов",
-            readyInMinutes = 12,
-            servings = 14,
-            ingredients = "Мука, яйца, молоко ...........",
-            notes = "Рецепт лучших блинов"
-        )
-    )
 
 @Composable
 private fun UsersRecipeDetailContent(
@@ -127,7 +112,7 @@ private fun UsersRecipeDetailContent(
         if (recipe.notes != null && recipe.notes.isNotBlank()) {
             item {
                 Text(
-                    text = "notes",
+                    text = stringResource(R.string.notes_field),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -143,7 +128,7 @@ private fun UsersRecipeDetailContent(
         if (recipe.ingredients != null && recipe.ingredients.isNotBlank()) {
             item {
                 Text(
-                    text = "ingredients",
+                    text = stringResource(R.string.ingredients_field),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )

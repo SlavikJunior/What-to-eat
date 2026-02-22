@@ -29,6 +29,13 @@ class FavoriteRecipeRepositoryImpl @Inject constructor(
                 }
             }
 
+            is Recipe.RecipeByIngredients -> {
+                withContext(ioDispatcher) {
+                    id = favoriteRecipeDao.insert(FavoriteRecipe.fromRecipeByIngredients(recipe))
+                    return@withContext id
+                }
+            }
+
             is Recipe.RecipeSimilar -> {
                 withContext(ioDispatcher) {
                     id = favoriteRecipeDao.insert(FavoriteRecipe.fromRecipeSimilar(recipe))
@@ -56,6 +63,13 @@ class FavoriteRecipeRepositoryImpl @Inject constructor(
             is Recipe.RecipeComplex -> {
                 withContext(ioDispatcher) {
                     cnt = favoriteRecipeDao.delete(FavoriteRecipe.fromRecipeComplex(recipe))
+                    return@withContext cnt
+                }
+            }
+
+            is Recipe.RecipeByIngredients -> {
+                withContext(ioDispatcher) {
+                    cnt = favoriteRecipeDao.delete(FavoriteRecipe.fromRecipeByIngredients(recipe))
                     return@withContext cnt
                 }
             }

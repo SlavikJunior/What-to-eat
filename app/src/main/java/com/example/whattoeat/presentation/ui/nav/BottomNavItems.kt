@@ -15,25 +15,25 @@ sealed interface BottomNavItem {
 }
 
 data object RecipeListBottomNavItem : BottomNavItem {
-    override val title = "Search"
+    override val title = "Поиск"
     override val imageVector = Icons.AutoMirrored.Filled.List
     override val isStarted = true
     override val index = 1
-    override val route = Screen.RecipeListDataObject
+    override val route = Screen.RecipeListScreen
 }
 
 data object FavoriteRecipesBottomNavItem : BottomNavItem {
-    override val title = "Favorite"
+    override val title = "Избранные"
     override val imageVector = Icons.Default.Favorite
     override val isStarted = false
     override val index = 2
-    override val route = Screen.FavoriteRecipesDataObject
+    override val route = Screen.FavoriteRecipesScreen
 }
 
 data object UsersRecipesBottomNavItem : BottomNavItem {
-    override val title = "Custom"
+    override val title = "Пользовательские"
     override val imageVector = Icons.Default.Edit
     override val isStarted = false
     override val index = 3
-    override val route = Screen.UsersRecipesDataObject()
+    override val route = Screen.UsersRecipesScreen()
 }

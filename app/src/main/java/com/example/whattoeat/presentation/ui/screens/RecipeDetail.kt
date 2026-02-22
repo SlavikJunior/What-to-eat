@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -64,12 +63,11 @@ import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailPageEvent
 import com.example.whattoeat.presentation.ui.viewModels.RecipeDetailViewModel
 import com.valentinilk.shimmer.shimmer
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeDetail(
     backStack: NavBackStack<Screen>,
     paddingValues: PaddingValues,
-    dataObject: Screen.RecipeDetailDataObject,
+    dataObject: Screen.RecipeDetailScreen,
     viewModel: RecipeDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -93,7 +91,8 @@ fun RecipeDetail(
                 ) {
                     Icon(
                         imageVector = if (recipe.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = if (recipe.isFavorite) "Remove from favorites" else "Add to favorites",
+                        contentDescription = if (recipe.isFavorite) stringResource(R.string.remove_favorite_recipe_title)
+                        else stringResource(R.string.add_favorite_recipe_title),
                         tint = if (recipe.isFavorite) Color.Red else LocalContentColor.current
                     )
 
@@ -120,7 +119,7 @@ fun RecipeDetail(
                             recipe = item,
                             similarRecipes = uiState.similarRecipes,
                             onSimilarClick = { id ->
-                                backStack.add(Screen.RecipeDetailDataObject(id))
+                                backStack.add(Screen.RecipeDetailScreen(id))
                             },
                             onSimilarFavorite = { similar ->
                                 viewModel.reduce(
@@ -185,9 +184,19 @@ private fun RecipeDetailContent(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Chip(stringResource(R.string.ready_in_minutes_title, recipe.readyInMinutes).lowercase())
+                Chip(
+                    stringResource(
+                        R.string.ready_in_minutes_title,
+                        recipe.readyInMinutes
+                    ).lowercase()
+                )
                 Chip(stringResource(R.string.servings_title, recipe.servings).lowercase())
-                Chip(stringResource(R.string.agregate_likes_title, recipe.aggregateLikes).lowercase())
+                Chip(
+                    stringResource(
+                        R.string.agregate_likes_title,
+                        recipe.aggregateLikes
+                    ).lowercase()
+                )
                 Chip(stringResource(R.string.health_title, recipe.healthScore.toInt()))
                 Chip(stringResource(R.string.score_title, recipe.spoonacularScore.toInt()))
             }
@@ -208,7 +217,7 @@ private fun RecipeDetailContent(
 
         item {
             Text(
-                recipe.summary.replace(Regex("<[^>]*>"), ""),
+                text = recipe.summary.replace(Regex("<[^>]*>"), ""),
                 style = MaterialTheme.typography.bodyLarge,
                 lineHeight = 24.sp
             )
@@ -251,7 +260,7 @@ private fun RecipeDetailContent(
                     contentPadding = PaddingValues(
                         horizontal = 4.dp,
                         vertical = 8.dp
-                    ) // Немного паддинга для теней карточек
+                    )
                 ) {
                     items(similarRecipes) { similar ->
                         SimilarRecipeCard(

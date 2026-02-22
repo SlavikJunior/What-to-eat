@@ -6,20 +6,20 @@ import kotlinx.serialization.Serializable
 sealed interface Screen: NavKey {
 
     @Serializable
-    data object RecipeListDataObject : Screen
+    data object RecipeListScreen : Screen
 
     @Serializable
     @JvmInline
-    value class RecipeDetailDataObject(val recipeId: Int) : Screen
+    value class RecipeDetailScreen(val recipeId: Int) : Screen
 
     @Serializable
-    data object FavoriteRecipesDataObject : Screen
-
-    @Serializable
-    @JvmInline
-    value class UsersRecipesDataObject(val openAddSheet: Boolean = false) : Screen
+    data object FavoriteRecipesScreen : Screen
 
     @Serializable
     @JvmInline
-    value class UsersRecipeDetailDataObject(val recipeId: Int) : Screen
+    value class UsersRecipesScreen(val openAddSheet: Boolean = false) : Screen
+
+    @Serializable
+    @JvmInline
+    value class UsersRecipeDetailScreen(val recipeId: Int) : Screen
 }

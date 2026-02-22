@@ -1,6 +1,5 @@
 package com.example.whattoeat.presentation.ui.screens
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,7 +32,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -81,8 +79,7 @@ import com.example.whattoeat.presentation.ui.viewModels.isDecreaseOffsetButtonEn
 import com.example.whattoeat.presentation.ui.viewModels.isIncreaseOffsetButtonEnabled
 import com.valentinilk.shimmer.shimmer
 
-@SuppressLint("CoroutineCreationDuringComposition")
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun RecipeList(
     backStack: NavBackStack<Screen>,
@@ -90,6 +87,33 @@ fun RecipeList(
     paddingValues: PaddingValues = PaddingValues()
 ) {
     val uiState = viewModel.uiState.collectAsState()
+
+    var queryValue by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = uiState.value.filter.query.orEmpty(),
+                selection = TextRange(uiState.value.filter.query.orEmpty().length)
+            )
+        )
+    }
+
+    var productsValue by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = uiState.value.filter.products.orEmpty(),
+                selection = TextRange(uiState.value.filter.products.orEmpty().length)
+            )
+        )
+    }
+
+    /*
+    * queryValue и productsValue два локальных состояния
+    * нарушаю UDF, т.к. получается что view хранит состояние
+    * но я не знаю, как его вынести во viewmodel без нарушения там
+    * у меня получается уже во вьюмодели будут импорты из compose пакетов,
+    * которых там не должно быть.
+    * возможно это можно провернуть как-то через combine, но пока не понимаю
+    */
 
     Column(
         modifier = Modifier
@@ -106,33 +130,25 @@ fun RecipeList(
             if (uiState.value.searchType == SearchType.COMPLEX_SEARCH) {
                 IconButton(onClick = { viewModel.reduce(RecipeListPageEvent.IsFilterBottomSheetVisibleChange) }
                 ) {
-                    Icon(painter = painterResource(R.drawable.ic_filter), contentDescription = null)
+                    Icon(
+                        painter = painterResource(R.drawable.ic_filter),
+                        contentDescription = stringResource(R.string.filter_button_content_description)
+                    )
                 }
             }
 
             IconButton(
-                onClick = { viewModel.reduce(RecipeListPageEvent.SearchTypeChange) }
+                onClick = {
+                    viewModel.reduce(RecipeListPageEvent.SearchTypeChange)
+                    queryValue = TextFieldValue()
+                    productsValue = TextFieldValue()
+                }
             ) {
-                Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = stringResource(R.string.refresh_button_content_description)
+                )
             }
-        }
-
-        var queryValue by remember {
-            mutableStateOf(
-                TextFieldValue(
-                    text = uiState.value.filter.query.orEmpty(),
-                    selection = TextRange(uiState.value.filter.query.orEmpty().length)
-                )
-            )
-        }
-
-        var productsValue by remember {
-            mutableStateOf(
-                TextFieldValue(
-                    text = uiState.value.filter.products.orEmpty(),
-                    selection = TextRange(uiState.value.filter.products.orEmpty().length)
-                )
-            )
         }
 
         val keyboardController = LocalSoftwareKeyboardController.current
@@ -189,6 +205,7 @@ fun RecipeList(
                     }
                 )
             }
+
             SearchType.SEARCH_BY_INGREDIENTS -> {
                 OutlinedTextField(
                     value = productsValue,
@@ -223,7 +240,11 @@ fun RecipeList(
                         IconButton(
                             onClick = {
                                 productsValue = productsValue.copy(text = "")
-                                viewModel.reduce(event = RecipeListPageEvent.ProductsChange(productsValue.text))
+                                viewModel.reduce(
+                                    event = RecipeListPageEvent.ProductsChange(
+                                        productsValue.text
+                                    )
+                                )
                             }
                         ) { Icon(imageVector = Icons.Default.Clear, contentDescription = "Clear") }
                     }
@@ -284,7 +305,7 @@ fun RecipeList(
                 items(uiState.value.recipesComplex) { recipe ->
                     RecipeComplexExtCard(
                         recipe = recipe,
-                        onCardClick = { backStack.add(Screen.RecipeDetailDataObject(recipe.id)) },
+                        onCardClick = { backStack.add(Screen.RecipeDetailScreen(recipe.id)) },
                         onFavoriteRecipeChange = {
                             viewModel.reduce(
                                 event = RecipeListPageEvent.FavoriteRecipeChange(
@@ -296,8 +317,7 @@ fun RecipeList(
                     Spacer(Modifier.height(16.dp))
                 }
             }
-        }
-        else if (uiState.value.isListShowing && uiState.value.totalResults > 0 && uiState.value.searchType == SearchType.SEARCH_BY_INGREDIENTS) {
+        } else if (uiState.value.isListShowing && uiState.value.totalResults > 0 && uiState.value.searchType == SearchType.SEARCH_BY_INGREDIENTS) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(horizontal = 16.dp)
@@ -305,7 +325,7 @@ fun RecipeList(
                 items(uiState.value.recipesByIngredients) { recipe ->
                     RecipeByIngredientsExtCard(
                         recipe = recipe,
-                        onCardClick = { backStack.add(Screen.RecipeDetailDataObject(recipe.id)) },
+                        onCardClick = { backStack.add(Screen.RecipeDetailScreen(recipe.id)) },
                         onFavoriteRecipeChange = {
                             viewModel.reduce(
                                 event = RecipeListPageEvent.FavoriteRecipeChange(
