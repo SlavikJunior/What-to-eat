@@ -2,6 +2,7 @@ package com.example.whattoeat.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.whattoeat.data.database.Migration_1_2
 import com.example.whattoeat.data.database.WhatToEatDatabase
 import dagger.Module
 import dagger.Provides
@@ -21,12 +22,9 @@ object LocalSourceModule {
             context = context,
             klass = WhatToEatDatabase::class.java,
             name = WhatToEatDatabase.WHAT_TO_EAT_DATABASE_NAME
-        ).build()
-
-    @Provides
-    @Singleton
-    fun provideCachedRecipeDao(whatToEatDatabase: WhatToEatDatabase) =
-        whatToEatDatabase.cachedRecipeDao()
+        )
+            .addMigrations(Migration_1_2)
+            .build()
 
     @Provides
     @Singleton

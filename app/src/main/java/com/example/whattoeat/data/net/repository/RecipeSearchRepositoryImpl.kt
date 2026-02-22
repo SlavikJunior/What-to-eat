@@ -19,7 +19,6 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 class RecipeSearchRepositoryImpl @Inject constructor(
-    @SpoonacularJson val json: Json,
     val apiKey: String,
     val service: SpoonacularApiService,
     @IoDispatcher val ioDispatcher: CoroutineDispatcher = Dispatchers.IO

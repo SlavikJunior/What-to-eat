@@ -2,7 +2,6 @@ package com.example.whattoeat.di
 
 import android.content.Context
 import com.example.whattoeat.BuildConfig
-import com.example.whattoeat.data.database.dao.CachedRecipeComplexDao
 import com.example.whattoeat.data.net.adapter.ResultCallAdapterFactory
 import com.example.whattoeat.data.net.repository.RecipeSearchRepositoryImpl
 import com.example.whattoeat.data.net.service.SpoonacularApiService
@@ -102,9 +101,7 @@ object RemoteSourceModule {
     @Provides
     @Singleton
     fun provideRecipeSearchRepository(
-        @SpoonacularJson json: Json,
         service: SpoonacularApiService,
-        cachedRecipeDao: CachedRecipeComplexDao
     ): RecipeSearchRepository {
         var apiKey: String?
         try {
@@ -118,7 +115,6 @@ object RemoteSourceModule {
         return RecipeSearchRepositoryImpl(
             apiKey = apiKey,
             service = service,
-            json = json
         )
     }
 
